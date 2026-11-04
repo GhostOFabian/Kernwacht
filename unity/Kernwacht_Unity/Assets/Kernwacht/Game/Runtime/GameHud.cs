@@ -139,7 +139,7 @@ namespace Kernwacht.Game
                 for (int k = i; k < i + cols && k < maps.Count; k++)
                 {
                     var m = maps[k];
-                    string txt = (menuMap == k ? "<color=#ffd27a>▶ </color>" : "") + $"<b>{m.biomeName}</b>\n<size=11>{BossLine(m)}</size>";
+                    string txt = (menuMap == k ? "<color=#ffd27a>» </color>" : "") + $"<b>{m.biomeName}</b>\n<size=11>{BossLine(m)}</size>";
                     if (GUILayout.Button(txt, button, GUILayout.Height(54))) menuMap = k;
                 }
                 GUILayout.EndHorizontal();
@@ -150,14 +150,14 @@ namespace Kernwacht.Game
             for (int i = 0; i < Diffs.Length; i++)
             {
                 string n = root.data.difficulty.TryGetValue(Diffs[i], out var d) ? d.name : Diffs[i];
-                if (GUILayout.Button((menuDiff == i ? "<color=#ffd27a>▶ </color>" : "") + n, button, GUILayout.Height(34))) menuDiff = i;
+                if (GUILayout.Button((menuDiff == i ? "<color=#ffd27a>» </color>" : "") + n, button, GUILayout.Height(34))) menuDiff = i;
             }
             GUILayout.EndHorizontal();
             GUILayout.Space(10);
             GUILayout.Label("<b>Modus</b>", label);
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button((!menuEndless ? "<color=#ffd27a>▶ </color>" : "") + "Schnelle Partie · 20 Wellen", button, GUILayout.Height(34))) menuEndless = false;
-            if (GUILayout.Button((menuEndless ? "<color=#ffd27a>▶ </color>" : "") + "Endlos", button, GUILayout.Height(34))) menuEndless = true;
+            if (GUILayout.Button((!menuEndless ? "<color=#ffd27a>» </color>" : "") + "Schnelle Partie · 20 Wellen", button, GUILayout.Height(34))) menuEndless = false;
+            if (GUILayout.Button((menuEndless ? "<color=#ffd27a>» </color>" : "") + "Endlos", button, GUILayout.Height(34))) menuEndless = true;
             GUILayout.EndHorizontal();
             GUILayout.Space(16);
             if (maps.Count == 0)
@@ -215,7 +215,7 @@ namespace Kernwacht.Game
         {
             var s = root.sim;
             var w = s.WaveFor(s.wave + 1);
-            return w != null && w.isBoss ? "▶ Bosswelle starten" : $"▶ Welle {s.wave + 1} starten";
+            return w != null && w.isBoss ? "» Bosswelle starten" : $"» Welle {s.wave + 1} starten";
         }
 
         void DrawBossBar(float W)
@@ -418,7 +418,8 @@ namespace Kernwacht.Game
             {
                 var m = root.messages[i];
                 string c = m.sev >= 2 ? "#ff9a7a" : m.sev == 1 ? "#ffd27a" : "#e6e0f0";
-                var rr = new Rect(12, y, 420, 24);
+                float tw = Mathf.Min(720f, small.CalcSize(new GUIContent(m.text)).x + 16f);
+                var rr = new Rect(12, y, Mathf.Max(200f, tw), 24);
                 GUI.DrawTexture(rr, barBg);
                 GUI.Label(new Rect(rr.x + 6, rr.y + 2, rr.width - 12, rr.height), $"<color={c}>{m.text}</color>", small);
                 y += 26;

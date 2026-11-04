@@ -122,6 +122,7 @@ namespace Kernwacht.Game.EditorTools
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
             PlayerSettings.WebGL.decompressionFallback = true;
             PlayerSettings.WebGL.dataCaching = true;
+            if (Directory.Exists("Assets/WebGLTemplates/Kernwacht")) PlayerSettings.WebGL.template = "PROJECT:Kernwacht";
         }
 
         [MenuItem("Kernwacht/4 · WebGL-Build erstellen", priority = 4)]

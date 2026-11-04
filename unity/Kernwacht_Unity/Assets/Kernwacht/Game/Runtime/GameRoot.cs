@@ -125,6 +125,9 @@ namespace Kernwacht.Game
             return new Vector3(p.x, GroundY(cx, cy) + lift, p.y);
         }
 
+        // Verweise, damit der WebGL-Build die Collider der Grundformen nicht wegoptimiert
+        static readonly System.Type[] KeepTypes = { typeof(SphereCollider), typeof(CapsuleCollider), typeof(BoxCollider), typeof(MeshCollider) };
+
         GameObject Prim(PrimitiveType type, Transform parent, Material mat, Color color)
         {
             var go = GameObject.CreatePrimitive(type);

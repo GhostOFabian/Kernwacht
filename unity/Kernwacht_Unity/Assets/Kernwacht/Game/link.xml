@@ -1,0 +1,6 @@
+<linker>
+  <!-- Grundformen (CreatePrimitive) brauchen ihre Collider-Klassen auch im WebGL-Build -->
+  <assembly fullname="UnityEngine.PhysicsModule" preserve="all"/>
+  <assembly fullname="Kernwacht.Game" preserve="all"/>
+  <assembly fullname="Kernwacht.Models" preserve="all"/>
+</linker>
