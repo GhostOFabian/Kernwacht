@@ -49,17 +49,17 @@ namespace Kernwacht.Game.EditorTools
 
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            // Einziger Einstiegspunkt: GameApp baut Kamera, Licht, Canvas (UI-Ebenen) und EventSystem zur Laufzeit auf.
             var go = new GameObject("Kernwacht");
-            var root = go.AddComponent<GameRoot>();
-            root.assets = ga;
-            go.AddComponent<GameHud>();
+            go.AddComponent<GameApp>();
             var cam = Camera.main;
             if (cam != null)
             {
                 cam.transform.position = new Vector3(11, 16, -6);
                 cam.transform.rotation = Quaternion.Euler(56, 0, 0);
+                cam.orthographic = true;
                 cam.clearFlags = CameraClearFlags.SolidColor;
-                cam.backgroundColor = new Color(0.07f, 0.06f, 0.09f);
+                cam.backgroundColor = new Color(0x12 / 255f, 0x0f / 255f, 0x1c / 255f);
             }
             EditorSceneManager.SaveScene(scene, ScenePath);
 
@@ -119,10 +119,15 @@ namespace Kernwacht.Game.EditorTools
             PlayerSettings.productName = "Kernwacht";
             PlayerSettings.companyName = "GhostOFabian";
             PlayerSettings.runInBackground = true;
+            // Bezugsauflösung der Oberfläche (CanvasScaler 1920×1080)
+            PlayerSettings.defaultWebScreenWidth = 1920;
+            PlayerSettings.defaultWebScreenHeight = 1080;
+            PlayerSettings.defaultScreenWidth = 1920;
+            PlayerSettings.defaultScreenHeight = 1080;
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
             PlayerSettings.WebGL.decompressionFallback = true;
             PlayerSettings.WebGL.dataCaching = true;
-            if (Directory.Exists("Assets/WebGLTemplates/Kernwacht")) PlayerSettings.WebGL.template = "PROJECT:Kernwacht";
+            PlayerSettings.WebGL.template = Directory.Exists("Assets/WebGLTemplates/Kernwacht") ? "PROJECT:Kernwacht" : "APPLICATION:Default";
         }
 
         [MenuItem("Kernwacht/4 · WebGL-Build erstellen", priority = 4)]
