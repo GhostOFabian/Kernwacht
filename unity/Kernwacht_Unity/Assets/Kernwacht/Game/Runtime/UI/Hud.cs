@@ -313,7 +313,7 @@ namespace Kernwacht.Game.UI
             bn.childForceExpandWidth = false;
             banners = bn.GetComponent<RectTransform>();
             banners.anchorMin = new Vector2(0, 1); banners.anchorMax = new Vector2(1, 1); banners.pivot = new Vector2(0.5f, 1);
-            banners.offsetMin = new Vector2(0, 0); banners.offsetMax = new Vector2(0, -80);
+            banners.sizeDelta = new Vector2(0, 0); banners.anchoredPosition = new Vector2(0, -80);
             HK.Fit(bn, false, true);
 
             var sl = Ui.Column(stage, 6);
@@ -713,7 +713,8 @@ namespace Kernwacht.Game.UI
                 if (b.t >= b.ms + 500) removeBanner(b);
             }
             float sh = stage.rect.height;
-            banners.offsetMax = new Vector2(0, -Mathf.Max(70, sh * 0.16f));
+            float by = -Mathf.Max(70, sh * 0.16f);
+            if (Mathf.Abs(banners.anchoredPosition.y - by) > 0.5f) banners.anchoredPosition = new Vector2(0, by);
             float targetL = letterOn > 0 ? sh * 0.09f : 0;
             letterH = Mathf.MoveTowards(letterH, targetL, Mathf.Max(1, sh * 0.09f) * dt * 2f);
             letterTop.rectTransform.sizeDelta = new Vector2(0, letterH);

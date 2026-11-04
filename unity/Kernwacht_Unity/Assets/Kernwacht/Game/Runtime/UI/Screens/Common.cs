@@ -152,7 +152,7 @@ namespace Kernwacht.Game.UI
                     setDisabled(tile.btn, !ok || forced != null);
                     Ui.Tip(tile.btn, () => ok ? $"{d.name} – {d.description}" : $"Gesperrt: schließe Mission „{(mission != null ? mission.name : d.unlock)}“ ab");
                     if (idx >= 0) para(tile.col, idx == 0 ? "Z" : "X", "small", TextAnchor.UpperRight).color = Theme.Gold;
-                    modelIcon(tile.col, id, 72);
+                    modelIcon(Ui.Row(tile.col, 0, TextAnchor.MiddleCenter, false).transform, id, 72);
                     para(tile.col, $"<b>{d.name.Split(' ').Last()}</b>", "", TextAnchor.UpperCenter);
                     para(tile.col, ok ? $"{d.role}{(d.support ? " · Unterstützer" : "")}" : $"Gesperrt · {(mission != null ? $"Mission {U.Fmt(mission.index + 1)}" : "gesperrt")}", "tiny muted", TextAnchor.UpperCenter);
                     return tile.rt;

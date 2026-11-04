@@ -382,7 +382,7 @@ namespace Kernwacht.Game
                     Add("octa", x + 0.3f, top + 0.12f, y + 0.35f, 0.16f, 0.3f, 0.16f, 0x7ae0ff, 0.35f, 0.3f, 0.2f);
                     Add("octa", x + 0.68f, top + 0.1f, y + 0.62f, 0.13f, 0.24f, 0.13f, 0x5ac0f0, 0.35f, 1.1f, -0.25f);
                     Add("octa", x + 0.62f, top + 0.08f, y + 0.26f, 0.1f, 0.18f, 0.1f, 0xb0f0ff, 0.35f, 0.6f, 0.3f);
-                    Add("disc", x + 0.5f, top + 0.015f, y + 0.5f, 0.43f, 1, 0.43f, 0x2a5a7a);
+                    Add("disc", x + 0.5f, top + 0.015f, y + 0.5f, 0.86f, 1, 0.86f, 0x2a5a7a);
                     glows.Add(new GlowPoint(x + 0.5f, top + 0.15f, y + 0.5f, 0.3f, 0x7ae0ff, (float)(di * 1.3)));
                 }
             foreach (var li in m.ley)

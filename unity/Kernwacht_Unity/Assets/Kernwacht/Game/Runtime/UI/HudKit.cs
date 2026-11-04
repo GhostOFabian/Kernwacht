@@ -151,7 +151,14 @@ namespace Kernwacht.Game.UI
 
         public static UText Label(Button b) { return b.GetComponent<HudFit>()?.label ?? b.GetComponentInChildren<UText>(); }
 
-        public static void SetBtnText(Button b, string s) { SetText(Label(b), s); }
+        /// <summary>Knopftext setzen; die Breite (HudFit) wird im umgebenden Layout neu berechnet.</summary>
+        public static void SetBtnText(Button b, string s)
+        {
+            var t = Label(b);
+            if (t == null || t.text == s) return;
+            t.text = s;
+            LayoutRebuilder.MarkLayoutForRebuild(b.GetComponent<RectTransform>());
+        }
 
         public static void SetIcon(Button b, string icon)
         {
