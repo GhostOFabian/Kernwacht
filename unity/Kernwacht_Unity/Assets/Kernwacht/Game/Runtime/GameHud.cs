@@ -15,7 +15,7 @@ namespace Kernwacht.Game
         float scale = 1f;
         readonly List<Rect> uiRects = new List<Rect>();
         readonly List<Rect> nextRects = new List<Rect>();
-        GUIStyle box, title, label, small, button, bigButton, center, tag;
+        GUIStyle box, title, label, small, button, bigButton, center, tagStyle;
         Texture2D panelTex, panelHi, barBg, white;
         Vector2 towerScroll, infoScroll;
         int menuMap, menuDiff = 1;
@@ -63,7 +63,7 @@ namespace Kernwacht.Game
             small = new GUIStyle(label) { fontSize = 12 };
             small.normal.textColor = new Color(0.72f, 0.7f, 0.78f);
             center = new GUIStyle(label) { alignment = TextAnchor.MiddleCenter, fontSize = 15 };
-            tag = new GUIStyle(label) { fontSize = 12, alignment = TextAnchor.MiddleCenter, wordWrap = false };
+            tagStyle = new GUIStyle(label) { fontSize = 12, alignment = TextAnchor.MiddleCenter, wordWrap = false };
             button = new GUIStyle(GUI.skin.button) { fontSize = 13, richText = true, wordWrap = true, padding = new RectOffset(6, 6, 4, 4) };
             button.normal.background = Tex(new Color(0.16f, 0.13f, 0.2f, 0.95f));
             button.hover.background = panelHi;
@@ -231,7 +231,7 @@ namespace Kernwacht.Game
             if (e.maxShield > 0 && e.shield > 0)
                 GUI.DrawTexture(new Rect(bar.x, bar.y, bar.width * Mathf.Clamp01(e.shield / e.maxShield), 4), Tex2(new Color(0.5f, 0.9f, 1f)));
             if (e.plates.Count > 0)
-                GUI.Label(new Rect(bar.x, bar.y - 2, bar.width, 18), $"<size=11>Schwachpunkte: {e.plates.Count}</size>", tag);
+                GUI.Label(new Rect(bar.x, bar.y - 2, bar.width, 18), $"<size=11>Schwachpunkte: {e.plates.Count}</size>", tagStyle);
         }
 
         void DrawTowerBar(float W, float H)
@@ -445,7 +445,7 @@ namespace Kernwacht.Game
                 GUI.DrawTexture(new Rect(r.x, r.y, r.width * hp, r.height), Tex2(c));
                 if (e.maxShield > 0 && e.shield > 0) GUI.DrawTexture(new Rect(r.x, r.y - 3, r.width * Mathf.Clamp01(e.shield / e.maxShield), 2), Tex2(new Color(0.5f, 0.85f, 1f)));
                 string st = StatusIcons(e);
-                if (st.Length > 0) GUI.Label(new Rect(x - 40, y - 16, 80, 16), st, tag);
+                if (st.Length > 0) GUI.Label(new Rect(x - 40, y - 16, 80, 16), st, tagStyle);
             }
             foreach (var f in root.floats)
             {
@@ -454,7 +454,7 @@ namespace Kernwacht.Game
                 var c = f.color; c.a = Mathf.Clamp01(f.t * 1.5f);
                 var old = GUI.color;
                 GUI.color = c;
-                GUI.Label(new Rect(sp.x / scale - 40, (Screen.height - sp.y) / scale - 10, 80, 20), "<b>" + f.text + "</b>", tag);
+                GUI.Label(new Rect(sp.x / scale - 40, (Screen.height - sp.y) / scale - 10, 80, 20), "<b>" + f.text + "</b>", tagStyle);
                 GUI.color = old;
             }
         }

@@ -11,14 +11,14 @@ namespace Kernwacht.Game
     public class GameRoot : MonoBehaviour, IGameView
     {
         public GameAssets assets;
-        [Tooltip("Höhe einer Geländestufe in Einheiten.")] public float stepHeight = 0.22f;
+        [Tooltip("Höhe einer Geländestufe in Einheiten.")] public float stepHeight = 0.12f;
 
-        public GameSim sim;
-        public GameData data;
+        [System.NonSerialized] public GameSim sim;
+        [System.NonSerialized] public GameData data;
         public int speed = 1;
         public bool paused;
-        public TowerDef buildDef;
-        public Tower selected;
+        [System.NonSerialized] public TowerDef buildDef;
+        [System.NonSerialized] public Tower selected;
         public Vector2Int hoverCell = new Vector2Int(-1, -1);
         public bool hoverValid;
         public string hoverReason;
@@ -60,7 +60,7 @@ namespace Kernwacht.Game
             cam.fieldOfView = 40f;
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 200f;
-            sun = FindFirstObjectByType<Light>();
+            sun = FindAnyObjectByType<Light>();
             if (sun == null)
             {
                 var l = new GameObject("Sonne");
@@ -116,7 +116,7 @@ namespace Kernwacht.Game
             if (sim == null || !sim.InBounds(x, y)) return 0f;
             int c = sim.CellAt(x, y);
             if (Cell.Walkable(c)) return 0.02f;
-            return 0.12f + sim.HeightAt(x, y) * stepHeight;
+            return 0.1f + sim.HeightAt(x, y) * stepHeight;
         }
 
         public Vector3 WorldPos(Vector2 p, float lift = 0f)
@@ -166,14 +166,14 @@ namespace Kernwacht.Game
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogColor = fog;
-            RenderSettings.fogStartDistance = 24f;
-            RenderSettings.fogEndDistance = 60f;
+            RenderSettings.fogStartDistance = 30f;
+            RenderSettings.fogEndDistance = 80f;
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = Color.Lerp(sky, light, 0.45f);
-            RenderSettings.ambientEquatorColor = Color.Lerp(fog, ground, 0.4f);
-            RenderSettings.ambientGroundColor = Color.Lerp(cliff, Color.black, 0.5f);
+            RenderSettings.ambientSkyColor = Color.Lerp(sky, light, 0.75f);
+            RenderSettings.ambientEquatorColor = Color.Lerp(Color.Lerp(fog, ground, 0.5f), light, 0.35f);
+            RenderSettings.ambientGroundColor = Color.Lerp(cliff, light, 0.15f);
             sun.color = light;
-            sun.intensity = 1.25f;
+            sun.intensity = 2.1f;
             sun.transform.rotation = Quaternion.Euler(48f, -35f, 0f);
 
             var terrain = new GameObject("Gelände").transform;
@@ -344,7 +344,7 @@ namespace Kernwacht.Game
             if (Inp.Held("q")) camYaw += 60f * dt;
             if (Inp.Held("e")) camYaw -= 60f * dt;
             float sc = Inp.Scroll;
-            if (Mathf.Abs(sc) > 0.01f && !hud.PointerOverUi(Inp.PointerPos)) camDist = Mathf.Clamp(camDist * (1f - sc * 0.1f), 6f, 40f);
+            if (Mathf.Abs(sc) > 0.01f && !hud.PointerOverUi(Inp.PointerPos)) camDist = Mathf.Clamp(camDist * (1f - sc * 0.12f), 5f, 40f);
 
             var pp = Inp.PointerPos;
             if (Inp.PanHeld)
@@ -528,7 +528,7 @@ namespace Kernwacht.Game
         {
             var pos = WorldPos(e.Pos);
             var go = SpawnModel(e.ModelId, pos, Quaternion.identity, dynamicRoot);
-            float s = e.elite ? data.eliteSize : 1f;
+            float s = (e.IsBoss ? 1f : 1.35f) * (e.elite ? data.eliteSize : 1f);
             if (e.mutation != null) s *= 1.05f;
             go.transform.localScale = Vector3.one * s;
             e.view = go;

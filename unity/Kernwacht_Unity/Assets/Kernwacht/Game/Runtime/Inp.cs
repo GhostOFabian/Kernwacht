@@ -18,7 +18,16 @@ namespace Kernwacht.Game
         public static bool PrimaryHeld => P != null && P.press.isPressed;
         public static bool SecondaryDown => M != null && M.rightButton.wasPressedThisFrame;
         public static bool PanHeld => M != null && (M.rightButton.isPressed || M.middleButton.isPressed);
-        public static float Scroll => M != null ? M.scroll.ReadValue().y / 120f : 0f;
+        public static float Scroll
+        {
+            get
+            {
+                if (M == null) return 0f;
+                float y = M.scroll.ReadValue().y;
+                // je nach Plattform ±120 je Raste (Windows) oder ±1 (normalisiert, WebGL/macOS)
+                return Mathf.Abs(y) > 10f ? y / 120f : Mathf.Clamp(y, -3f, 3f);
+            }
+        }
         public static int TouchCount => UnityEngine.InputSystem.Touchscreen.current != null ? CountTouches() : 0;
 
         static int CountTouches()

@@ -27,6 +27,41 @@ Die Kennungen sind dieselben wie im Browser-Spiel (`ranger`, `runner`, `ashQueen
 
 Alle Schritte lassen sich gefahrlos wiederholen, zum Beispiel nach einem Modell-Update. Dann einfach die .glb-Dateien in `Models/` ersetzen und Schritt 2 erneut ausführen.
 
+## Spielbares Kernwacht (Szene `Scenes/Kernwacht.unity`)
+
+4. **Kernwacht → 3 · Spielszene erzeugen**
+   - Legt Materialien und `Resources/KernwachtGameAssets.asset` an.
+   - Baut die Szene `Scenes/Kernwacht.unity` und setzt sie an die erste Stelle der Build-Liste.
+   - Stellt die WebGL-Einstellungen ein (Gzip mit Fallback, Daten-Caching).
+   - **Play** startet das Menü: Karte (7 Biome), Schwierigkeit und Modus (20 Wellen oder Endlos) wählen.
+5. **Kernwacht → 4 · WebGL-Build erstellen**
+   - Baut das Browserspiel nach `Builds/WebGL` (nötig: Modul „Web Build Support“ im Unity Hub).
+
+**Was schon drin ist (Werte 1:1 aus dem Webspiel):**
+- 7 Karten mit Wegen, Anhöhen, Leylinien, Goldadern und Hindernis-Modellen.
+- 30 vorberechnete Wellen je Karte, im Endlosmodus fortgesetzt.
+- 20 baubare Türme mit 3 Ausbaustufen und 2 Spezialisierungen, dazu 12 legendäre Fusionen.
+- Angriffsarten: Geschoss, Fläche, Puls, Kette, Strahl, Laser, Tesla, Meteor, Minen, Riss, Gravitation. Totem und Pylon verstärken, der Goldgräber bringt Einnahmen.
+- Status und Reaktionen: Brand, Gift, Kälte, Frost, Markierung, Spröde und Betäubung; außerdem Dampfstoß, Überladung, Thermoschock, Resonanzbruch und Giftbrand.
+- Alle 19 Gegner, Elite-Gegner, Mutationen, Schilde, Regeneration, Phasenverschiebung und Heiler.
+- 7 Bosse mit Phasen, Standfestigkeit, Brut, Rissprung, Zwillingsbund, Nullschild und Schwachpunkten.
+
+**Steuerung**
+- **Maus:** Linksklick baut oder wählt aus, Rechtsklick bricht ab. Rechte oder mittlere Maustaste ziehen bewegt die Kamera, das Mausrad zoomt.
+- **Kamera:** Q/E drehen, WASD verschiebt.
+- **Tasten:** Leertaste startet die Welle, 1–0 wählt einen Turm, U baut aus, Entf verkauft, F ändert das Tempo, P pausiert.
+
+**Noch nicht übertragen**
+- Helden
+- Runen
+- Netzwerke und Resonanzen
+- Roguelite-Modifikatoren
+- Kampagne
+- Mazing-Modus
+- Speicherstände
+
+Die Spieldaten erzeugt `web/scripts/export_unity.ts`. Aufruf im Webspiel-Ordner: `node --import tsx scripts/export_unity.ts <Zielordner>`. Danach die JSON-Dateien nach `Assets/Kernwacht/Resources/KernwachtData/` kopieren.
+
 ## 3. Im Spielcode verwenden
 ```csharp
 using Kernwacht.Models;
