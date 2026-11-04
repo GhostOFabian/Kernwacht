@@ -731,7 +731,9 @@ namespace Kernwacht.Game.UI
             }
             else if (d.specs.Count == 2 && t.spec == 0 && d.legendary != true)
             {
-                Small(body, "Spezialisierung wählen (später gegen Aufpreis wechselbar):", Theme.Muted);
+                bool anyAff = s.gold >= Math.Min(EconomySystem.specCost(t, 1), EconomySystem.specCost(t, 2));
+                Bold(body, anyAff ? "★ Spezialisierung bereit – jetzt wählen!" : "★ Spezialisierung wählen (später gegen Aufpreis wechselbar)", 16).color = anyAff ? HK.StarGold : Theme.Text;
+                if (anyAff) Small(body, "Später gegen Aufpreis wechselbar.", Theme.Muted);
                 for (int i = 0; i < 2; i++)
                 {
                     var sp = d.specs[i];

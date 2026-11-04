@@ -1449,6 +1449,27 @@ namespace Kernwacht.Game
                     r.ground(SPRITE_ADD, SHAPE.ring, x, by + 0.04f, z, 0.62f, 0xffe080, 0.45f + Mathf.Sin(t * 2) * 0.15f, t, 0.3f, 0.08f);
                     if (Rnd() < 0.12f * fx.intensity) fx.emit(x + (Rnd() - 0.5f) * 0.8f, by + 0.3f, z + (Rnd() - 0.5f) * 0.8f, 0.9f, 0xfff0b0, shape: SHAPE.star, vy: 0.8f, c1: 0xffb040, s0: 0.12f, s1: 0.03f);
                 }
+                // Hinweis über dem Turm: Spezialisierung wählbar und bezahlbar (goldener Stern), Fähigkeit bereit (cyan Ring)
+                if (inst.tower != null || inst.fallback)
+                {
+                    bool canSpec = def.specs.Count == 2 && tw.spec == 0 && def.legendary != true && EconomySystem.nextUpgradeCost(tw) == null
+                        && s.gold >= Math.Min(EconomySystem.specCost(tw, 1), EconomySystem.specCost(tw, 2));
+                    float realTopH = inst.fallback ? top * scale : inst.nativeH * inst.tr.localScale.x;
+                    if (canSpec)
+                    {
+                        float pz = 0.5f + 0.5f * Mathf.Sin(t * 4 + (float)tw.uid);
+                        float sy2 = by + realTopH + 0.42f + Mathf.Sin(t * 2.5f + (float)tw.uid) * 0.06f;
+                        r.billboard(SPRITE_ADD, SHAPE.glow, x, sy2, z, 0.75f + pz * 0.2f, 0xffb030, 0.45f + pz * 0.25f);
+                        r.billboard(false, SHAPE.star, x, sy2, z, 0.34f + pz * 0.05f, 0xffd040, 1f, t * 0.8f);
+                        r.ground(SPRITE_ADD, SHAPE.ring, x, by + 0.04f, z, 0.55f + pz * 0.08f, 0xffb030, 0.55f + pz * 0.3f, -t, 0.3f, 0.07f);
+                    }
+                    else if (def.active != null && !activeOn && EconomySystem.activeState(sim, tw).available)
+                    {
+                        float pz = 0.5f + 0.5f * Mathf.Sin(t * 5 + (float)tw.uid);
+                        r.ground(SPRITE_ADD, SHAPE.ring, x, by + 0.04f, z, 0.5f + pz * 0.06f, 0x60e0ff, 0.45f + pz * 0.35f, t, 0.3f, 0.06f);
+                        r.billboard(SPRITE_ADD, SHAPE.spark, x, by + realTopH + 0.3f, z, 0.28f + pz * 0.06f, 0x80f0ff, 0.8f, t * 2);
+                    }
+                }
                 if (activeOn)
                 {
                     r.ground(SPRITE_ADD, SHAPE.ring, x, by + 0.04f, z, 0.75f + Mathf.Sin(t * 6) * 0.05f, defColor, 0.8f, -t * 2, 0.3f, 0.14f);

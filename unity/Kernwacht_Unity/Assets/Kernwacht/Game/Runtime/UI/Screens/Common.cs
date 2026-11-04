@@ -396,15 +396,22 @@ namespace Kernwacht.Game.UI
         /// <summary>Anklickbare Kachel (.champ-pick, .skin, .hero-pick, .item): Panel + Knopf + senkrechte Anordnung.</summary>
         public static Tile tile(Transform p, Action onClick, Color? highlight = null, Color? bg = null, RectOffset pad = null, float spacing = 4)
         {
-            var img = Ui.Panel(p, "Tile", bg ?? new Color(40 / 255f, 30 / 255f, 64 / 255f, 0.5f), true, Theme.Round);
+            // Deckende Kachel: Unitys Outline/Shadow kopieren die ganze Fläche – bei durchscheinendem Grund
+            // färbte die Markierungsfarbe (z. B. Gold) die komplette Kachel ein und weiße Schrift war kaum lesbar.
+            Color baseBg = bg ?? new Color(40 / 255f, 30 / 255f, 64 / 255f, 0.5f);
+            baseBg.a = 1f;
+            if (highlight.HasValue) baseBg = Color.Lerp(new Color(30 / 255f, 22 / 255f, 48 / 255f, 1f), highlight.Value, 0.16f);
+            else baseBg = Color.Lerp(new Color(18 / 255f, 14 / 255f, 28 / 255f, 1f), baseBg, 0.6f);
+            baseBg.a = 1f;
+            var img = Ui.Panel(p, "Tile", baseBg, true, Theme.Round);
             var o = img.GetComponent<Outline>();
             o.effectColor = highlight ?? Theme.LineStrong;
             if (highlight.HasValue)
             {
-                o.effectDistance = new Vector2(2, -2);
+                o.effectDistance = new Vector2(3, -3);
                 var glow = img.gameObject.AddComponent<Shadow>();
-                glow.effectColor = new Color(highlight.Value.r, highlight.Value.g, highlight.Value.b, 0.35f);
-                glow.effectDistance = new Vector2(0, -4);
+                glow.effectColor = new Color(highlight.Value.r, highlight.Value.g, highlight.Value.b, 0.3f);
+                glow.effectDistance = new Vector2(0, -5);
             }
             var b = img.gameObject.AddComponent<Button>();
             var cb = b.colors;

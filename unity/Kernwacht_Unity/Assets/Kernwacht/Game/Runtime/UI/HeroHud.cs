@@ -352,7 +352,9 @@ namespace Kernwacht.Game.UI
             var fgo = Ui.Node("Fill", mask.transform);
             e.fill = fgo.AddComponent<Image>();
             e.fill.raycastTarget = false;
-            e.fill.color = e.ult ? new Color(1f, 0.71f, 0.24f, 0.62f) : HeroKit.A(hc, 0.38f);
+            // Gedämpfte, deckende Füllung: weiße Symbole und Zahlen bleiben auch bei hellen Heldenfarben (Gold) lesbar
+            var skBase = Theme.Hex(0x1a1428);
+            e.fill.color = e.ult ? Color.Lerp(skBase, new Color(1f, 0.71f, 0.24f, 1f), 0.34f) : Color.Lerp(skBase, hc, 0.26f);
             var fr = e.fill.rectTransform;
             fr.anchorMin = Vector2.zero; fr.anchorMax = new Vector2(1, 1); fr.pivot = new Vector2(0.5f, 0); fr.offsetMin = fr.offsetMax = Vector2.zero;
             e.icon = HeroKit.Ic(e.b.transform, sk.icon, 26, Theme.Muted);
@@ -609,8 +611,12 @@ namespace Kernwacht.Game.UI
                 if (state != e.state)
                 {
                     e.state = state;
-                    e.cg.alpha = locked ? 0.45f : 1f;
-                    e.icon.color = locked ? HeroKit.A(Theme.Muted, 0.2f) : ready ? Color.white : Theme.Muted;
+                    // Gesperrt: nicht mehr durchscheinend (das färbte den Knopf rosa), sondern dunkel mit gut lesbarer Stufe
+                    e.cg.alpha = 1f;
+                    e.bg.color = locked ? Theme.Hex(0x15111f) : Theme.Hex(0x1a1428);
+                    e.fill.enabled = !locked;
+                    e.cd.color = locked ? Theme.Hex(0xc9bfe0) : Color.white;
+                    e.icon.color = locked ? HeroKit.A(Theme.Muted, 0.25f) : ready ? Color.white : Theme.Muted;
                     e.noMana.enabled = nomana;
                     e.target.enabled = tg;
                     if (!ready) { e.border.effectColor = Theme.LineStrong; e.glow.effectColor = Color.clear; }
@@ -680,7 +686,9 @@ namespace Kernwacht.Game.UI
             e.icon.sprite = HeroKit.Spr(HeroKit.IconName(d.icon));
             e.icon.color = pc;
             e.border.effectColor = special ? Theme.Gold : HeroKit.A(pc, 0.6f);
-            e.glow.effectColor = ps.ok ? HeroKit.A(pc, 0.4f) : Color.clear;
+            e.glow.effectColor = ps.ok ? HeroKit.A(pc, 0.22f) : Color.clear;
+            e.glow.effectDistance = new Vector2(2, -2);
+            e.bg.color = Theme.Hex(0x160f22);
             e.n.text = $"×{U.Fmt(count)}";
             e.k.text = key;
             bool showCd = cd > 0;

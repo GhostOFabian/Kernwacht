@@ -130,6 +130,8 @@ namespace Kernwacht.Game.UI
         readonly Button speedBtn;
         double speedV = double.NaN;
         readonly Button pauseBtn;
+        readonly Button towerListBtn;
+        int specReady = -1;
         bool pauseShown;
         readonly Button lockBtn;
         readonly Button miniBtn;
@@ -155,6 +157,10 @@ namespace Kernwacht.Game.UI
             public UText cost, key, prespec, free;
             public CanvasGroup cg;
             public HudHover hover;
+            /// <summary>Fusionsmarke: leuchtet, wenn der Turm mit dem angeklickten Turm auf dem Feld kombinierbar ist.</summary>
+            public Image fuse;
+            public UText fuseLbl;
+            public string fuseWith;
             public string costTxt;
             public string costSig;
             public int flags = -1;
@@ -277,7 +283,8 @@ namespace Kernwacht.Game.UI
             Ui.Place(cRt, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-10, 0), new Vector2(0, TOP_H - 8));
             HK.Fit(controls, true, false);
             // Aufgeräumt: eindeutige Symbole, gleich hohe Knöpfe, keine doppelte Pause-Taste (☰ öffnet das Menü)
-            HK.Tip(HK.B(cRt, "Türme", () => toggleTowerList(), Ui.BtnKind.Normal, 16, 40, "scroll"), "Turmübersicht: alle Türme mit Aufwerten und Infos (O)");
+            towerListBtn = HK.B(cRt, "Türme", () => toggleTowerList(), Ui.BtnKind.Normal, 16, 40, "scroll");
+            Ui.Tip(towerListBtn, () => specReady > 0 ? $"Turmübersicht (O) – {specReady} Turm/Türme können jetzt spezialisiert werden (★)" : "Turmübersicht: alle Türme mit Aufwerten und Infos (O)");
             upAllBtn = HK.B(cRt, "Alle aufwerten", () => a.upgradeAll(), Ui.BtnKind.Normal, 16, 40, "up");
             Ui.Tip(upAllBtn, () => upAllTitle);
             speedBtn = HK.B(cRt, "1×", () => a.cycleSpeed(), Ui.BtnKind.Normal, 17, 40, "speed");
@@ -519,6 +526,22 @@ namespace Kernwacht.Game.UI
             tb.free = HK.T(tb.bg.transform, "∞", 12, Theme.Hex(0x9be36b), TextAnchor.UpperRight, FontStyle.Bold);
             Ui.Place(tb.free.rectTransform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-4, -1), new Vector2(16, 14));
             tb.free.gameObject.SetActive(false);
+            // Fusionsmarke (Symbol + Beschriftung über dem Knopf), standardmäßig aus
+            tb.fuse = HK.Img(tb.bg.transform, Icons.Get("fuse"), 20);
+            tb.fuse.color = FUSE_COL;
+            tb.fuse.raycastTarget = false;
+            Ui.Place(tb.fuse.rectTransform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-2, -16), new Vector2(20, 20));
+            tb.fuse.gameObject.AddComponent<Shadow>().effectColor = new Color(0, 0, 0, 0.9f);
+            tb.fuse.gameObject.SetActive(false);
+            tb.fuseLbl = HK.T(tb.bg.transform, "Fusion", 12, Theme.Hex(0x10202a), TextAnchor.MiddleCenter, FontStyle.Bold);
+            tb.fuseLbl.horizontalOverflow = HorizontalWrapMode.Overflow;
+            var fl = Ui.Node("FuseTag", tb.bg.transform).AddComponent<Image>();
+            fl.sprite = Theme.Round; fl.type = Image.Type.Sliced; fl.color = FUSE_COL; fl.raycastTarget = false;
+            Ui.Place(fl.rectTransform, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, 14), new Vector2(58, 18));
+            tb.fuseLbl.transform.SetParent(fl.transform, false);
+            Ui.Fill(tb.fuseLbl.rectTransform);
+            tb.fuseLbl.raycastTarget = false;
+            fl.gameObject.SetActive(false);
             if (banned) { tb.btn.interactable = false; tb.cg.alpha = 0.3f; }
             tb.btn.onClick.AddListener(() =>
             {
@@ -548,7 +571,41 @@ namespace Kernwacht.Game.UI
             }
             string dmg = d.damageType != null ? $" · {HudText.Dmg(d.damageType)}" : "";
             string lim = s.he != null && s.rules.endless && !Scaling.countsTowardLimit(id) ? " · zählt nicht zum Turmlimit" : "";
-            return $"{d.name} ({towerKey(id)}) – {d.role}{dmg}{lim}";
+            string fz = towerBtns.TryGetValue(id, out var tbx) && tbx.fuseWith != null ? $"\n✦ Fusionspartner: neben {tbx.fuseWith} stellen" : "";
+            return $"{d.name} ({towerKey(id)}) – {d.role}{dmg}{lim}{fz}";
+        }
+
+        static readonly Color FUSE_COL = new Color(0.48f, 0.88f, 1f, 1f);
+        readonly Dictionary<string, string> fusePartners = new Dictionary<string, string>();
+        double fuseSel = -1;
+        string fuseSelDef;
+
+        /// <summary>Partner des angeklickten Turms für alle Fusionsrezepte (Turmkennung → Name der Fusion).</summary>
+        void updateFusePartners()
+        {
+            var s = sim.s;
+            string def = null;
+            if (v.selectedTower != 0)
+                foreach (var t in s.towers) if (t.uid == v.selectedTower) { def = t.def; break; }
+            if (v.selectedTower == fuseSel && def == fuseSelDef) return;
+            fuseSel = v.selectedTower; fuseSelDef = def;
+            fusePartners.Clear();
+            if (def != null)
+                foreach (var r in Towers.FUSIONS)
+                {
+                    string partner = r.a == def ? r.b : r.b == def ? r.a : null;
+                    if (partner != null && !fusePartners.ContainsKey(partner)) fusePartners[partner] = Towers.TOWERS.TryGetValue(r.id, out var ld) ? ld.name : r.id;
+                }
+            string selName = def != null && Towers.TOWERS.TryGetValue(def, out var sd) ? sd.name : null;
+            foreach (var tb in towerBtnList)
+            {
+                bool on = fusePartners.TryGetValue(tb.id, out var fname);
+                tb.fuseWith = on ? $"{selName} → {fname}" : null;
+                tb.fuse.gameObject.SetActive(on);
+                tb.fuseLbl.transform.parent.gameObject.SetActive(on);
+                if (on) tb.fuseLbl.text = "Fusion";
+                tb.flags = -1; // Rahmen neu setzen
+            }
         }
 
         // ------------------------------------------------------------ Bauplatz-Erklärung (Turmlimit)
@@ -898,12 +955,26 @@ namespace Kernwacht.Game.UI
         {
             var s = sim.s;
             sig.Reset().N(Math.Floor(s.gold)).C('|');
-            foreach (var t in s.towers) sig.N(t.level);
+            foreach (var t in s.towers) sig.N(t.level).N(t.spec);
             sig.C('|').N(s.towers.Count);
             if (!sig.Changed(ref upAllSig)) return;
             var ups = EconomySystem.upgradableTowers(sim);
             double cheapest = double.PositiveInfinity;
             foreach (var t in ups) cheapest = Math.Min(cheapest, EconomySystem.nextUpgradeCost(t) ?? double.PositiveInfinity);
+            // Spezialisierung bereit (Höchststufe, noch keine Spezialisierung, bezahlbar): Zähler auf „Türme“
+            int sr = 0;
+            foreach (var t in s.towers)
+            {
+                var td = Towers.TOWERS[t.def];
+                if (td.specs.Count == 2 && t.spec == 0 && td.legendary != true && EconomySystem.nextUpgradeCost(t) == null
+                    && s.gold >= Math.Min(EconomySystem.specCost(t, 1), EconomySystem.specCost(t, 2))) sr++;
+            }
+            if (sr != specReady)
+            {
+                specReady = sr;
+                HK.SetBtnText(towerListBtn, sr > 0 ? $"Türme ★{sr}" : "Türme");
+                towerListBtn.GetComponentInChildren<UText>().color = sr > 0 ? HK.StarGold : Theme.Text;
+            }
             var all = EconomySystem.upgradeAllCost(sim);
             HK.Enable(upAllBtn, !(ups.Count == 0 || cheapest > s.gold));
             upAllTitle = ups.Count > 0
@@ -914,10 +985,17 @@ namespace Kernwacht.Game.UI
         void updateTowerBtns()
         {
             var s = sim.s;
+            updateFusePartners();
+            float pulse = 0.65f + 0.35f * Mathf.Sin(Time.unscaledTime * 5f);
             for (int i = 0; i < towerBtnList.Count; i++)
             {
                 var tb = towerBtnList[i];
                 string id = tb.id;
+                if (tb.fuseWith != null)
+                {
+                    tb.fuse.color = new Color(FUSE_COL.r, FUSE_COL.g, FUSE_COL.b, pulse);
+                    tb.outline.effectColor = new Color(FUSE_COL.r, FUSE_COL.g, FUSE_COL.b, 0.55f + 0.45f * pulse);
+                }
                 bool locked = s.he != null && !PassiveTree.towerUnlocked(id, s.he, s.wave);
                 int flags = 0;
                 string costTxt = tb.costTxt;
@@ -954,8 +1032,10 @@ namespace Kernwacht.Game.UI
                 if (tb.btn.interactable) tb.cg.alpha = locked ? 0.45f : poor ? 0.72f : 1f;
                 tb.bg.color = locked ? Theme.Hex(0x1e1a26) : Theme.Hex(0x28203c);
                 tb.cost.color = poor ? Theme.Bad : locked ? Theme.Hex(0xffd860) : Theme.Gold;
-                tb.outline.effectColor = active ? Theme.Gold : Theme.LineStrong;
-                tb.outline.effectDistance = active ? new Vector2(2, -2) : new Vector2(1, -1);
+                bool fusePartner = tb.fuseWith != null;
+                tb.outline.effectColor = active ? Theme.Gold : fusePartner ? FUSE_COL : Theme.LineStrong;
+                tb.outline.effectDistance = active || fusePartner ? new Vector2(3, -3) : new Vector2(1, -1);
+                if (fusePartner && tb.btn.interactable) tb.cg.alpha = 1f; // Partner immer gut sichtbar, auch wenn zu teuer
                 tb.prespec.gameObject.SetActive((flags & 8) != 0);
                 tb.free.gameObject.SetActive((flags & 16) != 0);
             }
