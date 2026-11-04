@@ -1,3 +1,5 @@
-# Kernwacht – Browser-Build (Unity WebGL)
+# Kernwacht – Browserversion (Unity WebGL)
 
-Automatisch erzeugt aus `unity/Kernwacht_Unity` (Menü „Kernwacht → 4 · WebGL-Build erstellen“).
+Spielen: https://ghostofabian.github.io/Kernwacht/
+
+Dieser Branch enthält nur den fertigen WebGL-Build. Quellcode: Branch `main`.
