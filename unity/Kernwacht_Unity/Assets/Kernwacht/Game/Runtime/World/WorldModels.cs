@@ -36,6 +36,8 @@ namespace Kernwacht.Game
         public Animator anim;
         public bool fallback;
         public float nativeH = 1, nativeMinY;
+        /// <summary>Mitte (x/z) und größte waagerechte Ausdehnung des Modells bei Maßstab 1, ungedreht.</summary>
+        public float nativeCX, nativeCZ, nativeFoot = 1;
         internal Renderer[] rs;
         internal Material[][] orig;
         internal Material[][] ghostMats;
@@ -51,11 +53,21 @@ namespace Kernwacht.Game
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
         /// <summary>Spielposition (Unterkante des Modells bei y), Zielhöhe in Welteinheiten, optional gestaucht.</summary>
-        public void Place(float x, float y, float z, float height, float squash = 1)
+        public void Place(float x, float y, float z, float height, float squash = 1, float maxFoot = 0)
         {
             float k = Mathf.Max(0.001f, height) / Mathf.Max(0.05f, nativeH);
+            // Lange Modelle (Vierbeiner) nicht breiter als den Weg werden lassen
+            if (maxFoot > 0 && nativeFoot * k > maxFoot) k = maxFoot / Mathf.Max(0.05f, nativeFoot);
             tr.localScale = new Vector3(k, k * squash, k);
-            tr.position = IsoCamera.W(x, y - nativeMinY * k * squash, z);
+            var p = IsoCamera.W(x, y - nativeMinY * k * squash, z);
+            // Figuren um die Körpermitte statt um den Modellursprung (bei Vierbeinern das Hinterteil) platzieren
+            if (unit != null && (nativeCX != 0 || nativeCZ != 0))
+            {
+                var off = tr.rotation * new Vector3(nativeCX * k, 0, nativeCZ * k);
+                p.x -= off.x;
+                p.z -= off.z;
+            }
+            tr.position = p;
         }
 
         /// <summary>Blickrichtung aus einem Spielwinkel (Richtung (cos a, sin a) in x/z-Spielkoordinaten).</summary>
@@ -63,6 +75,7 @@ namespace Kernwacht.Game
         {
             var d = new Vector3(Mathf.Cos(a), 0, -Mathf.Sin(a));
             tr.rotation = Quaternion.LookRotation(d, Vector3.up);
+            if (unit != null) unit.FaceTowards(tr.position + d);
         }
 
         public void SetActive(bool on)
@@ -152,7 +165,8 @@ namespace Kernwacht.Game
     public class ModelPool
     {
         readonly Dictionary<string, Stack<ModelInst>> pool = new Dictionary<string, Stack<ModelInst>>();
-        readonly Dictionary<string, Vector2> measured = new Dictionary<string, Vector2>();
+        readonly Dictionary<string, Vector4> measured = new Dictionary<string, Vector4>();
+        readonly Dictionary<string, float> measuredFoot = new Dictionary<string, float>();
         public readonly Transform root;
         readonly Transform parked;
         Material fallbackBase;
@@ -298,11 +312,17 @@ namespace Kernwacht.Game
                 float h = any ? b.size.y : 1f;
                 float minY = any ? b.min.y : 0f;
                 if (h < 0.05f) h = 0.05f;
-                hm = new Vector2(h, minY);
+                hm = new Vector4(h, minY, any ? b.center.x : 0, any ? b.center.z : 0);
                 measured[key] = hm;
+                measuredFoot[key] = any ? Mathf.Max(0.05f, Mathf.Max(b.size.x, b.size.z)) : 1f;
             }
             inst.nativeH = hm.x;
             inst.nativeMinY = hm.y;
+            inst.nativeCX = hm.z;
+            inst.nativeCZ = hm.w;
+            inst.nativeFoot = measuredFoot.TryGetValue(key, out var ft) ? ft : 1f;
+            // Blickrichtung kommt vom Spiel (Laufrichtung), nicht aus dem Positionsunterschied
+            if (inst.unit != null) inst.unit.SetAutoFacing(false);
             go.SetActive(false);
             return inst;
         }
@@ -413,7 +433,6 @@ namespace Kernwacht.Game
             }
             if (level >= 3)
             {
-                o.Add(new Part("torus", 0, 0.2f, 0, 0.96f, 0.35f, 0.96f, 0xc89a30, e: 0.1f));
                 o.Add(new Part("cyl8", -0.42f, 0.18f, -0.42f, 0.05f, 0.75f, 0.05f, WOOD_D));
                 o.Add(new Part("rbox", -0.42f, 0.78f, -0.34f, 0.03f, 0.2f, 0.18f, T, wing: 0.15f));
             }
@@ -424,7 +443,6 @@ namespace Kernwacht.Game
                     float a = k / 4f * Mathf.PI * 2 + Mathf.PI / 4;
                     o.Add(new Part("cone4", Mathf.Cos(a) * 0.48f, 0.2f, Mathf.Sin(a) * 0.48f, 0.12f, 0.34f, 0.12f, GOLD, e: 0.5f));
                 }
-                o.Add(new Part("ringThin", 0, top + 0.1f, 0, 0.3f, 1, 0.3f, A, e: 1.2f, spin: 1.5f));
             }
             var arr = o.ToArray();
             levelCache[key] = arr;

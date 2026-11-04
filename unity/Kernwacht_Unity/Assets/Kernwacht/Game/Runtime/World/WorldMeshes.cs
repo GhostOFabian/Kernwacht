@@ -18,7 +18,7 @@ namespace Kernwacht.Game
         public static readonly string[] IDS =
         {
             "box", "rbox", "cyl6", "cyl8", "cyl12", "cyl16", "cone4", "cone6", "cone8", "cone12",
-            "octa", "sphere", "sphereLo", "gem", "ring", "ringThin", "disc", "torus", "hex", "plane", "leaf",
+            "octa", "sphere", "sphereLo", "gem", "ring", "ringThin", "disc", "torus", "hex", "plane", "leaf", "band",
         };
 
         static readonly Dictionary<string, int> index = new Dictionary<string, int>();
@@ -144,6 +144,7 @@ namespace Kernwacht.Game
                 case "ringThin": return Ring(48, 0.95f);
                 case "disc": return Disc(32);
                 case "torus": return Torus(18, 6, 0.12f);
+                case "band": return Torus(56, 10, 0.028f); // feiner, glatter Ring (Turmstufen)
                 case "hex": return Cylinder(6, 0.5f, 0.5f, true, false);
                 case "plane": return Plane(8);
                 case "leaf": return Leaf();

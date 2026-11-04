@@ -219,14 +219,13 @@ namespace Kernwacht.Game.UI
             var body = panelBody;
             HK.T(body, HudText.MODE_NAMES.TryGetValue(s.mode, out var mode) ? mode : s.mode, HK.H3, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
             P(body, $"{s.map.name} · Seed {s.seed.text}", HK.FS, Theme.Muted);
-            if (s.he != null) Small(body, "Helden-Endlos: Wellen starten automatisch (Countdown auf der Startschaltfläche). Klick/Rechtsklick bewegt den Helden, A/S/D/W wirken Fähigkeiten, Tab öffnet den Charakter, X den Laden (am Laden nahe dem Kern).");
-            P(body, s.phase == "build"
-                ? "Bauphase: Wähle unten einen Turm und platziere ihn. Starte die Welle, wenn du bereit bist."
-                : "Kampf läuft. Tippe Türme an, um sie aufzuwerten, Fähigkeiten auszulösen oder ihre Zielwahl zu ändern.");
+            // Aufgeräumt: Bedienhinweise stehen im Hinweisbalken unten und unter Hilfe – hier nur, was diese Partie betrifft
+            if (s.he == null)
+                P(body, s.phase == "build"
+                    ? "Bauphase: Wähle unten einen Turm und platziere ihn. Starte die Welle, wenn du bereit bist."
+                    : "Kampf läuft. Tippe Türme an, um sie aufzuwerten, Fähigkeiten auszulösen oder ihre Zielwahl zu ändern.");
             if (s.heroes.Count > 0) Small(body, $"Helden: {string.Join(" & ", s.heroes.Select((x) => Heroes.HEROES[x.id].name))}. Mit Z/X (oder Porträt antippen) auf dem Weg einsetzen – das kostet Rissenergie, die du durch Abschüsse, Reaktionen und Wellen sammelst.");
-            Small(body, s.map.variant == "mazing"
-                ? "Mazing: Türme und Barrikaden lenken die Route. Der Weg kann nie vollständig blockiert werden."
-                : "Classic: Gegner folgen dem markierten Weg. Anhöhen geben +0,4 Reichweite, Leylinien (Ring) +15 % Schaden, Goldadern +50 % Minenertrag.", Theme.Muted);
+            Small(body, "Tipp: Turm, Gegner oder Hindernis anklicken zeigt hier Werte und Aktionen.", Theme.Muted);
             int sp = WorldGenerator.spawnsOf(s.map).Count;
             if (sp > 1) Small(body, $"⚠ Weggabelung: Gegner kommen aus {sp} Rissen.", Theme.Warn);
         }

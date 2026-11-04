@@ -588,12 +588,18 @@ namespace Kernwacht.Game
                     {
                         float y = gy(map, e.x, e.y);
                         for (int i = 0; i < 4; i++) fx.smoke(ex + (Rnd() - 0.5f) * 0.8f, y + 0.1f, ey + (Rnd() - 0.5f) * 0.8f, 0.5f, 0xb8a888, 0.4f, 0.8f);
-                        fx.ring(ex, y, ey, 0.9f, 0xffffff, 0.35f, 0.12f);
                         if (e.k == "upgrade")
                         {
-                            fx.pillar(ex, y, ey, 2.4f, 0xffd860, 0.5f, 0.25f);
+                            // Aufstieg: Goldwelle am Boden, drei aufsteigende Ringe, schmaler Lichtstrahl
+                            fx.ring(ex, y, ey, 1.05f, 0xffd860, 0.5f, 0.07f, 0.35f);
+                            fx.ring(ex, y, ey, 0.7f, 0xffffff, 0.35f, 0.05f, 0.5f);
+                            for (int i = 0; i < 3; i++)
+                                fx.emit(ex, y + 0.12f + i * 0.22f, ey, 0.55f + i * 0.12f, i == 1 ? 0xffffff : 0xffd860, shape: SHAPE.ring, flat: true,
+                                    vy: 1.4f + i * 0.25f, s0: 0.5f - i * 0.06f, s1: 0.28f, a: 0.85f, seed: 0.06f);
+                            fx.pillar(ex, y, ey, 2.0f, 0xffd860, 0.45f, 0.14f);
                             fx.sparks(ex, y + 0.8f, ey, 0xffd860, 10, 1.1f);
                         }
+                        else fx.ring(ex, y, ey, 0.9f, 0xffffff, 0.35f, 0.12f);
                         if (e.k == "sell")
                         {
                             fx.sparks(ex, y + 0.4f, ey, 0xffd84a, 12, 1.2f);
@@ -904,6 +910,8 @@ namespace Kernwacht.Game
         {
             float hold = 0;
             if (inst.unit != null) hold = Mathf.Min(boss ? 1.6f : 1.0f, inst.unit.PlayDeath());
+            // Tatsächlich angezeigte Größe übernehmen (Längenbegrenzung der Vierbeiner), damit der Körper beim Tod nicht springt
+            if (inst.tr != null && inst.nativeH > 0.05f && inst.tr.localScale.x > 0) height = Mathf.Min(height, inst.tr.localScale.x * inst.nativeH);
             return new Corpse { inst = inst, x = x, y = y, z = z, height = height, t = 0, hold = hold, max = boss ? 1.6f : 0.55f, color = color, boss = boss, scale = height };
         }
 
@@ -1401,7 +1409,27 @@ namespace Kernwacht.Game
 
                 if (def.attack != "none")
                 {
-                    if (tw.level >= 2) drawParts(WorldModels.levelParts((int)tw.level, top), x, by, z, 0, scale, main, accent, "opaque", 1, -1, 0, 0, (float)tw.uid);
+                    if (tw.level >= 2)
+                    {
+                        // Stufenschmuck am echten Modell ausrichten: Fußkreis und Höhe aus den Modellmaßen
+                        float kk = inst.tr.localScale.x;
+                        float realTop = inst.fallback ? top * scale : inst.nativeH * kk;
+                        float foot = inst.fallback ? 0.4f * scale : Mathf.Clamp(inst.nativeFoot * kk * 0.5f, 0.2f, 0.47f * tsz);
+                        drawParts(WorldModels.levelParts((int)tw.level, top), x, by, z, 0, foot / 0.46f, main, accent, "opaque", 1, -1, 0, 0, (float)tw.uid);
+                        int gold = 0xf0c040;
+                        // Stufe 2: feiner goldener Bodenring
+                        r.ground(SPRITE_ADD, SHAPE.ring, x, by + 0.035f, z, foot + 0.16f, gold, 0.45f, 0, 0.3f, 0.04f);
+                        // Stufe 3: glatter Goldreif dicht um den Sockel
+                        if (tw.level >= 3) r.add("opaque", "band", x, by + 0.05f, z, (foot + 0.07f) * 2, 1, (foot + 0.07f) * 2, 0xe0b040, 1, 0.35f, 0);
+                        // Stufe 4: schwebender, leuchtender Heiligenschein über der Turmspitze
+                        if (tw.level >= 4)
+                        {
+                            float hy = by + realTop * squash + 0.16f + Mathf.Sin(t * 2.2f + (float)tw.uid) * 0.03f;
+                            int hc = tw.spec == 0 ? 0xffe080 : accent;
+                            r.add("opaque", "band", x, hy, z, 0.44f, 1.4f, 0.44f, hc, 1, 1.4f, t * 1.2f);
+                            r.billboard(SPRITE_ADD, SHAPE.glow, x, hy, z, 0.55f, hc, 0.3f);
+                        }
+                    }
                     if (tw.spec != 0) drawParts(WorldModels.specParts((int)tw.spec, top), x, by, z, 0, scale, main, accent, "opaque", 1, -1, 0, 0, (float)tw.uid);
                 }
                 // 3.6: Veredelung ★ – kleine Sterne über dem Turm
@@ -2093,8 +2121,9 @@ namespace Kernwacht.Game
         /// <summary>Gegnermodell setzen: Position, Größe (Zielhöhe), Ausrichtung, Tarnung/Phase als Geisterbild, Farbstich.</summary>
         void ApplyEnemyLook(ModelInst inst, Smooth sm, float baseY, float height, float squash, bool ghost, float alpha, int bodyColor, int tint, float tintAmt, float emit)
         {
-            inst.Place(sm.x, baseY, sm.y, height, squash);
+            inst.Place(sm.x, baseY, sm.y, height, squash, sm.boss == null ? (sm.elite ? 1.1f : 0.92f) : 0);
             if (inst.unit == null) inst.SetHeading(sm.head);
+            else inst.unit.FaceTowards(inst.tr.position + new Vector3(Mathf.Cos(sm.head), 0, -Mathf.Sin(sm.head)));
             if (ghost)
             {
                 inst.Ghost(true, ghostMat, tint >= 0 ? Col.Mix(bodyColor, tint, tintAmt) : Col.Mix(bodyColor, 0x8070a0, 0.4), alpha);

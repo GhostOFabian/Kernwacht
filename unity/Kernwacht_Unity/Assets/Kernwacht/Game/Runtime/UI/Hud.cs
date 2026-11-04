@@ -266,7 +266,7 @@ namespace Kernwacht.Game.UI
             statsBox = stats.GetComponent<RectTransform>();
             Ui.Place(statsBox, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(10, 0), new Vector2(0, TOP_H - 8));
             HK.Fit(stats, true, false);
-            HK.Tip(HK.IconBtn(statsBox, "menu", () => a.togglePause(), 40), "Menü");
+            HK.Tip(HK.IconBtn(statsBox, "menu", () => a.togglePause(), 44), "Menü: Pause, Hilfe, Einstellungen (Esc/P)");
             gold = StatPill(statsBox, "coin", Theme.Gold, Theme.Gold, "Gold", out goldStat);
             lives = StatPill(statsBox, "heart", Theme.Hex(0xff6a80), Theme.Text, "Kernenergie", out livesStat);
             wave = StatPill(statsBox, "wave", Theme.Hex(0x9ad0ff), Theme.Text, "Welle", out _);
@@ -276,16 +276,16 @@ namespace Kernwacht.Game.UI
             var cRt = controls.GetComponent<RectTransform>();
             Ui.Place(cRt, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-10, 0), new Vector2(0, TOP_H - 8));
             HK.Fit(controls, true, false);
-            HK.Tip(HK.Sm(cRt, "Türme", () => toggleTowerList(), Ui.BtnKind.Normal, "up"), "Turmübersicht: alle Türme mit Aufwerten und Infos (O)");
-            upAllBtn = HK.Sm(cRt, "Alle ▲", () => a.upgradeAll(), Ui.BtnKind.Normal, "up");
+            // Aufgeräumt: eindeutige Symbole, gleich hohe Knöpfe, keine doppelte Pause-Taste (☰ öffnet das Menü)
+            HK.Tip(HK.B(cRt, "Türme", () => toggleTowerList(), Ui.BtnKind.Normal, 16, 40, "scroll"), "Turmübersicht: alle Türme mit Aufwerten und Infos (O)");
+            upAllBtn = HK.B(cRt, "Alle aufwerten", () => a.upgradeAll(), Ui.BtnKind.Normal, 16, 40, "up");
             Ui.Tip(upAllBtn, () => upAllTitle);
             speedBtn = HK.B(cRt, "1×", () => a.cycleSpeed(), Ui.BtnKind.Normal, 17, 40, "speed");
             HK.Tip(speedBtn, "Spielgeschwindigkeit 1× / 2× / 3× / 5× / 8× (F)");
-            miniBtn = HK.Sm(cRt, "Mini", () => a.miniPause(), Ui.BtnKind.Normal, "pause");
-            HK.Tip(miniBtn, "Mini-Pause ohne Menü: Spiel anhalten und weiter bauen/aufwerten (Leertaste im Kampf)");
-            pauseBtn = HK.IconBtn(cRt, "pause", () => a.togglePause(), 40);
-            HK.Tip(pauseBtn, "Pause (P)");
-            startBtn = HK.B(cRt, "", () => a.startWave(), Ui.BtnKind.Primary, 17, 40, "play");
+            miniBtn = HK.B(cRt, "Pause", () => a.miniPause(), Ui.BtnKind.Normal, 16, 40, "pause");
+            HK.Tip(miniBtn, "Spiel anhalten, ohne das Menü zu öffnen – Bauen und Aufwerten bleiben möglich (Leertaste im Kampf)");
+            pauseBtn = null; // PORT: zweite Pause-Taste entfernt – das Menü (☰, Esc/P) pausiert bereits
+            startBtn = HK.B(cRt, "Welle", () => a.startWave(), Ui.BtnKind.Primary, 17, 40, "play");
             startBtn.GetComponent<HudFit>().minW = 150;
             Ui.Tip(startBtn, () => startTitle);
 
@@ -343,8 +343,6 @@ namespace Kernwacht.Game.UI
             CamBtn(camRt, "rotL", () => a.rotate(-1), "Drehen links (Q, 90°). Frei drehen: mittlere Maustaste oder Strg/Alt + Ziehen, Zwei-Finger-Drehung, Tasten , und .");
             CamBtn(camRt, "rotR", () => a.rotate(1), "Drehen rechts (E, 90°). Neigung: mittlere Maustaste/Strg + hoch/runter ziehen oder Bild↑/Bild↓");
             CamBtn(camRt, "back", () => a.resetView(), "Blickwinkel zurücksetzen (Pos1)"); // PORT: TS zeigt hier das Zeichen ⟲
-            CamBtn(camRt, "plus", () => a.zoom(0.8), "Hineinzoomen");
-            CamBtn(camRt, "minus", () => a.zoom(1.25), "Herauszoomen");
             CamBtn(camRt, "fit", () => a.fit(), "Ganze Karte");
             CamBtn(camRt, "minimap", () => { showMinimap = !showMinimap; }, "Minikarte");
             followBtn = CamBtn(camRt, "crown", null, "Kamera folgt dem Boss");
@@ -354,7 +352,6 @@ namespace Kernwacht.Game.UI
                 HK.On(followBtn, followBoss);
             });
             CamBtn(camRt, "range", () => a.toggleRanges(), "Alle Reichweiten (R)");
-            CamBtn(camRt, "help", () => a.help(), "Hilfe (H)");
             HK.On(lockBtn, v.rotationLocked);
 
             var st = Ui.Column(stage, 6);
@@ -487,7 +484,7 @@ namespace Kernwacht.Game.UI
 
         Button CamBtn(Transform p, string icon, Action act, string title)
         {
-            var b = HK.IconBtn(p, icon, act, 36);
+            var b = HK.IconBtn(p, icon, act, 44);
             b.GetComponent<Image>().color = new Color(28 / 255f, 22 / 255f, 44 / 255f, 0.85f);
             HK.Tip(b, title);
             return b;
@@ -853,7 +850,7 @@ namespace Kernwacht.Game.UI
             HK.On(miniBtn, mini);
             HK.Show(miniBadge, mini);
             if (s.speed != speedV) { speedV = s.speed; HK.SetBtnText(speedBtn, $"{U.Fmt(s.speed)}×"); }
-            if (s.paused != pauseShown) { pauseShown = s.paused; HK.SetIcon(pauseBtn, s.paused ? "play" : "pause"); }
+            if (s.paused != pauseShown) { pauseShown = s.paused; if (pauseBtn != null) HK.SetIcon(pauseBtn, s.paused ? "play" : "pause"); }
             updateTowerBtns();
             updateStrip();
             updateBoss();
@@ -1011,11 +1008,15 @@ namespace Kernwacht.Game.UI
                 var w = WaveDirector.previewNextWave(s);
                 sig.Reset().C('b').N(s.wave).C('-');
                 if (w != null) sig.N(w.index); else sig.C('x');
+                if (s.he != null) sig.N((s.he.profile ?? "").GetHashCode());
                 if (!sig.Changed(ref stripSig)) return;
                 HK.Clear(strip.transform);
                 if (w == null) return;
                 bool ch = w.groups.Any((g) => g.challenge == true);
-                Chip(strip.transform, $"Nächste Welle {U.Fmt(w.index)}{(ch ? " · ⚔ CHALLENGE-BOSS" : w.isBoss ? " · BOSS" : "")}:", Theme.Line, Theme.Text, null, null);
+                // Wellenart (Helden-Endlos) hier statt doppelt in der Kopfzeile
+                string profName = null;
+                if (s.he != null) foreach (var pf in HeroEndless.WAVE_PROFILES) if (pf.id == s.he.profile) { profName = pf.name; break; }
+                Chip(strip.transform, $"Nächste Welle {U.Fmt(w.index)}{(profName != null ? $" · {profName}" : "")}{(ch ? " · ⚔ CHALLENGE-BOSS" : w.isBoss ? " · BOSS" : "")}:", Theme.Line, Theme.Text, null, null);
                 foreach (var g in w.groups)
                 {
                     var sum = HudText.waveSummary(g);

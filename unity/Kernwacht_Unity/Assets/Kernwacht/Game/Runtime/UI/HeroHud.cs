@@ -311,15 +311,15 @@ namespace Kernwacht.Game.UI
             footRow2 = r2.GetComponent<RectTransform>();
             var br = Ui.Row(r1.transform, 5, TextAnchor.MiddleRight, false);
             btnRow = br.GetComponent<RectTransform>();
-            sheetBtn = HeroKit.Btn(btnRow, "Held", () => toggle("sheet"), Ui.BtnKind.Normal, true, "book", 16, 38);
+            sheetBtn = HeroKit.Btn(btnRow, "Held", () => toggle("sheet"), Ui.BtnKind.Normal, true, "book", 16, 42);
             HeroKit.Tip(sheetBtn, "Charakter, Inventar, Skillbaum (Tab)");
-            shopBtn = HeroKit.Btn(btnRow, "Laden", () => toggle("shop"), Ui.BtnKind.Normal, true, "coins", 16, 38);
+            shopBtn = HeroKit.Btn(btnRow, "Laden", () => toggle("shop"), Ui.BtnKind.Normal, true, "coins", 16, 42);
             Ui.Tip(shopBtn, () => nearLast ? "Laden & Schmiede öffnen (X)" : "Laden (X): der Held muss beim Laden stehen – Klick zeigt das Angebot");
-            holdBtn = HeroKit.Btn(btnRow, null, () => a.toggleHold(), Ui.BtnKind.Normal, true, "hold", 16, 38);
+            holdBtn = HeroKit.Btn(btnRow, null, () => a.toggleHold(), Ui.BtnKind.Normal, true, "hold", 16, 42);
             HeroKit.Tip(holdBtn, "Position festsetzen (Z): Klicks bewegen den Helden nicht mehr, er verfolgt keine Gegner");
-            followBtn = HeroKit.Btn(btnRow, null, () => a.toggleFollow(), Ui.BtnKind.Normal, true, "advance", 16, 38);
+            followBtn = HeroKit.Btn(btnRow, null, () => a.toggleFollow(), Ui.BtnKind.Normal, true, "advance", 16, 42);
             HeroKit.Tip(followBtn, "Kamera folgt dem Helden (Y)");
-            topBtn = HeroKit.Btn(btnRow, null, () => a.toggleTopDown(), Ui.BtnKind.Normal, true, "map", 16, 38);
+            topBtn = HeroKit.Btn(btnRow, null, () => a.toggleTopDown(), Ui.BtnKind.Normal, true, "map", 16, 42);
             HeroKit.Tip(topBtn, "Draufsicht / Isometrie umschalten (V)");
             footRow2.gameObject.SetActive(false);
             return rt;
@@ -449,7 +449,7 @@ namespace Kernwacht.Game.UI
                 profLastId = he.profile; profLastCombat = combat;
                 WaveProfile prof = null;
                 foreach (var p in HeroEndless.WAVE_PROFILES) if (p.id == he.profile) { prof = p; break; }
-                profile.text = prof != null && combat == 0 ? $"Nächste: {prof.name}" : "";
+                profile.text = ""; // Wellenart steht in der Vorschau „Nächste Welle …“ (Hud-Streifen)
             }
             if (c.level != lvlLast || c.skillPoints != spLast)
             {
@@ -746,6 +746,8 @@ namespace Kernwacht.Game.UI
             rebuildWindow();
         }
 
+        const string NOT_AT_SHOP = "Held ist nicht am Laden";
+
         private void rebuildWindow()
         {
             var s = sim.s;
@@ -763,7 +765,8 @@ namespace Kernwacht.Game.UI
                 tabs(new[]
                 {
                     ("gear", "Ausrüstung"), ("stats", "Werte"), ("tree", $"Skillbaum{(U.Truthy(c.skillPoints) ? $" ({U.Fmt(c.skillPoints)})" : "")}"),
-                    ("paragon", $"Paragon{(U.Truthy(pFree) ? $" ({U.Fmt(pFree)})" : "")}"), ("passive", "Passiv"), ("collection", "Sammlung"), ("progress", "Fortschritt"),
+                    // Aufgeräumt: „Passiv“ entfernt – der passive Baum wird im Startbildschirm vergeben und ist dort zu sehen
+                    ("paragon", $"Paragon{(U.Truthy(pFree) ? $" ({U.Fmt(pFree)})" : "")}"), ("collection", "Sammlung"), ("progress", "Fortschritt"),
                 }, sheetTab, (t) => sheetTab = t);
                 var body = makeBody();
                 if (sheetTab == "gear") renderGear(body, false);
@@ -856,7 +859,8 @@ namespace Kernwacht.Game.UI
             bool layer = winInLayer();
             avail -= (layer ? stageTop + stageBottom : 0) + 20;
             win.anchoredPosition = new Vector2(0, layer ? (stageBottom - stageTop) / 2f : 0);
-            float bh = Mathf.Min(ch, Mathf.Max(140, avail - chrome));
+            // Feste Fensterhöhe: Reiter und Schließen-Knopf bleiben beim Umschalten an derselben Stelle
+            float bh = Mathf.Max(140, Mathf.Min(avail - chrome, 640));
             bodyLe.preferredHeight = bh; bodyLe.minHeight = bh;
             LayoutRebuilder.ForceRebuildLayoutImmediate(win);
             float y = Mathf.Clamp(keepY, 0, Mathf.Max(0, ch - bh));
@@ -1180,15 +1184,16 @@ namespace Kernwacht.Game.UI
             var b = HeroKit.CardBtn(parent, HeroKit.NodeBg, border, click, out bg, out bo);
             if (can) { var g = b.gameObject.AddComponent<Outline>(); g.effectColor = new Color(1f, 216 / 255f, 96 / 255f, 0.3f); g.effectDistance = new Vector2(3, -3); }
             var v = b.gameObject.AddComponent<VerticalLayoutGroup>();
-            v.padding = new RectOffset(7, 7, 6, 6); v.spacing = 2;
+            // Rang unten rechts statt oben: der Name bekommt die volle Breite und bricht nicht mitten im Wort um
+            v.padding = new RectOffset(7, 7, 6, 18); v.spacing = 2;
             v.childControlWidth = true; v.childControlHeight = true; v.childForceExpandWidth = true; v.childForceExpandHeight = false;
             Ui.Get<LayoutElement>(b.gameObject).minHeight = minH;
             var top = Ui.Row(b.transform, 4, TextAnchor.MiddleLeft, false);
-            top.padding = new RectOffset(0, 40, 0, 0);
+            top.padding = new RectOffset(0, 0, 0, 0);
             if (icon != null) HeroKit.Ic(top.transform, icon, 17, Theme.Text);
             var nt = HeroKit.T(top.transform, $"<b>{name}</b>", 15, Theme.Text);
             Ui.Size(nt, -1, -1, 1);
-            var rk = HeroKit.Abs(b.transform, rank, 13, Theme.Gold, TextAnchor.UpperRight, new Vector2(-7, -5));
+            var rk = HeroKit.Abs(b.transform, rank, 13, Theme.Gold, TextAnchor.LowerRight, new Vector2(-7, 4));
             rk.fontStyle = FontStyle.Bold;
             HeroKit.T(b.transform, desc, 13, Theme.Text);
             if (tag != null) HeroKit.T(b.transform, tag, 12, Theme.Gold);
@@ -1281,7 +1286,7 @@ namespace Kernwacht.Game.UI
                 var b = HeroKit.Btn(row, costText(o.cost), () => a.shopBuy(oid), Ui.BtnKind.Primary);
                 HeroKit.Enable(b, chk.ok);
                 if (!string.IsNullOrEmpty(chk.reason)) HeroKit.Tip(b, chk.reason);
-                if (!chk.ok && !string.IsNullOrEmpty(chk.reason)) HeroKit.P(row.parent, chk.reason, 13, Theme.Bad);
+                if (!chk.ok && !string.IsNullOrEmpty(chk.reason) && chk.reason != NOT_AT_SHOP) HeroKit.P(row.parent, chk.reason, 13, Theme.Bad); // steht schon oben im Hinweis
             }
         }
 
@@ -1308,7 +1313,7 @@ namespace Kernwacht.Game.UI
                 var b = HeroKit.Btn(row, costText(chk.cost), () => a.shopBuyItem(iid), Ui.BtnKind.Primary);
                 HeroKit.Enable(b, chk.ok);
                 if (!string.IsNullOrEmpty(chk.reason)) HeroKit.Tip(b, chk.reason);
-                if (!chk.ok && !string.IsNullOrEmpty(chk.reason)) HeroKit.P(row.parent, chk.reason, 13, Theme.Bad);
+                if (!chk.ok && !string.IsNullOrEmpty(chk.reason) && chk.reason != NOT_AT_SHOP) HeroKit.P(row.parent, chk.reason, 13, Theme.Bad); // steht schon oben im Hinweis
             }
         }
 
@@ -1352,7 +1357,7 @@ namespace Kernwacht.Game.UI
                 var b = HeroKit.Btn(rowT, "Herstellen", () => a.craft(rid), Ui.BtnKind.Primary);
                 HeroKit.Enable(b, chk.ok);
                 if (!string.IsNullOrEmpty(chk.reason)) HeroKit.Tip(b, chk.reason);
-                if (!chk.ok && !string.IsNullOrEmpty(chk.reason)) HeroKit.P(rowT.parent, chk.reason, 13, Theme.Bad);
+                if (!chk.ok && !string.IsNullOrEmpty(chk.reason) && chk.reason != NOT_AT_SHOP) HeroKit.P(rowT.parent, chk.reason, 13, Theme.Bad); // steht schon oben im Hinweis
             };
             HeroKit.H3(body, $"Heldenschmiede – {Champions.CHAMPIONS[he.champion.id].name}");
             HeroKit.P(body, "Signaturgegenstände nur für diesen Helden: der epische ab Welle 8 aus Ressourcen, die legendäre Waffe ab Welle 20 aus dem epischen Gegenstand.", 15, Theme.Muted);

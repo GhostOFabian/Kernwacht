@@ -18,6 +18,7 @@ namespace Kernwacht.Models
         Vector3 _lastPos;
         Vector3 _face;
         bool _auto = true;
+        bool _autoFace = true;
 
         protected override void OnEnable()
         {
@@ -28,6 +29,9 @@ namespace Kernwacht.Models
 
         /// <summary>Automatik aus: dann Laufen/Stehen nur noch über SetMoving.</summary>
         public void SetAutoMovement(bool on) => _auto = on;
+
+        /// <summary>Blickrichtung automatisch aus der Bewegung (Standard) oder nur über FaceTowards.</summary>
+        public void SetAutoFacing(bool on) => _autoFace = on;
 
         public void SetMoving(bool moving, float speed = 1f)
         {
@@ -57,7 +61,7 @@ namespace Kernwacht.Models
                 float v = delta.magnitude / dt;
                 bool moving = v > moveThreshold;
                 SetMoving(moving, v);
-                if (moving) _face = delta.normalized;
+                if (moving && _autoFace) _face = delta.normalized;
             }
             if (_face.sqrMagnitude > 0.5f)
             {
