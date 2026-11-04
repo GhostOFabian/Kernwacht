@@ -1,0 +1,7 @@
+{
+    "name": "Kernwacht.Sim.Editor",
+    "rootNamespace": "Kernwacht.Sim.EditorTools",
+    "references": ["Kernwacht.Sim"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": false
+}

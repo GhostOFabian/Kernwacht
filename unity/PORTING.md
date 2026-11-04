@@ -71,3 +71,23 @@ Objektliterale mit Ad-hoc-Form, die zurückgegeben werden: kleine `public class`
 - Datei vollständig übersetzen, **kein TODO, kein „…“, keine ausgelassenen Fälle**. Kommentare der Quelle sinngemäß übernehmen (deutsch).
 - Am Ende der Datei keinen Testcode.
 - Unsicherheiten (z. B. unklare Typen aus einer anderen Datei) mit `// PORT:`-Kommentar markieren und im Bericht nennen.
+
+## Fundament (bereits vorhanden – lesen, nicht ändern)
+`Sim/Core/Types.cs`, `Sim/Core/Rng.cs`, `Sim/Core/U.cs`, `Sim/Config/Stats.cs`, `Sim/Kernwacht.Sim.asmdef`. **Vor dem Übersetzen Types.cs und U.cs lesen**, um Feldtypen/Nullbarkeit und vorhandene Hilfen zu kennen.
+
+Wichtige Festlegungen:
+- Optionale Zahlen `double?`, optionale bools `bool?`, optionale Strings/Objekte/Listen `null`. Nicht-optionale List/Dictionary-Felder sind leer initialisiert; verschachtelte Klassenfelder (z. B. `GameState.seed/rules/map/rng/network/stats`) starten `null`.
+- `GameState`: `missionId`, `currentWave`, `modOffer`, `boss`, `he`, `laneBarricades` können null sein; `bossSlots` ist `double?`; `rng.loot` ist `double?`.
+- `MissionRules.bosses` ist `Dictionary<double,string>` (Wellennummer → BossId).
+- `HeroInstance.abilityCd` ist `double[2]`; `HeroDefinition.abilities` ist `HeroAbilityDefinition[2]`, `perks` ist `List<HeroPerk[]>`; `ChampionState.equipment` ist `List<double?>`.
+- `Partial<HeroStats>`/`Partial<ChampionStats>` → `Dictionary<string,double>`. `HeroStats`/`ChampionStats` haben Indexer `this[string key]` (wirft bei unbekanntem Schlüssel), statische `KEYS` und `Copy()`.
+- `GameEvent`: Zahl/bool-Felder sind einfache `double`/`bool` (Standard 0/false). TS-Feld `boss` kollidiert: bei `kill`/`waveStart` heißt der bool `isBoss`, bei `bossPhase`/`death` ist `boss` die BossId (string).
+- Schlüsselwort-Felder mit `@`: `TowerDefinition.@base`, `HeroDefinition.@base`, `WaveDefinition.@event`, `Pickup.@ref`.
+- `Stats.ZERO_STATS` ist `Dictionary<string,double>`; TS `{...ZERO_STATS}` → `Stats.zeroStats()` (frische Kopie).
+- `ParagonProgress` (aus config/paragon.ts) muss als **Namespace-Klasse** in `Sim/Config/Paragon.cs` definiert werden: `public class ParagonProgress { public double level; public double xp; public Dictionary<string,double> points = new Dictionary<string,double>(); }` (Felder genau wie in paragon.ts prüfen).
+- Rng: `new Rng(seed)`, `rng.next()`, `rng.range(a,b)`, `rng.@int(min,maxIncl)`, `rng.chance(p)`, `rng.pick(list)`, `rng.shuffle(list)`, `rng.weighted(list, w)`; frei: `RngUtil.hashString`, `RngUtil.hashSeed(base, label)` (label string oder double), `RngUtil.normalizeSeedText`, `RngUtil.randomSeedText`, `RngUtil.dailySeedText`.
+- U: `Truthy`, `Or`, `Round`, `Sign`, `Trunc`, `Min/Max(params)`, `Clamp`, `IsFinite`, `Hypot`, `ToInt32`, `ToUint32`, `Imul`, `Ushr/Shr/Shl/BitAnd/BitOr/BitXor/BitNot`, `StableSort(list, cmp)`, `SortDefault`, `Splice`, `Slice`, `Shift`, `Pop`, `Unshift`, `Push`, `Fill`, `Concat`, `Includes`, `IndexOf`, `LastIndexOf`, `Join`, `PadStart/PadEnd/Repeat`, `Get(dict,key,def)`, `GetN(dict,key)` (→ double?), `AddTo(dict,key,v)`, `Keys/Values/Entries`, `Fmt`, `Fixed`, `De`, `ParseNumber`, `DeepClone`, `ToJson`, `FromJson<T>`, `OrderedDict<K,V>`.
+- Konstanten `Cell.Open/Path/Blocked/Spawn/Goal/NoBuild` sind `const double` (Namespace-Klasse `Cell`).
+
+## Paralleles Arbeiten
+Mehrere Übersetzer arbeiten gleichzeitig an verschiedenen Dateien. **Nur die eigenen Zieldateien schreiben.** Aufrufe in fremde Module über die Namensregel (`Modul.funktion(...)`); die Signatur aus der TS-Quelle des Zielmoduls ableiten (Zahlen → double, optionale Parameter → C#-Defaults bzw. `double? x = null`). Ein optionaler TS-Parameter `x?: number` wird `double? x = null`; mit Default `x = 1` wird `double x = 1`. Union `0 | 1 | 2` → `double`. Rückgaben `CommandResult` → Klasse `CommandResult` (in GameSimulation.cs definiert: `public class CommandResult { public bool ok; public string message; public string reason; }` plus statische Helfer `CommandResult.Ok(string message = null)`, `CommandResult.Fail(string reason)`). Wenn ein Modul ein TS-Objekt `{ ok: true, ... extra }` zurückgibt, eine abgeleitete Klasse in der eigenen Datei.

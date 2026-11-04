@@ -1,0 +1,4 @@
+<linker>
+  <!-- Speicherstände: U.ToJson/FromJson arbeiten per Reflection über öffentliche Felder -->
+  <assembly fullname="Kernwacht.Sim" preserve="all"/>
+</linker>
