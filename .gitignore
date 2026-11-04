@@ -1,0 +1,21 @@
+# Unity
+unity/*/[Ll]ibrary/
+unity/*/[Tt]emp/
+unity/*/[Oo]bj/
+unity/*/[Bb]uild/
+unity/*/[Bb]uilds/
+unity/*/[Ll]ogs/
+unity/*/[Uu]ser[Ss]ettings/
+unity/*/MemoryCaptures/
+unity/*/*.csproj
+unity/*/*.sln
+unity/*/.vs/
+unity/*/.idea/
+# Web
+web/node_modules/
+web/dist/
+web/e2e-out*/
+# Modelle
+tools/modelgen/out/
+__pycache__/
+.DS_Store

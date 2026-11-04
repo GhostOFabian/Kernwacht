@@ -1,0 +1,175 @@
+<title>Kernwacht Modellkatalog</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Alegreya+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: Kopf mit Kategorien, links das Raster der Modelle, rechts (bzw. darüber auf dem Handy) der Live-Betrachter */
+:root {
+  --bg: #120f17; --panel: #1b1722; --line: #2e2838; --fg: #e9e3ef; --muted: #a39bb0;
+  --ember: #e0873a; --arcane: #a77ae6; --frost: #7cc6e6;
+  --display: "Cinzel", "Palatino Linotype", Georgia, serif;
+  --body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--fg); }
+body { font: 16px/1.5 var(--body); margin: 0; }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; max-width: 1500px; margin: 0 auto; }
+header { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: end; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+h1 { font: 700 clamp(1.6rem, 3.4vw, 2.5rem)/1.1 var(--display); letter-spacing: 0.06em; margin: 0; text-wrap: balance; }
+h1 span { color: var(--ember); }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+.totals { font: 0.85rem var(--mono); color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+.totals b { color: var(--fg); font-weight: 600; }
+nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0; }
+nav button { font: 500 0.95rem var(--body); color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+nav button[aria-pressed="true"] { color: var(--bg); background: var(--ember); border-color: var(--ember); }
+nav button:focus-visible, .card:focus-visible, .clips button:focus-visible { outline: 2px solid var(--frost); outline-offset: 2px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 460px); gap: 20px; align-items: start; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; min-width: 0; }
+.card { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; cursor: pointer; text-align: left; color: inherit; font: inherit; padding: 0; }
+.card:hover { border-color: #4a3f5a; }
+.card[aria-current="true"] { border-color: var(--ember); box-shadow: 0 0 0 1px var(--ember) inset; }
+.card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: radial-gradient(circle at 50% 40%, #2c2635, #15111b); }
+.card .t { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 2px; }
+.card .n { font-weight: 700; line-height: 1.2; }
+.card .m { font: 0.72rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.viewer { position: sticky; top: max(12px, env(safe-area-inset-top, 0px)); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.stage { position: relative; aspect-ratio: 1; max-width: 100%; background: radial-gradient(circle at 50% 38%, #3a3246, #120f17 72%); }
+.stage canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.stage .hint { position: absolute; left: 12px; bottom: 10px; font: 0.72rem var(--mono); color: var(--muted); pointer-events: none; }
+.stage .load { position: absolute; inset: 0; display: grid; place-items: center; font: 0.9rem var(--mono); color: var(--muted); }
+.info { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+.info h2 { font: 700 1.25rem/1.2 var(--display); margin: 0; letter-spacing: 0.04em; }
+.info .file { font: 0.78rem var(--mono); color: var(--muted); word-break: break-all; }
+.clips { display: flex; flex-wrap: wrap; gap: 6px; }
+.clips button { font: 600 0.85rem var(--body); background: #262030; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+.clips button[aria-pressed="true"] { background: var(--arcane); border-color: var(--arcane); color: #140f1a; }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0; font-size: 0.9rem; }
+dt { color: var(--muted); }
+dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.chip { display: inline-block; font: 0.72rem var(--mono); padding: 1px 6px; border: 1px solid var(--line); border-radius: 4px; margin: 0 4px 4px 0; color: var(--muted); }
+.note { font-size: 0.85rem; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.layout.solo { grid-template-columns: minmax(0, 1fr); }
+.vhead { display: flex; gap: 10px; align-items: start; justify-content: space-between; }
+.close { flex: none; font: 600 0.9rem var(--body); color: var(--fg); background: #2a2333; border: 1px solid var(--line); border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+.close:hover { border-color: var(--ember); }
+.close:focus-visible { outline: 2px solid var(--frost); outline-offset: 2px; }
+.backdrop { display: none; }
+/* Handy/Tablet: Betrachter als Blatt von unten, mit Schließen-Knopf; Liste bleibt darunter bedienbar */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .viewer { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20; max-height: 88vh; overflow-y: auto; border-radius: 14px 14px 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6); }
+  .stage { aspect-ratio: auto; height: min(52vh, 100vw); }
+  .backdrop { display: block; position: fixed; inset: 0; z-index: 19; background: rgba(8, 6, 12, 0.6); }
+  .backdrop[hidden] { display: none; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Kernwacht <span>Modellkatalog</span></h1>
+      <p class="sub">Alle Dark-Fantasy-Modelle des Spiels als GLB, mit PBR-Texturen. Figuren haben Skelett und die Animationen Idle, Walk, Attack und Death, Türme drehbare Knoten. Modell anklicken, im Betrachter ziehen zum Drehen, Mausrad zum Zoomen.</p>
+    </div>
+    <div class="totals" id="totals"></div>
+  </header>
+  <nav id="cats" aria-label="Kategorien"></nav>
+  <div class="layout">
+    <div class="grid" id="grid"></div>
+    <div class="backdrop" id="backdrop" hidden></div>
+    <aside class="viewer" id="viewer" aria-label="Betrachter" hidden>
+      <div class="stage"><canvas id="cv"></canvas><div class="load" id="load" hidden>lädt …</div><div class="hint">ziehen = drehen · Rad = zoomen</div></div>
+      <div class="info">
+        <div class="vhead"><h2 id="vt">–</h2><button type="button" class="close" id="vclose" aria-label="Betrachter schließen">✕ Schließen</button></div>
+        <div class="file" id="vf"></div>
+        <div class="clips" id="clips"></div>
+        <dl id="vd"></dl>
+        <p class="note" id="vn"></p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="viewer.js"></script>
+<script>
+(async () => {
+  const CATS = { tower: 'Türme', enemy: 'Gegner', boss: 'Bosse', hero: 'Helden', world: 'Welt' };
+  const CLIPDE = { Idle: 'Idle', Walk: 'Walk', Attack: 'Attack', Death: 'Death' };
+  const man = await (await fetch('manifest.json')).json();
+  const items = Object.entries(man).map(([id, v]) => ({ id, ...v }));
+  const order = Object.keys(CATS);
+  items.sort((a, b) => order.indexOf(a.category) - order.indexOf(b.category));
+  const fmt = (n) => n.toLocaleString('de-DE');
+  const tot = items.reduce((s, i) => s + i.tris, 0);
+  const counts = {}; items.forEach((i) => { counts[i.category] = (counts[i.category] || 0) + 1; });
+  document.getElementById('totals').innerHTML = `<span><b>${items.length}</b> Modelle</span>` + order.map((c) => `<span>${CATS[c]} <b>${counts[c] || 0}</b></span>`).join('') + `<span>Ø <b>${fmt(Math.round(tot / items.length))}</b> Dreiecke</span>`;
+  let cat = 'all';
+  try { cat = localStorage.getItem('kw-cat') || 'all'; } catch (e) {}
+  const nav = document.getElementById('cats');
+  const grid = document.getElementById('grid');
+  const btns = [['all', 'Alle']].concat(order.map((c) => [c, CATS[c]]));
+  btns.forEach(([c, label]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.id = 'cat-' + c;
+    b.setAttribute('aria-pressed', String(c === cat));
+    b.onclick = () => { cat = c; try { localStorage.setItem('kw-cat', c); } catch (e) {} nav.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); draw(); };
+    nav.appendChild(b);
+  });
+  const v = new GlbViewer(document.getElementById('cv'));
+  v.start();
+  let current = null;
+  let seq = 0;
+  function draw() {
+    grid.innerHTML = '';
+    items.filter((i) => cat === 'all' || i.category === cat).forEach((i) => {
+      const c = document.createElement('button'); c.type = 'button'; c.className = 'card'; c.id = 'm-' + i.id;
+      c.setAttribute('aria-current', String(current === i.id));
+      c.innerHTML = `<img src="thumbs/${i.id}.jpg" alt="" loading="lazy" width="300" height="300"><span class="t"><span class="n">${i.title}</span><span class="m">${fmt(i.tris)} △ · ${(i.bytes / 1e6).toFixed(1)} MB</span></span>`;
+      c.onclick = () => open(i.id);
+      grid.appendChild(c);
+    });
+  }
+  const viewerEl = document.getElementById('viewer');
+  const layoutEl = document.querySelector('.layout');
+  const backdrop = document.getElementById('backdrop');
+  const narrow = () => window.matchMedia('(max-width: 900px)').matches;
+  function closeViewer() {
+    viewerEl.hidden = true; backdrop.hidden = true; layoutEl.classList.add('solo');
+    current = null; grid.querySelectorAll('.card').forEach((x) => x.setAttribute('aria-current', 'false'));
+  }
+  document.getElementById('vclose').onclick = closeViewer;
+  backdrop.onclick = closeViewer;
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !viewerEl.hidden) closeViewer(); });
+  async function open(id) {
+    const i = man[id];
+    current = id;
+    viewerEl.hidden = false; layoutEl.classList.remove('solo');
+    backdrop.hidden = !narrow();
+    grid.querySelectorAll('.card').forEach((x) => x.setAttribute('aria-current', String(x.id === 'm-' + id)));
+    document.getElementById('vt').textContent = i.title;
+    document.getElementById('vf').textContent = i.file;
+    const load = document.getElementById('load'); load.textContent = 'lädt …'; load.hidden = false;
+    const tok = ++seq;
+    try { await v.load(i.web || i.file); } catch (e) { load.textContent = 'Konnte nicht geladen werden: ' + e.message; return; }
+    if (tok !== seq) return;
+    load.hidden = true;
+    const clips = document.getElementById('clips'); clips.innerHTML = '';
+    Object.keys(v.clips).forEach((n) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = CLIPDE[n] || n;
+      b.setAttribute('aria-pressed', String(v.clip === n));
+      b.onclick = () => { v.play(n, n !== 'Death'); clips.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); };
+      clips.appendChild(b);
+    });
+    const dd = [['Kategorie', CATS[i.category]], ['Dreiecke', fmt(i.tris)], ['Datei', (i.bytes / 1e6).toFixed(2) + ' MB'],
+      [i.bones ? 'Knochen' : 'Knoten', i.bones ? String(i.bones) : (i.nodes || []).join(', ')],
+      ['Materialien', i.materials.map((m) => `<span class="chip">${m}</span>`).join('')]];
+    document.getElementById('vd').innerHTML = dd.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
+    document.getElementById('vn').textContent = i.notes || '';
+  }
+  draw();
+  if (narrow()) closeViewer(); else open(items[0].id);
+})();
+</script>

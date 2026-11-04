@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;background:#1a1620;display:flex;flex-wrap:wrap;gap:0}
+.cell{width:340px;height:380px;position:relative;background:radial-gradient(circle at 50% 40%,#3a3444,#141018)}
+canvas{width:340px;height:340px;display:block}
+.l{color:#ddd;font:12px sans-serif;padding:3px 6px}
+</style></head><body><script src="viewer.js"></script><script>
+(async()=>{
+ const q=new URLSearchParams(location.search);
+ const m=q.get('m'); const views=JSON.parse(q.get('v')||'[["Idle",0,0.6]]');
+ const out=[];
+ for(const [clip,t,yaw] of views){
+  const d=document.createElement('div');d.className='cell';const c=document.createElement('canvas');d.appendChild(c);
+  const l=document.createElement('div');l.className='l';d.appendChild(l);document.body.appendChild(d);
+  const v=new GlbViewer(c);const info=await v.load(m);v.spin=0;v.yaw=yaw;
+  if(clip&&v.clips[clip]){v.play(clip,clip!=='Death');v.t=t*v.clips[clip].dur;}
+  v.render(0);
+  l.textContent=`${m.split('/').pop()} · ${clip} · ${info.tris} Dreiecke · ${info.clips.join(', ')}`;
+  out.push(info); window.__v=v;
+ }
+ window.__info=out;window.__ready=true;
+})().catch(e=>{document.body.innerHTML='<pre style="color:red">'+e.stack+'</pre>';window.__err=String(e);window.__ready=true;});
+</script></body></html>

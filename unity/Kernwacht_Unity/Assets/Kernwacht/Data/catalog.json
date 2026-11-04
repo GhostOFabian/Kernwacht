@@ -1,0 +1,1404 @@
+{
+ "version": 2,
+ "cellSize": 1.0,
+ "items": [
+  {
+   "id": "ranger",
+   "title": "Waldläuferposten",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/ranger.glb",
+   "tris": 9474,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "ember",
+   "title": "Glutwerfer",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/ember.glb",
+   "tris": 4260,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "frost",
+   "title": "Frostwächter",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/frost.glb",
+   "tris": 3939,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "storm",
+   "title": "Sturmrufer",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/storm.glb",
+   "tris": 4324,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "spore",
+   "title": "Sporenwerfer",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/spore.glb",
+   "tris": 15128,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "ballista",
+   "title": "Belagerungsarmbrust",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/ballista.glb",
+   "tris": 7076,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "rune",
+   "title": "Runenweber",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/rune.glb",
+   "tris": 5732,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "resonator",
+   "title": "Resonator",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/resonator.glb",
+   "tris": 6288,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "goldmine",
+   "title": "Goldgräber (2×2)",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/goldmine.glb",
+   "tris": 11996,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": "Belegt 2×2 Felder (Grundfläche ≈ 1,9 m)."
+  },
+  {
+   "id": "pylon",
+   "title": "Leitpylon",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/pylon.glb",
+   "tris": 3298,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "cannon",
+   "title": "Kanonenschmiede",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/cannon.glb",
+   "tris": 6582,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "riftbinder",
+   "title": "Rissbinder",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/riftbinder.glb",
+   "tris": 5008,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "meteor",
+   "title": "Meteorbeschwörer",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/meteor.glb",
+   "tris": 5340,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "tesla",
+   "title": "Tesla-Spule",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/tesla.glb",
+   "tris": 5070,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "gravity",
+   "title": "Gravitationsbrunnen",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/gravity.glb",
+   "tris": 4308,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "dragon",
+   "title": "Drachenhorst",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/dragon.glb",
+   "tris": 12888,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "laser",
+   "title": "Kristalllaser",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/laser.glb",
+   "tris": 3748,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "totem",
+   "title": "Totemschrein",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/totem.glb",
+   "tris": 11792,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "minelayer",
+   "title": "Minenwerfer",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/minelayer.glb",
+   "tris": 4234,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "skyguard",
+   "title": "Flakbatterie",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/skyguard.glb",
+   "tris": 3416,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "barricade",
+   "title": "Barrikade",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/barricade.glb",
+   "tris": 5720,
+   "clips": [],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "lanebarricade",
+   "title": "Lane-Barrikade",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/lanebarricade.glb",
+   "tris": 6430,
+   "clips": [],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": "Wird auf den Weg gebaut; Gegner werden verlangsamt."
+  },
+  {
+   "id": "plasma",
+   "title": "Plasmawerfer",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/plasma.glb",
+   "tris": 5114,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "glacier",
+   "title": "Gletscherkanone",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/glacier.glb",
+   "tris": 9434,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "voidlance",
+   "title": "Leerenlanze",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/voidlance.glb",
+   "tris": 3977,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "starfall",
+   "title": "Sternenfall",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/starfall.glb",
+   "tris": 3976,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "thornwood",
+   "title": "Dornenhain",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/thornwood.glb",
+   "tris": 12080,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "thunderspire",
+   "title": "Donnerspitze",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/thunderspire.glb",
+   "tris": 5648,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "riftgate",
+   "title": "Rissportal",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/riftgate.glb",
+   "tris": 8166,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "phoenix",
+   "title": "Phönixhorst",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/phoenix.glb",
+   "tris": 8568,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "cathedral",
+   "title": "Klangkathedrale",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/cathedral.glb",
+   "tris": 3672,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "stormeye",
+   "title": "Sturmauge",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/stormeye.glb",
+   "tris": 7576,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "sporemine",
+   "title": "Sporenminenfeld",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sporemine.glb",
+   "tris": 8272,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "skywatch",
+   "title": "Himmelswacht",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/skywatch.glb",
+   "tris": 3956,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "runner",
+   "title": "Flinkling",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/runner.glb",
+   "tris": 9220,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "brute",
+   "title": "Steinhäuter",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/brute.glb",
+   "tris": 13864,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "regen",
+   "title": "Moosling",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/regen.glb",
+   "tris": 10860,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "flyer",
+   "title": "Aschenschwinge",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/flyer.glb",
+   "tris": 7036,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 13,
+   "notes": ""
+  },
+  {
+   "id": "shield",
+   "title": "Schildträger",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/shield.glb",
+   "tris": 23194,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "phase",
+   "title": "Phasenwandler",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/phase.glb",
+   "tris": 13392,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "saboteur",
+   "title": "Funkenfresser",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/saboteur.glb",
+   "tris": 13712,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "scout",
+   "title": "Pfadspäher",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/scout.glb",
+   "tris": 20556,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "broodmother",
+   "title": "Brutmutter",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/broodmother.glb",
+   "tris": 9864,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 29,
+   "notes": ""
+  },
+  {
+   "id": "broodling",
+   "title": "Brutling",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/broodling.glb",
+   "tris": 4000,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 23,
+   "notes": ""
+  },
+  {
+   "id": "golem",
+   "title": "Höhlengolem",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/golem.glb",
+   "tris": 1756,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "golemling",
+   "title": "Golemsplitter",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/golemling.glb",
+   "tris": 1756,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "stalker",
+   "title": "Schattenschleicher",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/stalker.glb",
+   "tris": 9000,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 20,
+   "notes": ""
+  },
+  {
+   "id": "siege",
+   "title": "Belagerungsbestie",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/siege.glb",
+   "tris": 15812,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 20,
+   "notes": ""
+  },
+  {
+   "id": "shaman",
+   "title": "Heilerschamane",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/shaman.glb",
+   "tris": 16419,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "tunneler",
+   "title": "Tunnelgräber",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/tunneler.glb",
+   "tris": 8840,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 20,
+   "notes": ""
+  },
+  {
+   "id": "griffin",
+   "title": "Sturmgreif",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/griffin.glb",
+   "tris": 8576,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 13,
+   "notes": ""
+  },
+  {
+   "id": "swarm",
+   "title": "Splitterschwarm",
+   "category": "enemy",
+   "path": "Assets/Kernwacht/Models/enemy/swarm.glb",
+   "tris": 6488,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 9,
+   "notes": ""
+  },
+  {
+   "id": "riftColossus",
+   "title": "Der Risskoloss",
+   "category": "boss",
+   "path": "Assets/Kernwacht/Models/boss/riftColossus.glb",
+   "tris": 3636,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "ashQueen",
+   "title": "Die Aschenkönigin",
+   "category": "boss",
+   "path": "Assets/Kernwacht/Models/boss/ashQueen.glb",
+   "tris": 20888,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 22,
+   "notes": ""
+  },
+  {
+   "id": "nullWarden",
+   "title": "Der Nullhüter",
+   "category": "boss",
+   "path": "Assets/Kernwacht/Models/boss/nullWarden.glb",
+   "tris": 13088,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 7,
+   "notes": ""
+  },
+  {
+   "id": "maw",
+   "title": "Der Schlund der Tiefe",
+   "category": "boss",
+   "path": "Assets/Kernwacht/Models/boss/maw.glb",
+   "tris": 19377,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 10,
+   "notes": ""
+  },
+  {
+   "id": "twinSol",
+   "title": "Sol, der Glühende Zwilling",
+   "category": "boss",
+   "path": "Assets/Kernwacht/Models/boss/twinSol.glb",
+   "tris": 28292,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "twinLuna",
+   "title": "Luna, die Kalte Zwillingin",
+   "category": "boss",
+   "path": "Assets/Kernwacht/Models/boss/twinLuna.glb",
+   "tris": 28720,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "worldbreaker",
+   "title": "Der Weltenbrecher",
+   "category": "boss",
+   "path": "Assets/Kernwacht/Models/boss/worldbreaker.glb",
+   "tris": 32184,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "lyra",
+   "title": "Lyra · Turmweberin",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/lyra.glb",
+   "tris": 19247,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "brann",
+   "title": "Brann · Klingenrufer",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/brann.glb",
+   "tris": 25324,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "vela",
+   "title": "Vela · Sturmschützin",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/vela.glb",
+   "tris": 17536,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "kaela",
+   "title": "Kaela · Klingenwächterin",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/kaela.glb",
+   "tris": 22590,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "varo",
+   "title": "Varo · Aschenjäger",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/varo.glb",
+   "tris": 18972,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "nyx",
+   "title": "Nyx · Risswandler",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/nyx.glb",
+   "tris": 21172,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "liora",
+   "title": "Liora · Runenbardin",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/liora.glb",
+   "tris": 19468,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "thorgrim",
+   "title": "Thorgrim · Schmiedemeister",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/thorgrim.glb",
+   "tris": 22800,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "sena",
+   "title": "Sena · Wettermacherin",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/sena.glb",
+   "tris": 18671,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "oran",
+   "title": "Oran · Leylinien-Mystiker",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/oran.glb",
+   "tris": 18899,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "mira",
+   "title": "Mira · Prospektorin",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/mira.glb",
+   "tris": 18272,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "ommar",
+   "title": "Ommar · Wächter der Stille",
+   "category": "hero",
+   "path": "Assets/Kernwacht/Models/hero/ommar.glb",
+   "tris": 19220,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Death"
+   ],
+   "nodes": [],
+   "bones": 18,
+   "notes": ""
+  },
+  {
+   "id": "core",
+   "title": "Kern (Ziel)",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/core.glb",
+   "tris": 1300,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Crystal",
+    "Ring"
+   ],
+   "bones": 0,
+   "notes": "Attack = Treffer am Kern (Kernenergie verloren)."
+  },
+  {
+   "id": "portal",
+   "title": "Rissportal (Gegner-Spawn)",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/portal.glb",
+   "tris": 5456,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Vortex"
+   ],
+   "bones": 0,
+   "notes": "Attack = Gegner tritt aus dem Portal."
+  },
+  {
+   "id": "shop",
+   "title": "Laden",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/shop.glb",
+   "tris": 4216,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base",
+    "Sign"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "tree",
+   "title": "Hindernis: Laubbaum (dunkel)",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/tree.glb",
+   "tris": 7000,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "tree_dead",
+   "title": "Hindernis: Toter Baum",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/tree_dead.glb",
+   "tris": 9240,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "willow",
+   "title": "Hindernis: Trauerweide",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/willow.glb",
+   "tris": 7000,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "rock",
+   "title": "Hindernis: Fels",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/rock.glb",
+   "tris": 4000,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "crystals",
+   "title": "Hindernis: Kristallgruppe",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/crystals.glb",
+   "tris": 1852,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "lavapool",
+   "title": "Hindernis: Lavabecken",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/lavapool.glb",
+   "tris": 2736,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "iceblock",
+   "title": "Hindernis: Eisblock",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/iceblock.glb",
+   "tris": 3144,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "ruin",
+   "title": "Hindernis: Ruine",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/ruin.glb",
+   "tris": 1946,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "mushroom",
+   "title": "Hindernis: Riesenpilz",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/mushroom.glb",
+   "tris": 4000,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "glowshroom",
+   "title": "Hindernis: Leuchtpilz",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/glowshroom.glb",
+   "tris": 4000,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "cloudbank",
+   "title": "Hindernis: Nebelbank (Himmelsinseln)",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/cloudbank.glb",
+   "tris": 3000,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0,
+   "notes": ""
+  }
+ ]
+}

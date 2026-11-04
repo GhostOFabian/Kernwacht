@@ -1,0 +1,15 @@
+{
+  "name": "KERNWACHT – Welten unter Belagerung",
+  "short_name": "KERNWACHT",
+  "description": "Isometrisches Tower-Defense mit prozeduralen Welten.",
+  "lang": "de",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#120f1c",
+  "theme_color": "#120f1c",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

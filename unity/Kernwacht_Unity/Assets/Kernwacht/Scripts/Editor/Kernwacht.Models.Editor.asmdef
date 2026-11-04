@@ -1,0 +1,7 @@
+{
+    "name": "Kernwacht.Models.Editor",
+    "rootNamespace": "Kernwacht.Models.EditorTools",
+    "references": ["Kernwacht.Models"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": false
+}
