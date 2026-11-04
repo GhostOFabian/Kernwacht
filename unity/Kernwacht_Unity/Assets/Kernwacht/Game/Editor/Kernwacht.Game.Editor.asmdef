@@ -1,0 +1,7 @@
+{
+    "name": "Kernwacht.Game.Editor",
+    "rootNamespace": "Kernwacht.Game.EditorTools",
+    "references": ["Kernwacht.Game", "Kernwacht.Models"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": false
+}

@@ -1,0 +1,678 @@
+{
+ "statusRules": {
+  "chillHardCap": 0.75,
+  "freezeImmuneDur": 3,
+  "wetDur": 5,
+  "brittleBonus": 0.3,
+  "overloadMul": 1.5,
+  "steamMul": 1.4,
+  "shatterMul": 2,
+  "shatterMaxHpPct": 0.06,
+  "toxicBlazeRadius": 1.2,
+  "markHardCap": 0.6,
+  "bossTetherPct": 0.15,
+  "poisonSlowCap": 0.3,
+  "shredFloor": -0.2
+ },
+ "flyer": {
+  "maxSpeed": 2,
+  "speedMulShare": 0.5,
+  "slowMul": 1.3
+ },
+ "difficulty": {
+  "easy": {
+   "name": "Entspannt",
+   "hpMul": 0.8,
+   "goldMul": 1.15,
+   "lives": 30,
+   "rewardMul": 1.1
+  },
+  "normal": {
+   "name": "Normal",
+   "hpMul": 1.1,
+   "goldMul": 1,
+   "lives": 20,
+   "rewardMul": 1
+  },
+  "hard": {
+   "name": "Hart",
+   "hpMul": 1.25,
+   "goldMul": 0.9,
+   "lives": 15,
+   "rewardMul": 0.95
+  }
+ },
+ "economy": {
+  "startGold": {
+   "classic": 260,
+   "mazing": 430
+  },
+  "waveBonusBase": 30,
+  "waveBonusPerWave": 5,
+  "bossWaveBonus": 40,
+  "interestRate": 0.05,
+  "interestCap": 40,
+  "veinMul": 1.5,
+  "veinFlat": 8,
+  "veinFlatPerWave": 1.5,
+  "leyDamageMul": 1.15,
+  "highgroundRangeAdd": 0.4
+ },
+ "quickRun": {
+  "waves": 20,
+  "bosses": [
+   10,
+   20
+  ],
+  "modifierWaves": [
+   3,
+   6,
+   10,
+   14,
+   17
+  ]
+ },
+ "lives": 20,
+ "endlessCurve": [
+  {
+   "wave": 1,
+   "hpMul": 1,
+   "bossHpMul": 1.5,
+   "rewardMul": 1
+  },
+  {
+   "wave": 2,
+   "hpMul": 1.127,
+   "bossHpMul": 1.5,
+   "rewardMul": 1.035
+  },
+  {
+   "wave": 3,
+   "hpMul": 1.268,
+   "bossHpMul": 1.5,
+   "rewardMul": 1.07
+  },
+  {
+   "wave": 4,
+   "hpMul": 1.4229999999999998,
+   "bossHpMul": 1.5,
+   "rewardMul": 1.105
+  },
+  {
+   "wave": 5,
+   "hpMul": 1.592,
+   "bossHpMul": 1.5,
+   "rewardMul": 1.1400000000000001
+  },
+  {
+   "wave": 6,
+   "hpMul": 1.7750000000000001,
+   "bossHpMul": 1.5,
+   "rewardMul": 1.175
+  },
+  {
+   "wave": 7,
+   "hpMul": 1.972,
+   "bossHpMul": 1.5,
+   "rewardMul": 1.21
+  },
+  {
+   "wave": 8,
+   "hpMul": 2.183,
+   "bossHpMul": 1.5,
+   "rewardMul": 1.245
+  },
+  {
+   "wave": 9,
+   "hpMul": 2.408,
+   "bossHpMul": 1.5,
+   "rewardMul": 1.28
+  },
+  {
+   "wave": 10,
+   "hpMul": 2.6470000000000002,
+   "bossHpMul": 1.5,
+   "rewardMul": 1.315
+  },
+  {
+   "wave": 11,
+   "hpMul": 2.9000000000000004,
+   "bossHpMul": 1.6350000000000002,
+   "rewardMul": 1.35
+  },
+  {
+   "wave": 12,
+   "hpMul": 3.167,
+   "bossHpMul": 1.77,
+   "rewardMul": 1.385
+  },
+  {
+   "wave": 13,
+   "hpMul": 3.448,
+   "bossHpMul": 1.905,
+   "rewardMul": 1.42
+  },
+  {
+   "wave": 14,
+   "hpMul": 3.7430000000000003,
+   "bossHpMul": 2.04,
+   "rewardMul": 1.455
+  },
+  {
+   "wave": 15,
+   "hpMul": 4.052,
+   "bossHpMul": 2.175,
+   "rewardMul": 1.49
+  },
+  {
+   "wave": 16,
+   "hpMul": 4.375,
+   "bossHpMul": 2.31,
+   "rewardMul": 1.525
+  },
+  {
+   "wave": 17,
+   "hpMul": 4.712,
+   "bossHpMul": 2.445,
+   "rewardMul": 1.56
+  },
+  {
+   "wave": 18,
+   "hpMul": 5.063000000000001,
+   "bossHpMul": 2.58,
+   "rewardMul": 1.5950000000000002
+  },
+  {
+   "wave": 19,
+   "hpMul": 5.428,
+   "bossHpMul": 2.715,
+   "rewardMul": 1.6300000000000001
+  },
+  {
+   "wave": 20,
+   "hpMul": 5.807,
+   "bossHpMul": 2.8499999999999996,
+   "rewardMul": 1.665
+  },
+  {
+   "wave": 21,
+   "hpMul": 6.2,
+   "bossHpMul": 2.985,
+   "rewardMul": 1.7000000000000002
+  },
+  {
+   "wave": 22,
+   "hpMul": 6.606999999999999,
+   "bossHpMul": 3.12,
+   "rewardMul": 1.735
+  },
+  {
+   "wave": 23,
+   "hpMul": 7.028,
+   "bossHpMul": 3.255,
+   "rewardMul": 1.77
+  },
+  {
+   "wave": 24,
+   "hpMul": 7.463,
+   "bossHpMul": 3.3899999999999997,
+   "rewardMul": 1.8050000000000002
+  },
+  {
+   "wave": 25,
+   "hpMul": 7.912,
+   "bossHpMul": 3.5249999999999995,
+   "rewardMul": 1.84
+  },
+  {
+   "wave": 26,
+   "hpMul": 8.375,
+   "bossHpMul": 3.66,
+   "rewardMul": 1.875
+  },
+  {
+   "wave": 27,
+   "hpMul": 8.852,
+   "bossHpMul": 3.7950000000000004,
+   "rewardMul": 1.9100000000000001
+  },
+  {
+   "wave": 28,
+   "hpMul": 9.343,
+   "bossHpMul": 3.93,
+   "rewardMul": 1.945
+  },
+  {
+   "wave": 29,
+   "hpMul": 9.847999999999999,
+   "bossHpMul": 4.0649999999999995,
+   "rewardMul": 1.98
+  },
+  {
+   "wave": 30,
+   "hpMul": 10.367,
+   "bossHpMul": 4.199999999999999,
+   "rewardMul": 2.015
+  },
+  {
+   "wave": 31,
+   "hpMul": 10.899999999999999,
+   "bossHpMul": 4.334999999999999,
+   "rewardMul": 2.05
+  },
+  {
+   "wave": 32,
+   "hpMul": 13.469999999999999,
+   "bossHpMul": 4.47,
+   "rewardMul": 2.085
+  },
+  {
+   "wave": 33,
+   "hpMul": 14.86842712474619,
+   "bossHpMul": 4.6049999999999995,
+   "rewardMul": 2.12
+  },
+  {
+   "wave": 34,
+   "hpMul": 16.074101615137753,
+   "bossHpMul": 4.74,
+   "rewardMul": 2.1550000000000002
+  },
+  {
+   "wave": 35,
+   "hpMul": 17.18,
+   "bossHpMul": 4.875,
+   "rewardMul": 2.1900000000000004
+  },
+  {
+   "wave": 36,
+   "hpMul": 18.22213595499958,
+   "bossHpMul": 5.01,
+   "rewardMul": 2.225
+  },
+  {
+   "wave": 37,
+   "hpMul": 19.218979485566358,
+   "bossHpMul": 5.145,
+   "rewardMul": 2.2600000000000002
+  },
+  {
+   "wave": 38,
+   "hpMul": 20.18150262212918,
+   "bossHpMul": 5.28,
+   "rewardMul": 2.295
+  },
+  {
+   "wave": 39,
+   "hpMul": 21.11685424949238,
+   "bossHpMul": 5.415,
+   "rewardMul": 2.33
+  },
+  {
+   "wave": 40,
+   "hpMul": 22.03,
+   "bossHpMul": 5.55,
+   "rewardMul": 2.365
+  },
+  {
+   "wave": 41,
+   "hpMul": 22.92455532033676,
+   "bossHpMul": 5.654999999999999,
+   "rewardMul": 2.4000000000000004
+  },
+  {
+   "wave": 42,
+   "hpMul": 23.803249580710798,
+   "bossHpMul": 5.76,
+   "rewardMul": 2.435
+  },
+  {
+   "wave": 43,
+   "hpMul": 24.66820323027551,
+   "bossHpMul": 5.864999999999999,
+   "rewardMul": 2.47
+  },
+  {
+   "wave": 44,
+   "hpMul": 25.52110255092798,
+   "bossHpMul": 5.969999999999999,
+   "rewardMul": 2.505
+  },
+  {
+   "wave": 45,
+   "hpMul": 26.36331477354788,
+   "bossHpMul": 6.074999999999999,
+   "rewardMul": 2.54
+  },
+  {
+   "wave": 46,
+   "hpMul": 27.195966692414835,
+   "bossHpMul": 6.18,
+   "rewardMul": 2.575
+  },
+  {
+   "wave": 47,
+   "hpMul": 28.02,
+   "bossHpMul": 6.284999999999999,
+   "rewardMul": 2.6100000000000003
+  },
+  {
+   "wave": 48,
+   "hpMul": 28.83621125123532,
+   "bossHpMul": 6.39,
+   "rewardMul": 2.6450000000000005
+  },
+  {
+   "wave": 49,
+   "hpMul": 29.645281374238564,
+   "bossHpMul": 6.495,
+   "rewardMul": 2.68
+  },
+  {
+   "wave": 50,
+   "hpMul": 30.44779788708135,
+   "bossHpMul": 6.6,
+   "rewardMul": 2.715
+  },
+  {
+   "wave": 51,
+   "hpMul": 31.24427190999916,
+   "bossHpMul": 6.705,
+   "rewardMul": 2.75
+  },
+  {
+   "wave": 52,
+   "hpMul": 32.03515138991168,
+   "bossHpMul": 6.8100000000000005,
+   "rewardMul": 2.785
+  },
+  {
+   "wave": 53,
+   "hpMul": 32.82083151964686,
+   "bossHpMul": 6.914999999999999,
+   "rewardMul": 2.8200000000000003
+  },
+  {
+   "wave": 54,
+   "hpMul": 33.60166304662543,
+   "bossHpMul": 7.02,
+   "rewardMul": 2.8550000000000004
+  },
+  {
+   "wave": 55,
+   "hpMul": 34.37795897113271,
+   "bossHpMul": 7.125,
+   "rewardMul": 2.89
+  },
+  {
+   "wave": 56,
+   "hpMul": 35.15,
+   "bossHpMul": 7.23,
+   "rewardMul": 2.9250000000000003
+  },
+  {
+   "wave": 57,
+   "hpMul": 35.91803902718557,
+   "bossHpMul": 7.334999999999999,
+   "rewardMul": 2.96
+  },
+  {
+   "wave": 58,
+   "hpMul": 36.68230484541326,
+   "bossHpMul": 7.4399999999999995,
+   "rewardMul": 2.995
+  },
+  {
+   "wave": 59,
+   "hpMul": 37.44300524425836,
+   "bossHpMul": 7.544999999999999,
+   "rewardMul": 3.0300000000000002
+  },
+  {
+   "wave": 60,
+   "hpMul": 38.20032961426901,
+   "bossHpMul": 7.6499999999999995,
+   "rewardMul": 3.0650000000000004
+  },
+  {
+   "wave": 61,
+   "hpMul": 39.73354017310539,
+   "bossHpMul": 7.89459,
+   "rewardMul": 3.1
+  },
+  {
+   "wave": 62,
+   "hpMul": 41.30963208617671,
+   "bossHpMul": 8.14550664,
+   "rewardMul": 3.1350000000000002
+  },
+  {
+   "wave": 63,
+   "hpMul": 42.929799088790624,
+   "bossHpMul": 8.40289843188,
+   "rewardMul": 3.1700000000000004
+  },
+  {
+   "wave": 64,
+   "hpMul": 44.59525818109495,
+   "bossHpMul": 8.66691718411632,
+   "rewardMul": 3.205
+  },
+  {
+   "wave": 65,
+   "hpMul": 46.30725082385872,
+   "bossHpMul": 8.93771807234122,
+   "rewardMul": 3.24
+  },
+  {
+   "wave": 66,
+   "hpMul": 48.06704407648301,
+   "bossHpMul": 9.215459711374558,
+   "rewardMul": 3.2750000000000004
+  },
+  {
+   "wave": 67,
+   "hpMul": 49.87593168933174,
+   "bossHpMul": 9.500304228757663,
+   "rewardMul": 3.31
+  },
+  {
+   "wave": 68,
+   "hpMul": 51.73523516032846,
+   "bossHpMul": 9.792417339820073,
+   "rewardMul": 3.345
+  },
+  {
+   "wave": 69,
+   "hpMul": 53.64630476406152,
+   "bossHpMul": 10.091968424310613,
+   "rewardMul": 3.3800000000000003
+  },
+  {
+   "wave": 70,
+   "hpMul": 55.61052056027845,
+   "bossHpMul": 10.399130604624707,
+   "rewardMul": 3.415
+  },
+  {
+   "wave": 71,
+   "hpMul": 57.62929338755467,
+   "bossHpMul": 10.714080825660634,
+   "rewardMul": 3.45
+  },
+  {
+   "wave": 72,
+   "hpMul": 59.70406584703597,
+   "bossHpMul": 11.036999936337958,
+   "rewardMul": 3.4850000000000003
+  },
+  {
+   "wave": 73,
+   "hpMul": 61.83631328043463,
+   "bossHpMul": 11.368072772812148,
+   "rewardMul": 3.5200000000000005
+  },
+  {
+   "wave": 74,
+   "hpMul": 64.02754474586997,
+   "bossHpMul": 11.707488243420038,
+   "rewardMul": 3.555
+  },
+  {
+   "wave": 75,
+   "hpMul": 66.27930399466315,
+   "bossHpMul": 12.05543941539142,
+   "rewardMul": 3.5900000000000003
+  },
+  {
+   "wave": 76,
+   "hpMul": 68.59317045179742,
+   "bossHpMul": 12.412123603362906,
+   "rewardMul": 3.6250000000000004
+  },
+  {
+   "wave": 77,
+   "hpMul": 70.97076020242812,
+   "bossHpMul": 12.777742459730774,
+   "rewardMul": 3.66
+  },
+  {
+   "wave": 78,
+   "hpMul": 73.41372698655336,
+   "bossHpMul": 13.152502066880395,
+   "rewardMul": 3.6950000000000003
+  },
+  {
+   "wave": 79,
+   "hpMul": 75.92376320373067,
+   "bossHpMul": 13.536613031330452,
+   "rewardMul": 3.7300000000000004
+  },
+  {
+   "wave": 80,
+   "hpMul": 78.50260092953648,
+   "bossHpMul": 13.930290579831043,
+   "rewardMul": 3.765
+  },
+  {
+   "wave": 81,
+   "hpMul": 81.15201294530698,
+   "bossHpMul": 14.333754657455506,
+   "rewardMul": 3.8000000000000003
+  },
+  {
+   "wave": 82,
+   "hpMul": 83.87381378256832,
+   "bossHpMul": 14.747230027726584,
+   "rewardMul": 3.8350000000000004
+  },
+  {
+   "wave": 83,
+   "hpMul": 86.66986078345337,
+   "bossHpMul": 15.1709463748184,
+   "rewardMul": 3.87
+  },
+  {
+   "wave": 84,
+   "hpMul": 89.54205517831004,
+   "bossHpMul": 15.60513840787654,
+   "rewardMul": 3.9050000000000002
+  },
+  {
+   "wave": 85,
+   "hpMul": 92.49234318162969,
+   "bossHpMul": 16.050045967499333,
+   "rewardMul": 3.9400000000000004
+  },
+  {
+   "wave": 86,
+   "hpMul": 95.52271710735916,
+   "bossHpMul": 16.505914134424394,
+   "rewardMul": 3.975
+  },
+  {
+   "wave": 87,
+   "hpMul": 98.63521650460711,
+   "bossHpMul": 16.97299334046529,
+   "rewardMul": 4.01
+  },
+  {
+   "wave": 88,
+   "hpMul": 101.83192931471042,
+   "bossHpMul": 17.451539481744103,
+   "rewardMul": 4.045
+  },
+  {
+   "wave": 89,
+   "hpMul": 105.11499305059041,
+   "bossHpMul": 17.941814034266645,
+   "rewardMul": 4.08
+  },
+  {
+   "wave": 90,
+   "hpMul": 108.48659599929846,
+   "bossHpMul": 18.44408417188791,
+   "rewardMul": 4.115
+  },
+  {
+   "wave": 91,
+   "hpMul": 111.9489784486266,
+   "bossHpMul": 18.958622886716437,
+   "rewardMul": 4.15
+  },
+  {
+   "wave": 92,
+   "hpMul": 115.50443393864019,
+   "bossHpMul": 19.4857091120071,
+   "rewardMul": 4.1850000000000005
+  },
+  {
+   "wave": 93,
+   "hpMul": 119.15531053897374,
+   "bossHpMul": 20.025627847592933,
+   "rewardMul": 4.220000000000001
+  },
+  {
+   "wave": 94,
+   "hpMul": 122.90401215272159,
+   "bossHpMul": 20.578670287907563,
+   "rewardMul": 4.255000000000001
+  },
+  {
+   "wave": 95,
+   "hpMul": 126.75299984774648,
+   "bossHpMul": 21.145133952650905,
+   "rewardMul": 4.290000000000001
+  },
+  {
+   "wave": 96,
+   "hpMul": 130.70479321622426,
+   "bossHpMul": 21.725322820151717,
+   "rewardMul": 4.325
+  },
+  {
+   "wave": 97,
+   "hpMul": 134.7619717632413,
+   "bossHpMul": 22.319547463481907,
+   "rewardMul": 4.36
+  },
+  {
+   "wave": 98,
+   "hpMul": 138.92717632526094,
+   "bossHpMul": 22.92812518937825,
+   "rewardMul": 4.3950000000000005
+  },
+  {
+   "wave": 99,
+   "hpMul": 143.2031105192774,
+   "bossHpMul": 23.5513801800287,
+   "rewardMul": 4.43
+  },
+  {
+   "wave": 100,
+   "hpMul": 147.59254222347957,
+   "bossHpMul": 24.1896436377812,
+   "rewardMul": 4.465
+  }
+ ]
+}
