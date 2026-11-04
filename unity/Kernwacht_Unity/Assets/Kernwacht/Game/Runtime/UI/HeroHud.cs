@@ -77,9 +77,9 @@ namespace Kernwacht.Game.UI
         private static string statName(string k) { string n; return Champions.STAT_NAMES.TryGetValue(k, out n) ? n : k; }
 
         /// <summary>Abstand der Heldenleiste vom unteren Rand (über der Turmleiste), falls sie nicht umgehängt wird.</summary>
-        public static float dockBottom = 104;
-        /// <summary>Höhe von Kopfzeile/Turmleiste, um das Fenster in der Spielfläche zu zentrieren.</summary>
-        public static float stageTop = 56, stageBottom = 100;
+        public static float dockBottom = 82;
+        /// <summary>Höhe von Kopfzeile/Turmleiste (Hud: TOP_H/BAR_H), solange das Fenster direkt unter einer Ebene liegt.</summary>
+        public static float stageTop = 52, stageBottom = 76;
 
         // ------------------------------------------------------------ Zustand
 
@@ -150,11 +150,11 @@ namespace Kernwacht.Game.UI
             hc = Theme.Hex(def.accent);
             var app = GameApp.I;
             Transform hudParent = app != null ? app.hudLayer : null;
-            Transform overParent = app != null && app.overlayLayer != null ? (Transform)app.overlayLayer : hudParent;
 
             resBar = buildResBar(hudParent);
             dock = buildDock(hudParent);
-            win = buildWin(overParent);
+            // Fenster zunächst in der HUD-Ebene (GameSession hängt es wie in TS in hud.stage um)
+            win = buildWin(hudParent);
         }
 
         /// <summary>Entfernt alle Elemente (Sitzungsende).</summary>
@@ -268,6 +268,7 @@ namespace Kernwacht.Game.UI
             setPortrait();
             var lvlBg = Ui.Panel(pimg.transform, "Lvl", Theme.Gold, false, Theme.Circle);
             lvlBg.raycastTarget = false;
+            lvlBg.type = Image.Type.Simple;
             Ui.Place(lvlBg.rectTransform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(-2, 1), new Vector2(23, 23));
             lvl = HeroKit.T(lvlBg.transform, "1", 13, Theme.Hex(0x2a1a00), FontStyle.Bold, TextAnchor.MiddleCenter);
             lvl.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -427,6 +428,7 @@ namespace Kernwacht.Game.UI
 
         public void update()
         {
+            if (!fittersChecked) checkFitters();
             var s = sim.s;
             var he = s.he;
             if (he == null) return;
@@ -687,6 +689,29 @@ namespace Kernwacht.Game.UI
             e.tip = $"{d.name} ({keyTip}) – {d.description}{(special ? " · im Spezialslot" : "")}";
         }
 
+        private bool fittersChecked;
+
+        /// <summary>Nach dem Umhängen in Layout-Gruppen (statsBox, stageLeft) steuert der Elternteil die Größe.</summary>
+        private void checkFitters()
+        {
+            fittersChecked = true;
+            foreach (var rt in new[] { resBar, dock })
+            {
+                if (rt == null || rt.parent == null || rt.parent.GetComponent<LayoutGroup>() == null) continue;
+                var f = rt.GetComponent<ContentSizeFitter>();
+                if (f != null) UnityEngine.Object.Destroy(f);
+            }
+        }
+
+        /// <summary>Liegt das Fenster direkt unter einer App-Ebene (nicht in hud.stage)?</summary>
+        private bool winInLayer()
+        {
+            var app = GameApp.I;
+            if (app == null) return true;
+            var p = win.parent;
+            return p == null || p == app.hudLayer || p == app.overlayLayer || p == app.root;
+        }
+
         // ------------------------------------------------------------ Fenster
 
         private void updateWindow()
@@ -828,7 +853,9 @@ namespace Kernwacht.Game.UI
             float ch = LayoutUtility.GetPreferredHeight(content);
             var prt = win.parent as RectTransform;
             float avail = prt != null && prt.rect.height > 0 ? prt.rect.height : 1080;
-            avail -= stageTop + stageBottom + 20;
+            bool layer = winInLayer();
+            avail -= (layer ? stageTop + stageBottom : 0) + 20;
+            win.anchoredPosition = new Vector2(0, layer ? (stageBottom - stageTop) / 2f : 0);
             float bh = Mathf.Min(ch, Mathf.Max(140, avail - chrome));
             bodyLe.preferredHeight = bh; bodyLe.minHeight = bh;
             LayoutRebuilder.ForceRebuildLayoutImmediate(win);
