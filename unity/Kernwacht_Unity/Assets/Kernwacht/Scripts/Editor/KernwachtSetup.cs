@@ -60,6 +60,7 @@ namespace Kernwacht.Models.EditorTools
             EnsureDir(PrefabDir); EnsureDir(AnimDir); EnsureDir(ControllerDir);
             int ok = 0, failed = 0;
             var entries = new List<ModelCatalog.Entry>();
+            KernwachtTextures.Reset();
             try
             {
                 AssetDatabase.StartAssetEditing();
@@ -96,7 +97,7 @@ namespace Kernwacht.Models.EditorTools
             catalog.entries = entries;
             EditorUtility.SetDirty(catalog);
             AssetDatabase.SaveAssets();
-            Debug.Log($"[Kernwacht] Fertig: {ok} Prefabs eingerichtet, {failed} fehlgeschlagen. Katalog: {CatalogAsset}");
+            Debug.Log($"[Kernwacht] Fertig: {ok} Prefabs eingerichtet, {failed} fehlgeschlagen. Katalog: {CatalogAsset}. Texturen: {KernwachtTextures.exported} komprimiert, {KernwachtTextures.reused} doppelte zusammengefasst.");
             Selection.activeObject = catalog;
         }
 
@@ -191,6 +192,7 @@ namespace Kernwacht.Models.EditorTools
                         u.walkSpeedReference = info.category == ModelCategory.Boss ? 0.8f : 1f;
                         break;
                 }
+                KernwachtTextures.Apply(go, it.id);
                 AddPickCollider(go);
                 var dir = $"{PrefabDir}/{it.category}";
                 EnsureDir(dir);
