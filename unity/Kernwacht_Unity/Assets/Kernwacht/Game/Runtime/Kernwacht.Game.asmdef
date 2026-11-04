@@ -1,6 +1,6 @@
 {
     "name": "Kernwacht.Game",
     "rootNamespace": "Kernwacht.Game",
-    "references": ["Kernwacht.Models", "Unity.InputSystem"],
+    "references": ["Kernwacht.Models", "Kernwacht.Sim", "Unity.InputSystem", "UnityEngine.UI"],
     "autoReferenced": true
 }
