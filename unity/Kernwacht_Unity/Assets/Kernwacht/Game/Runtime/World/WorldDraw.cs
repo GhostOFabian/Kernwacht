@@ -255,16 +255,16 @@ namespace Kernwacht.Game
             matSpriteAlpha = FxBase(false);
             matSpriteAlpha.name = "kw_spriteAlpha";
             SetBlend(matSpriteAlpha, BlendMode.SrcAlpha, BlendMode.OneMinusSrcAlpha);
-            matSpriteAlpha.mainTexture = atlas;
             if (matSpriteAlpha.HasProperty("_BaseMap")) matSpriteAlpha.SetTexture("_BaseMap", atlas);
+            if (matSpriteAlpha.HasProperty("_MainTex")) matSpriteAlpha.SetTexture("_MainTex", atlas);
             SetColor(matSpriteAlpha, Color.white);
             matSpriteAlpha.renderQueue = 3010;
 
             matSpriteAdd = FxBase(false);
             matSpriteAdd.name = "kw_spriteAdd";
             SetBlend(matSpriteAdd, BlendMode.SrcAlpha, BlendMode.One);
-            matSpriteAdd.mainTexture = atlas;
             if (matSpriteAdd.HasProperty("_BaseMap")) matSpriteAdd.SetTexture("_BaseMap", atlas);
+            if (matSpriteAdd.HasProperty("_MainTex")) matSpriteAdd.SetTexture("_MainTex", atlas);
             SetColor(matSpriteAdd, Color.white);
             matSpriteAdd.renderQueue = 3030;
 
@@ -441,7 +441,7 @@ namespace Kernwacht.Game
             Flush(sprAlpha, matSpriteAlpha, cam);
             Flush(lines, matLine, cam);
             Flush(sprAdd, matSpriteAdd, cam);
-            Flush(sprTop, matLineTop == null ? matSpriteAdd : matSpriteAdd, cam);
+            Flush(sprTop, matSpriteAdd, cam);
             Flush(linesTop, matLineTop, cam);
             Flush(overlay, matOverlay, cam);
         }

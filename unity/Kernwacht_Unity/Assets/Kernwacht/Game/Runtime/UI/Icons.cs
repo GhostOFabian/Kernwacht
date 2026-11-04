@@ -476,7 +476,10 @@ namespace Kernwacht.Game.UI
             try
             {
                 var assets = GameAssets.Instance;
-                var entry = assets != null && assets.catalog != null ? assets.catalog.Find(modelId) : null;
+                var cat = assets != null ? assets.catalog : null;
+                var entry = cat != null ? cat.Find(modelId) : null;
+                if (entry == null && cat != null) entry = cat.Find(WorldModels.champModel(modelId));
+                if (entry == null && cat != null) entry = cat.Find(WorldModels.heroModel(modelId));
                 if (entry != null && entry.prefab != null) s = RenderPortrait(entry, size);
             }
             catch (Exception e)

@@ -90,13 +90,14 @@ namespace Kernwacht.Game
 
         static readonly List<RaycastResult> rayHits = new List<RaycastResult>();
         static PointerEventData rayData;
+        static EventSystem rayEs;
 
         /// <summary>Liegt der Punkt (Pixel, Ursprung oben links) über einem uGUI-Element, das Strahlen abfängt?</summary>
         public static bool overUi(float x, float yTop)
         {
             var es = EventSystem.current;
             if (es == null) return false;
-            if (rayData == null || rayData.eventSystem != es) rayData = new PointerEventData(es);
+            if (rayData == null || rayEs != es) { rayData = new PointerEventData(es); rayEs = es; }
             rayData.position = new Vector2(x, Screen.height - yTop);
             rayHits.Clear();
             es.RaycastAll(rayData, rayHits);

@@ -42,7 +42,7 @@ namespace Kernwacht.Models
 
         public bool HasClip(string clip) => _states.Contains(Animator.StringToHash(clip)) || HasState(clip);
 
-        bool HasState(string clip) => animator != null && animator.HasState(0, Animator.StringToHash(clip));
+        bool HasState(string clip) => animator != null && animator.runtimeAnimatorController != null && animator.isActiveAndEnabled && animator.HasState(0, Animator.StringToHash(clip));
 
         protected void Play(string clip, float fade)
         {

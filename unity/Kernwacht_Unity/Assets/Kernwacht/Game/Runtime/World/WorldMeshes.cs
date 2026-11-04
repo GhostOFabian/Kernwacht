@@ -57,6 +57,9 @@ namespace Kernwacht.Game
                 var m = new Mesh { name = "kw_" + IDS[i] };
                 m.vertices = d.v;
                 m.normals = d.n;
+                var white = new Color32[d.v.Length];
+                for (int k = 0; k < white.Length; k++) white[k] = new Color32(255, 255, 255, 255);
+                m.colors32 = white;   // unbeleuchtete Effekt-Shader multiplizieren mit der Vertexfarbe
                 var tri = new int[d.v.Length];
                 for (int k = 0; k < tri.Length; k++) tri[k] = k;
                 m.triangles = tri;

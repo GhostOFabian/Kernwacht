@@ -184,7 +184,7 @@ namespace Kernwacht.Game
                 float bottom = Mathf.Max(nt, -0.7f);
                 if (bottom >= top - 0.001f) continue;
                 float band = Mathf.Max(bottom, top - capBand);
-                SideFace(x, y, dx, dy, band, top, capCol);
+                if (top - band > 0.001f) SideFace(x, y, dx, dy, band, top, capCol);
                 if (band > bottom + 0.001f) SideFace(x, y, dx, dy, bottom, band, sideCol);
             }
         }
@@ -638,6 +638,9 @@ namespace Kernwacht.Game
                 }
             var mesh = new Mesh { name = "kw_sea" };
             mesh.SetVertices(v); mesh.SetUVs(0, uv); mesh.SetNormals(nrm); mesh.SetTriangles(tri, 0);
+            var white = new Color32[v.Count];
+            for (int i = 0; i < white.Length; i++) white[i] = new Color32(255, 255, 255, 255);
+            mesh.colors32 = white;
             mesh.RecalculateBounds();
             owned.Add(mesh);
             Material mat;
@@ -709,6 +712,9 @@ namespace Kernwacht.Game
                 mesh.SetVertices(b.v, start, n);
                 mesh.SetNormals(b.n, start, n);
                 mesh.SetUVs(0, b.uv, start, n);
+                var white = new Color32[n];
+                for (int i = 0; i < n; i++) white[i] = new Color32(255, 255, 255, 255);
+                mesh.colors32 = white;
                 var tri = new int[n];
                 for (int i = 0; i < n; i++) tri[i] = i;
                 mesh.SetTriangles(tri, 0);

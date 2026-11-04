@@ -375,6 +375,8 @@ namespace Kernwacht.Game.UI
         public float minHeight => -1;
         public float preferredHeight => -1;
         public float flexibleHeight => -1;
+        public float maxWidth => -1;
+        public float maxHeight => -1;
         public int layoutPriority => 2;
     }
 
@@ -427,7 +429,7 @@ namespace Kernwacht.Game.UI
                 w += LayoutUtility.GetPreferredWidth(c) + (i > 0 ? spacingX : 0);
                 mn = Mathf.Max(mn, LayoutUtility.GetMinWidth(c));
             }
-            SetLayoutInputForAxis(mn + padding.horizontal, w, -1, 0);
+            SetLayoutInputForAxis(mn + padding.horizontal, w, -1, -1, 0);
         }
 
         void Rows(float width)
@@ -455,7 +457,7 @@ namespace Kernwacht.Game.UI
             Rows(rectTransform.rect.width);
             float h = padding.vertical;
             for (int r = 0; r < rowH.Count; r++) h += rowH[r] + (r > 0 ? spacingY : 0);
-            SetLayoutInputForAxis(h, h, -1, 1);
+            SetLayoutInputForAxis(h, h, -1, -1, 1);
         }
 
         void Place(int axis)
