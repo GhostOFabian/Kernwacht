@@ -186,7 +186,7 @@ namespace Kernwacht.Sim
                 specs = new List<UpgradeDefinition>
                 {
                     new UpgradeDefinition { id = "ballistaA", name = "Durchschlag", description = "Bolzen durchschlagen bis zu 4 Gegner in einer Linie", cost = 250, mods = new List<StatMod> { new StatMod { stat = "pierce", add = 4 }, new StatMod { stat = "damage", add = 20 } } },
-                    new UpgradeDefinition { id = "ballistaB", name = "Kolossjäger", description = "+3 % der max. LP als Zusatzschaden (Bosse: 0,75 %)", cost = 250, mods = new List<StatMod> { new StatMod { stat = "maxHpPct", add = 0.03 }, new StatMod { stat = "damage", mul = 1.25 } } },
+                    new UpgradeDefinition { id = "ballistaB", name = "Kolossjäger", description = "+1,5 % der max. LP als Zusatzschaden (Bosse: 0,4 %), höchstens das 3-Fache des eigenen Treffers", cost = 250, mods = new List<StatMod> { new StatMod { stat = "maxHpPct", add = 0.015 }, new StatMod { stat = "damage", mul = 1.25 } } },
                 },
                 synergies = "Panzerbrechend: ideal gegen Steinhäuter, Golems und den Weltenbrecher. Spröde-Effekt verstärkt alle physischen Türme.",
                 counters = "Langsam, schwach gegen Schwärme, trifft keine Flieger. Phasenwandler werden zeitweise immun.",
