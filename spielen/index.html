@@ -21,6 +21,19 @@
   <div id="loader"><h1>KERNWACHT</h1><div id="bar"><div id="fill"></div></div><div id="hint">Lädt … (beim ersten Mal ca. 40 MB)</div><div id="err"></div></div>
   <script>
     var canvas = document.querySelector("#unity-canvas");
+    // Grafikkontext verloren (Treiber, Speicherdruck, Browser-Spar- oder RAM-Begrenzer): Ohne Neuladen bleiben
+    // Gelände und Modelle danach unsichtbar. Der Spielstand wird zu jeder Welle gesichert – also automatisch neu laden.
+    var kwLost = false;
+    canvas.addEventListener("webglcontextlost", function (e) {
+      e.preventDefault();
+      if (kwLost) return;
+      kwLost = true;
+      var o = document.createElement("div");
+      o.style.cssText = "position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(13,11,18,.88);color:#f2dca0;font:600 18px system-ui,sans-serif;z-index:9;text-align:center;padding:24px";
+      o.textContent = "Der Browser hat die Grafik zurückgesetzt – Kernwacht lädt neu, dein Spielstand ab der letzten Welle bleibt erhalten …";
+      document.body.appendChild(o);
+      setTimeout(function () { location.reload(); }, 1500);
+    }, false);
     var config = {
       dataUrl: "Build/WebGL.data.unityweb",
       frameworkUrl: "Build/WebGL.framework.js.unityweb",
