@@ -558,6 +558,17 @@ namespace Kernwacht.Game.UI
                 cam.farClipPlane = dist * 2f + 10f;
                 cam.allowHDR = false;
                 cam.allowMSAA = true;
+                // Porträt-Kamera ohne Schatten und Nachbearbeitung: Sonst bindet URP für diese Aufnahme eine leere
+                // Schattenkarte, und im Browser (WebGL 2) scheitern danach alle schattenempfangenden Zeichnungen
+                // („Mismatch between texture format and sampler type“) – Gelände und Modelle verschwinden.
+                var urp = UnityEngine.Rendering.Universal.CameraExtensions.GetUniversalAdditionalCameraData(cam);
+                if (urp != null)
+                {
+                    urp.renderShadows = false;
+                    urp.renderPostProcessing = false;
+                    urp.requiresDepthTexture = false;
+                    urp.requiresColorTexture = false;
+                }
                 cam.transform.position = center + tc * dist;
                 cam.transform.LookAt(center, Vector3.up);
 

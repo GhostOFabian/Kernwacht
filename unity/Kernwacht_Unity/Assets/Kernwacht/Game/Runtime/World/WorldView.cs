@@ -1048,6 +1048,7 @@ namespace Kernwacht.Game
             cam.tx += sx;
             cam.tz += sz;
             cam.Update(dt);
+            keepShadowCaster();
             cam.tx -= sx;
             cam.tz -= sz;
             r.begin(cam.cam, time);
@@ -1087,6 +1088,30 @@ namespace Kernwacht.Game
             if (ui.particleCap > 0) return (float)ui.particleCap;
             var app = GameApp.I;
             return app != null ? (float)app.particleCap() : 700f;
+        }
+
+        GameObject shadowAnchor;
+
+        /// <summary>
+        /// Unsichtbarer Schattenwerfer unter dem Blickpunkt: Die Schattenkarte enthält so immer etwas und ist eine echte
+        /// Tiefenkarte. Ohne Werfer bindet URP eine Ersatztextur, an der WebGL 2 alle schattenempfangenden Zeichnungen
+        /// verweigert (Gelände und Modelle verschwinden bis zum Neuladen).
+        /// </summary>
+        void keepShadowCaster()
+        {
+            if (shadowAnchor == null)
+            {
+                shadowAnchor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                shadowAnchor.name = "Schattenanker";
+                var col = shadowAnchor.GetComponent<Collider>();
+                if (col != null) UnityEngine.Object.Destroy(col);
+                var mr = shadowAnchor.GetComponent<MeshRenderer>();
+                mr.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+                mr.receiveShadows = false;
+                if (r != null && r.matLit != null) mr.sharedMaterial = r.matLit;
+                shadowAnchor.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            }
+            shadowAnchor.transform.position = IsoCamera.W(cam.tx, -3f, cam.tz);
         }
 
         void updateLighting(GameSimulation sim, float dt)
