@@ -84,10 +84,28 @@ namespace Kernwacht.Sim
             return false;
         }
 
-        /// <summary>Anteil des Befehlsbonus für einen Turm (1 = Affinität, sonst 0,25).</summary>
-        public static double affinityShare(string champId, string towerDef)
+        /// <summary>Affinität inklusive angelegter Befehlsrelikte.</summary>
+        public static bool affine(HeroEndlessState he, string towerDef)
         {
-            return affine(champId, towerDef) ? 1 : OFF_AFFINITY;
+            if (he == null) return false;
+            if (affine(he.champion.id, towerDef)) return true;
+            if (towerDef == null || !Towers.TOWERS.TryGetValue(towerDef, out var d)) return false;
+            foreach (double? uid in he.champion.equipment)
+            {
+                if (uid == null) continue;
+                ItemInstance inst = null;
+                foreach (var i in he.champion.inventory) if (i.uid == uid.Value) { inst = i; break; }
+                if (inst == null || !Items.ITEMS.TryGetValue(inst.item, out var it) || it.affinity == null) continue;
+                foreach (var a in it.affinity)
+                    if (a == "*" || a == towerDef || (d.damageType != null && a == d.damageType)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>Anteil des Befehlsbonus für einen Turm (1 = Affinität, sonst 0,25).</summary>
+        public static double affinityShare(HeroEndlessState he, string towerDef)
+        {
+            return affine(he, towerDef) ? 1 : OFF_AFFINITY;
         }
 
         public static double commandRadius(ChampionStats st)

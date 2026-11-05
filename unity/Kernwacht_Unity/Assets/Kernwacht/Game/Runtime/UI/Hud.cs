@@ -542,13 +542,14 @@ namespace Kernwacht.Game.UI
             // Fusionsmarke (Symbol + Beschriftung über dem Knopf), standardmäßig aus
             // Befehlsmarke: Turm gehört zur Affinität des Helden (voller Befehlsbonus)
             var heS = sim.s.he;
-            if (commandMarked(id))
+            if (heS != null)
             {
                 var fg = HK.Img(tb.bg.transform, Icons.Get("flag"), 15, Theme.Hex(Champions.CHAMPIONS[heS.champion.id].accent));
                 fg.raycastTarget = false;
                 Ui.Place(fg.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(4, -21), new Vector2(15, 15));
                 fg.gameObject.AddComponent<Shadow>().effectColor = new Color(0, 0, 0, 0.9f);
                 tb.cmd = fg;
+                fg.gameObject.SetActive(false);
             }
             tb.fuse = HK.Img(tb.bg.transform, Icons.Get("fuse"), 20);
             tb.fuse.color = FUSE_COL;
@@ -599,7 +600,6 @@ namespace Kernwacht.Game.UI
             Ui.Place(tb.icon.rectTransform, new Vector2(0.5f, chip ? 0.5f : 1), new Vector2(0.5f, chip ? 0.5f : 1), chip ? new Vector2(0, 6) : new Vector2(0, -3), new Vector2(ic, ic));
             tb.icon.color = chip ? new Color(0.62f, 0.62f, 0.68f, 1f) : Color.white;
             tb.key.gameObject.SetActive(!chip);
-            if (tb.cmd != null) tb.cmd.gameObject.SetActive(!chip);
             tb.cost.fontSize = chip ? 11 : 13;
             tb.cost.rectTransform.sizeDelta = new Vector2(w, 17);
             tb.elem.rectTransform.sizeDelta = new Vector2(chip ? -8 : -12, chip ? 3 : 4);
@@ -611,7 +611,7 @@ namespace Kernwacht.Game.UI
             var he = sim.s.he;
             var prof = he != null ? HeroCommand.profileOf(he.champion.id) : null;
             if (prof == null || (prof.types.Length > 0 && prof.types[0] == "*")) return false;
-            return HeroCommand.affine(he.champion.id, id);
+            return HeroCommand.affine(he, id);
         }
 
         string towerTitle(string id)
@@ -1084,6 +1084,12 @@ namespace Kernwacht.Game.UI
                     if (s.rules.endless && !Scaling.countsTowardLimit(id) && Towers.TOWERS[id].attack != "none") flags |= 16;
                 }
                 if (costTxt != tb.costTxt) { tb.costTxt = costTxt; tb.cost.text = costTxt; }
+                // Befehlsmarke (Affinität kann sich durch Befehlsrelikte ändern)
+                if (tb.cmd != null)
+                {
+                    bool mk = !locked && commandMarked(id);
+                    if (tb.cmd.gameObject.activeSelf != mk) tb.cmd.gameObject.SetActive(mk);
+                }
                 if (flags == tb.flags) continue;
                 tb.flags = flags;
                 setChip(tb, locked);

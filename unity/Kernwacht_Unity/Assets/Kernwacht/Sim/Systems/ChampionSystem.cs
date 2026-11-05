@@ -659,13 +659,13 @@ namespace Kernwacht.Sim
                     HeroBanner bn = he.banner;
                     foreach (TowerInstance t in sim.s.towers)
                     {
-                        if (Towers.TOWERS[t.def].attack == "economy" && !HeroCommand.affine(c.id, t.def)) continue;
+                        if (Towers.TOWERS[t.def].attack == "economy" && !HeroCommand.affine(he, t.def)) continue;
                         if (Towers.TOWERS[t.def].attack == "none") continue;
                         double k = 0;
                         if (dist2(t.cx + 0.5, t.cy + 0.5, c.x, c.y) <= r2) k = 1;
                         else if (bn != null && dist2(t.cx + 0.5, t.cy + 0.5, bn.x, bn.y) <= r2) k = HeroCommand.BANNER_POWER;
                         if (k <= 0) continue;
-                        k *= HeroCommand.affinityShare(c.id, t.def);
+                        k *= HeroCommand.affinityShare(he, t.def);
                         ChampTowerBuff a = get(t.uid);
                         a.dmg += U.Min(HeroCommand.CAP_DMG, baseDmg * k);
                         a.speed += U.Min(HeroCommand.CAP_SPEED, baseSpd * k);
