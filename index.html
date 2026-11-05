@@ -1,50 +1,412 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
-  <title>Kernwacht</title>
-  <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0d0b12; }
-    #unity-canvas { width: 100%; height: 100%; display: block; background: #0d0b12; outline: none; }
-    #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
-      color: #f2dca0; font: 600 15px/1.4 system-ui, sans-serif; background: radial-gradient(circle at 50% 40%, #2a1d36, #0d0b12 70%); }
-    #loader h1 { margin: 0; font-size: 40px; letter-spacing: 6px; color: #f5d78a; text-shadow: 0 0 24px #b66cf088; }
-    #bar { width: min(420px, 80vw); height: 8px; border-radius: 4px; background: #241a2e; overflow: hidden; }
-    #fill { width: 0; height: 100%; background: linear-gradient(90deg, #b36cf0, #f2b04a); transition: width .2s; }
-    #hint { color: #9a90a8; font-weight: 400; font-size: 13px; }
-    #err { color: #ff8a7a; max-width: 80vw; text-align: center; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kernwacht – Welten unter Belagerung</title>
+<meta name="description" content="Kernwacht ist ein kostenloses Dark-Fantasy-Browserspiel: Baue Türme, führe deinen Helden und halte den Kern gegen endlose Wellen.">
+<meta property="og:title" content="Kernwacht – Welten unter Belagerung">
+<meta property="og:description" content="Türme bauen, Helden führen, den Kern halten. Kostenlos im Browser spielen.">
+<meta property="og:image" content="img/shots/kampf.jpg">
+<link rel="icon" href="img/kern.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700;800&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --nacht:#17111f;      /* Grund */
+  --tiefe:#221a2e;      /* Flächen */
+  --rand:#3a2e4c;       /* Linien */
+  --pergament:#efe6d2;  /* Text */
+  --nebel:#b6abc9;      /* Nebentext */
+  --kristall:#7ae0ff;   /* Kern-Leuchten */
+  --glut:#f0b54a;       /* Gold der Stufenringe */
+  --glut-dunkel:#2a1d08;
+  --maxw:1180px;
+  --pad:clamp(16px,4vw,40px);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--nacht);color:var(--pergament);font:400 1.125rem/1.62 "Alegreya Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+a{color:var(--kristall)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--kristall);outline-offset:3px;border-radius:6px}
+h1,h2,h3{font-family:"Grenze Gotisch",serif;font-weight:700;line-height:1.05;margin:0;letter-spacing:.005em}
+h2{font-size:clamp(2.4rem,5vw,3.6rem);margin-bottom:.35em}
+h3{font-size:1.75rem;margin-bottom:.15em}
+p{margin:0 0 1em;max-width:62ch}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
+.leise{color:var(--nebel)}
+
+/* Knöpfe */
+.knopf{display:inline-flex;align-items:center;gap:.55em;font:700 1.15rem/1 "Alegreya Sans",sans-serif;text-decoration:none;padding:.95em 1.5em;border-radius:10px;border:2px solid transparent;transition:transform .15s ease,background-color .15s ease}
+.knopf.haupt{background:var(--glut);color:var(--glut-dunkel)}
+.knopf.haupt:hover{background:#ffc965;transform:translateY(-1px)}
+.knopf.neben{color:var(--pergament);border-color:var(--rand);background:rgba(34,26,46,.6)}
+.knopf.neben:hover{border-color:var(--nebel)}
+.knopf svg{width:1.05em;height:1.05em}
+
+/* Kopfzeile */
+.kopf{position:absolute;inset:0 0 auto 0;z-index:5}
+.kopf .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
+.marke{font-family:"Grenze Gotisch",serif;font-weight:800;font-size:1.7rem;color:var(--pergament);text-decoration:none;display:flex;align-items:center;gap:.4em}
+.marke img{width:28px;height:28px}
+.kopf nav{display:flex;gap:1.6rem;font-weight:500}
+.kopf nav a{color:var(--nebel);text-decoration:none}
+.kopf nav a:hover{color:var(--pergament)}
+@media (max-width:760px){.kopf nav{display:none}}
+
+/* Auftakt */
+.auftakt{position:relative;min-height:min(100vh,940px);display:flex;align-items:flex-end;overflow:hidden;isolation:isolate}
+.auftakt .bild{position:absolute;inset:0;z-index:-2;background:url(img/shots/kampf.jpg) center/cover no-repeat;filter:saturate(1.05)}
+.auftakt::before{content:"";position:absolute;inset:0;z-index:-1;background:
+  linear-gradient(180deg,rgba(23,17,31,.55) 0%,rgba(23,17,31,.2) 35%,rgba(23,17,31,.85) 78%,var(--nacht) 100%),
+  linear-gradient(90deg,rgba(23,17,31,.9) 0%,rgba(23,17,31,.35) 55%,rgba(23,17,31,0) 100%)}
+.auftakt .wrap{width:100%;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:2rem;align-items:end;padding-bottom:clamp(48px,9vh,110px);padding-top:120px}
+.titel{position:relative;z-index:2}
+.titel h1{font-size:clamp(4.6rem,14vw,11.5rem);font-weight:800;line-height:.82;letter-spacing:-.01em;color:var(--pergament);text-shadow:0 0 60px rgba(122,224,255,.28),0 4px 0 rgba(0,0,0,.35)}
+.titel .unter{font-family:"Grenze Gotisch",serif;font-weight:500;font-size:clamp(1.5rem,3vw,2.2rem);color:var(--kristall);margin:.35em 0 .7em;display:block}
+.titel p{font-size:1.25rem;max-width:44ch}
+.titel .knoepfe{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.6rem}
+.titel .hinweis{font-size:.98rem;color:var(--nebel);margin-top:1rem}
+
+/* Der Kern: das eine auffällige Element */
+.kern{position:relative;justify-self:center;width:min(440px,90%);aspect-ratio:1}
+.kern .glanz{position:absolute;inset:6%;border-radius:50%;background:radial-gradient(circle,rgba(122,224,255,.55) 0%,rgba(122,224,255,.16) 38%,rgba(122,224,255,0) 68%);animation:atmen 5.5s ease-in-out infinite}
+.kern .ring{position:absolute;inset:14%;border-radius:50%;border:2px solid rgba(122,224,255,.5);box-shadow:0 0 24px rgba(122,224,255,.35),inset 0 0 24px rgba(122,224,255,.2)}
+.kern .ring.zwei{inset:2%;border-color:rgba(240,181,74,.45);box-shadow:0 0 18px rgba(240,181,74,.25);border-style:dashed;animation:kreisen 60s linear infinite}
+.kern img{position:absolute;left:50%;bottom:4%;width:62%;transform:translateX(-50%);filter:drop-shadow(0 18px 24px rgba(0,0,0,.6))}
+@keyframes atmen{0%,100%{opacity:.75;transform:scale(.96)}50%{opacity:1;transform:scale(1.04)}}
+@keyframes kreisen{to{transform:rotate(360deg)}}
+@media (max-width:860px){.auftakt .wrap{grid-template-columns:1fr}.kern{width:min(300px,70%);order:-1;margin-bottom:-1rem}}
+
+/* Abschnitte */
+section{padding:clamp(52px,7.5vw,96px) 0}
+.kopfzeile{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2rem;align-items:end;margin-bottom:2.6rem}
+.kopfzeile p{margin:0}
+@media (max-width:760px){.kopfzeile{grid-template-columns:1fr;gap:.5rem}}
+
+/* Spielprinzip */
+.prinzip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(16px,3vw,36px)}
+.prinzip article{position:relative;padding-top:210px}
+.prinzip article img{position:absolute;top:0;left:-8px;height:220px;width:auto}
+.prinzip article h3{color:var(--pergament)}
+.prinzip article p{color:var(--nebel);font-size:1.06rem}
+@media (max-width:760px){.prinzip{grid-template-columns:1fr}.prinzip article{padding-top:0;padding-left:130px;min-height:160px}.prinzip article img{height:160px;left:-14px}}
+
+/* Helden */
+.helden{background:linear-gradient(180deg,var(--nacht),var(--tiefe) 30%,var(--tiefe) 70%,var(--nacht))}
+.heldenreihe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,2vw,24px)}
+.held{position:relative;border-radius:14px;padding:0 1.1rem 1.3rem;background:radial-gradient(120% 70% at 50% 0%,var(--farbe,#6a4ab0) 0%,rgba(34,26,46,0) 62%),#1d1627;border:1px solid var(--rand);overflow:hidden}
+.held img{height:300px;width:auto;margin:-6px auto 0;object-fit:contain}
+.held h3{font-size:2rem}
+.held .rolle{color:var(--akzent,var(--glut));font-weight:700;margin-bottom:.5em}
+.held p{font-size:1rem;color:var(--nebel);margin:0}
+@media (max-width:980px){.heldenreihe{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.heldenreihe{grid-template-columns:1fr}.held img{height:240px}}
+
+/* Türme */
+.turmreihe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,2vw,24px)}
+.turm{text-align:center}
+.turm img{height:240px;width:auto;margin:0 auto -6px}
+.turm h3{font-size:1.6rem}
+.turm .rolle{color:var(--kristall);font-size:.98rem;margin-bottom:.35em}
+.turm p{font-size:1rem;color:var(--nebel);margin:0 auto;max-width:28ch}
+@media (max-width:860px){.turmreihe{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:2rem}}
+
+.fusion{margin-top:clamp(48px,7vw,84px);display:grid;grid-template-columns:auto auto auto auto minmax(0,1.3fr);align-items:center;gap:clamp(8px,2vw,22px);padding:clamp(20px,3vw,36px);border:1px solid rgba(240,181,74,.45);border-radius:16px;background:linear-gradient(135deg,rgba(240,181,74,.08),rgba(122,224,255,.06))}
+.fusion figure{margin:0;text-align:center}
+.fusion figure img{height:170px;width:auto;margin:0 auto}
+.fusion figcaption{font-weight:700;font-size:1rem}
+.fusion .zeichen{font-family:"Grenze Gotisch",serif;font-size:3rem;color:var(--glut);line-height:1}
+.fusion .ergebnis img{height:210px;filter:drop-shadow(0 0 22px rgba(122,224,255,.45))}
+.fusion .text h3{color:var(--glut)}
+.fusion .text p{color:var(--nebel);margin:0}
+@media (max-width:980px){.fusion{grid-template-columns:repeat(5,auto);justify-content:center}.fusion .text{grid-column:1/-1;text-align:center}.fusion .text p{margin:0 auto}}
+@media (max-width:560px){.fusion figure img{height:110px}.fusion .ergebnis img{height:140px}.fusion .zeichen{font-size:2rem}}
+
+/* Gegner und Bosse */
+.gegnerreihe{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin-bottom:clamp(40px,6vw,70px);flex-wrap:wrap}
+.gegnerreihe figure{margin:0;text-align:center;flex:1 1 140px}
+.gegnerreihe img{height:190px;width:auto;margin:0 auto}
+.gegnerreihe figcaption{color:var(--nebel);font-size:1rem}
+.bosse{display:grid;gap:clamp(18px,3vw,30px)}
+.boss{display:grid;grid-template-columns:240px minmax(0,1fr);gap:clamp(16px,3vw,36px);align-items:center;padding:clamp(16px,2.5vw,28px);border-radius:16px;background:#1d1627;border:1px solid var(--rand)}
+.boss:nth-child(even){grid-template-columns:minmax(0,1fr) 240px}
+.boss:nth-child(even) img{order:2}
+.boss img{height:260px;width:auto;margin:0 auto;filter:drop-shadow(0 10px 20px rgba(0,0,0,.55))}
+.boss h3{font-size:2.3rem}
+.boss .beiname{color:#ff9a7a;font-weight:700;margin-bottom:.5em}
+.boss p{color:var(--nebel);margin:0}
+@media (max-width:700px){.boss,.boss:nth-child(even){grid-template-columns:1fr;text-align:center}.boss:nth-child(even) img{order:0}.boss img{height:200px}.boss p{margin:0 auto}}
+
+/* Bilder aus dem Spiel */
+.bilder{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.6vw,18px)}
+.bilder figure{margin:0;border-radius:12px;overflow:hidden;border:1px solid var(--rand);background:#0f0b15}
+.bilder img{width:100%;object-fit:cover;aspect-ratio:16/9}
+.bilder figcaption{padding:.55rem .85rem;font-size:.98rem;color:var(--nebel);background:#1d1627}
+@media (max-width:760px){.bilder{grid-template-columns:1fr}.bilder figure{grid-column:auto!important}}
+
+/* Steuerung */
+.steuerung{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.2rem 3rem;margin:0}
+.steuerung div{display:grid;grid-template-columns:13rem minmax(0,1fr);gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--rand)}
+.steuerung dt{font-weight:700}
+.steuerung dd{margin:0;color:var(--nebel)}
+kbd{display:inline-block;min-width:1.8em;padding:.08em .45em;border:1px solid #57476e;border-bottom-width:3px;border-radius:6px;background:#2a2138;font:700 .92rem/1.4 "Alegreya Sans",sans-serif;text-align:center;color:var(--pergament)}
+@media (max-width:860px){.steuerung{grid-template-columns:1fr}.steuerung div{grid-template-columns:10rem minmax(0,1fr)}}
+
+/* Schluss */
+.schluss{text-align:center;padding:clamp(80px,12vw,150px) 0;background:radial-gradient(60% 70% at 50% 60%,rgba(122,224,255,.14),rgba(23,17,31,0) 70%)}
+.schluss h2{font-size:clamp(2.8rem,7vw,5.2rem)}
+.schluss p{margin:0 auto 2rem;color:var(--nebel)}
+footer{border-top:1px solid var(--rand);padding:28px 0 40px;color:var(--nebel);font-size:.98rem}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem}
+</style>
 </head>
 <body>
-  <canvas id="unity-canvas" tabindex="-1"></canvas>
-  <div id="loader"><h1>KERNWACHT</h1><div id="bar"><div id="fill"></div></div><div id="hint">Lädt … (beim ersten Mal ca. 40 MB)</div><div id="err"></div></div>
-  <script>
-    var canvas = document.querySelector("#unity-canvas");
-    var config = {
-      dataUrl: "Build/WebGL.data.unityweb",
-      frameworkUrl: "Build/WebGL.framework.js.unityweb",
-      codeUrl: "Build/WebGL.wasm.unityweb",
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "GhostOFabian",
-      productName: "Kernwacht",
-      productVersion: "0.1.0",
-      matchWebGLToCanvasSize: true,
-      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
-    };
-    var script = document.createElement("script");
-    script.src = "Build/WebGL.loader.js";
-    script.onload = function () {
-      createUnityInstance(canvas, config, function (p) {
-        document.querySelector("#fill").style.width = Math.round(p * 100) + "%";
-      }).then(function () {
-        document.querySelector("#loader").style.display = "none";
-        canvas.focus();
-      }).catch(function (m) {
-        document.querySelector("#err").textContent = "Fehler beim Start: " + m;
-      });
-    };
-    document.body.appendChild(script);
-  </script>
+
+<header class="kopf">
+  <div class="wrap">
+    <a class="marke" href="#"><img src="img/kern.svg" alt="">Kernwacht</a>
+    <nav aria-label="Seitenbereiche">
+      <a href="#spiel">Das Spiel</a>
+      <a href="#helden">Helden</a>
+      <a href="#tuerme">Türme</a>
+      <a href="#bosse">Bosse</a>
+      <a href="#steuerung">Steuerung</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="auftakt">
+    <div class="bild" role="img" aria-label="Ausschnitt aus dem Spiel: eine Karte mit Türmen, Weg und Gegnern"></div>
+    <div class="wrap">
+      <div class="titel">
+        <h1>Kernwacht</h1>
+        <span class="unter">Welten unter Belagerung</span>
+        <p>Baue Türme, führe deinen Helden durch die Schlacht und halte den Kern – Welle um Welle, so lange du durchhältst.</p>
+        <div class="knoepfe">
+          <a class="knopf haupt" href="spielen/">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l13-7.5z"/></svg>
+            Jetzt im Browser spielen
+          </a>
+          <a class="knopf neben" href="#spiel">Worum es geht</a>
+        </div>
+        <p class="hinweis">Kostenlos, ohne Download. Am besten am PC mit Chrome, Edge oder Firefox.</p>
+      </div>
+      <div class="kern" aria-hidden="true">
+        <div class="glanz"></div>
+        <div class="ring zwei"></div>
+        <div class="ring"></div>
+        <img src="img/lyra.webp" alt="">
+      </div>
+    </div>
+  </div>
+
+  <section id="spiel">
+    <div class="wrap">
+      <div class="kopfzeile">
+        <h2>Der Kern darf nicht fallen</h2>
+        <p class="leise">Aus Rissen strömen Gegner auf den Kern deiner Welt zu. Du entscheidest, wo Türme stehen, wann du sie aufwertest und wohin dein Held läuft. Jede Welt wird aus einem Seed neu erschaffen – keine Karte gleicht der anderen.</p>
+      </div>
+      <div class="prinzip">
+        <article>
+          <img src="img/ranger.webp" alt="Waldläuferposten">
+          <h3>Türme bauen</h3>
+          <p>Über 30 Türme mit eigenen Stärken: Bögen, Frost, Blitz, Feuer, Gift und Arkanes. Wertet sie bis Stufe 4 auf und wähle danach eine Spezialisierung.</p>
+        </article>
+        <article>
+          <img src="img/kaela.webp" alt="Kaela">
+          <h3>Den Helden führen</h3>
+          <p>Dein Held kämpft selbst mit: Klick auf die Karte bewegt ihn, A, S, D und W lösen seine Fähigkeiten aus. Er sammelt Erfahrung, Ausrüstung und Tränke.</p>
+        </article>
+        <article>
+          <img src="img/brute.webp" alt="Steinhäuter">
+          <h3>Wellen überstehen</h3>
+          <p>Gemischte Wellen aus Fliegern, Panzern, Schleichern und Schwärmen – und alle paar Wellen ein Boss mit eigenen Angriffen. Wie weit kommst du?</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="helden" class="helden">
+    <div class="wrap">
+      <div class="kopfzeile">
+        <h2>Zwölf Helden, zwölf Spielweisen</h2>
+        <p class="leise">Vier Helden stehen von Anfang an bereit, die übrigen schaltest du mit deiner besten Welle frei. Jeder Held hat einen eigenen Skillbaum und steigt bis Stufe 99 auf.</p>
+      </div>
+      <div class="heldenreihe">
+        <article class="held" style="--farbe:#4a3380;--akzent:#ffd860">
+          <img src="img/lyra.webp" alt="Lyra">
+          <h3>Lyra</h3>
+          <div class="rolle">Turmweberin, Unterstützerin</div>
+          <p>Verstärkt Türme mit Auren und gezielten Runen. Schwach im direkten Kampf, aber mit klugem Stellungsspiel trägt sie ganze Verteidigungslinien.</p>
+        </article>
+        <article class="held" style="--farbe:#6e2a22;--akzent:#ffc080">
+          <img src="img/brann.webp" alt="Brann">
+          <h3>Brann</h3>
+          <div class="rolle">Klingenrufer, Kämpfer</div>
+          <p>Berserker und Wellenbrecher: hält zwei Gegner im Nahkampf fest, trifft mit jedem Hieb Umstehende und heilt sich durch Treffer.</p>
+        </article>
+        <article class="held" style="--farbe:#27405e;--akzent:#9ed2ff">
+          <img src="img/kaela.webp" alt="Kaela">
+          <h3>Kaela</h3>
+          <div class="rolle">Klingenwächterin, Kämpferin</div>
+          <p>Die Schildträgerin: hält bis zu vier Gegner fest, verspottet ganze Gruppen und wird mit dem Bollwerk nahezu unverwundbar.</p>
+        </article>
+        <article class="held" style="--farbe:#5a3a1c;--akzent:#f0b54a">
+          <img src="img/thorgrim.webp" alt="Thorgrim">
+          <h3>Thorgrim</h3>
+          <div class="rolle">Schmiedemeister, Unterstützer</div>
+          <p>Repariert und verbessert Türme direkt im Feld und haut mit dem Hammer Gegner um.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="tuerme">
+    <div class="wrap">
+      <div class="kopfzeile">
+        <h2>Türme, die zusammenwirken</h2>
+        <p class="leise">Stell Türme geschickt nebeneinander: Leylinien verbinden sie zu Netzwerken, Elemente lösen Reaktionen aus, und zwei passende Türme auf Höchststufe verschmelzen zu einem legendären Turm.</p>
+      </div>
+      <div class="turmreihe">
+        <div class="turm">
+          <img src="img/ranger.webp" alt="Waldläuferposten">
+          <h3>Waldläuferposten</h3>
+          <div class="rolle">Allrounder</div>
+          <p>Günstiger, schneller Bogenturm. Trifft Boden- und Luftziele.</p>
+        </div>
+        <div class="turm">
+          <img src="img/frost.webp" alt="Frostwächter">
+          <h3>Frostwächter</h3>
+          <div class="rolle">Kontrolle und Verlangsamung</div>
+          <p>Sendet Kältewellen aus, die alle Gegner in Reichweite verlangsamen.</p>
+        </div>
+        <div class="turm">
+          <img src="img/tesla.webp" alt="Tesla-Spule">
+          <h3>Tesla-Spule</h3>
+          <div class="rolle">Blitz und Lichtbogen</div>
+          <p>Spannt einen Lichtbogen zu anderen Spulen. Wer ihn kreuzt, wird gegrillt.</p>
+        </div>
+        <div class="turm">
+          <img src="img/dragon.webp" alt="Drachenhorst">
+          <h3>Drachenhorst</h3>
+          <div class="rolle">Feuer und Flieger-Abwehr</div>
+          <p>Ein junger Drache speit Feuer – Flieger trifft er zuerst und besonders hart.</p>
+        </div>
+      </div>
+
+      <div class="fusion" aria-label="Beispiel einer Fusion">
+        <figure><img src="img/frost.webp" alt=""><figcaption>Frostwächter</figcaption></figure>
+        <div class="zeichen" aria-hidden="true">+</div>
+        <figure><img src="img/storm.webp" alt=""><figcaption>Sturmrufer</figcaption></figure>
+        <div class="zeichen" aria-hidden="true">=</div>
+        <div class="text">
+          <figure class="ergebnis"><img src="img/stormeye.webp" alt="Sturmauge"></figure>
+          <h3>Sturmauge</h3>
+          <p>Eisige Kettenblitze springen zwischen Gegnern und verlangsamen sie stark. Klickst du einen Turm an, zeigt dir die Turmleiste, welche Partner zu ihm passen.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="bosse" class="helden">
+    <div class="wrap">
+      <div class="kopfzeile">
+        <h2>Was aus den Rissen kommt</h2>
+        <p class="leise">Neunzehn Gegnerarten mit eigenen Tricks – Schilde, Regeneration, Tarnung, Brut – und sieben Bosse, die deine Verteidigung auf die Probe stellen.</p>
+      </div>
+      <div class="gegnerreihe">
+        <figure><img src="img/brute.webp" alt=""><figcaption>Steinhäuter</figcaption></figure>
+        <figure><img src="img/stalker.webp" alt=""><figcaption>Schattenschleicher</figcaption></figure>
+        <figure><img src="img/golem.webp" alt=""><figcaption>Höhlengolem</figcaption></figure>
+        <figure><img src="img/broodmother.webp" alt=""><figcaption>Brutmutter</figcaption></figure>
+      </div>
+      <div class="bosse">
+        <article class="boss">
+          <img src="img/ashQueen.webp" alt="Die Aschenkönigin">
+          <div>
+            <h3>Die Aschenkönigin</h3>
+            <div class="beiname">Herrin der Glut</div>
+            <p>Beschwört Flinklinge und setzt angekündigte Feuerzonen auf deine Turmgruppen. Wer seine Türme zu eng baut, verliert sie.</p>
+          </div>
+        </article>
+        <article class="boss">
+          <img src="img/nullWarden.webp" alt="Der Nullhüter">
+          <div>
+            <h3>Der Nullhüter</h3>
+            <div class="beiname">Stille zwischen den Welten</div>
+            <p>Ein Nullschild schluckt physischen Schaden. Danach stört er Netzwerke mit Nullpulsen und erneuert einmalig seinen Schild.</p>
+          </div>
+        </article>
+        <article class="boss">
+          <img src="img/worldbreaker.webp" alt="Der Weltenbrecher">
+          <div>
+            <h3>Der Weltenbrecher</h3>
+            <div class="beiname">Koloss aus vielen Welten</div>
+            <p>Drei leuchtende Schwachpunkte schützen seinen Kern. Erst wenn sie gebrochen sind, liegt der Kern frei – hoher Einzelschaden ist hier gefragt.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="bilder">
+    <div class="wrap">
+      <div class="kopfzeile">
+        <h2>Aus dem Spiel</h2>
+        <p class="leise">Sieben Biome von Verwunschenem Wald bis Leuchtgrotte, jede Karte mit eigener Stimmung: Morgenrot, Mondnacht oder violetter Dunst.</p>
+      </div>
+      <div class="bilder">
+        <figure><img src="img/shots/kampf.jpg" alt="Erste Türme am Pfad im Vulkanödland" loading="lazy"><figcaption>Erste Türme am Pfad im Vulkanödland</figcaption></figure>
+        <figure><img src="img/shots/helden.jpg" alt="Heldenauswahl vor dem Lauf" loading="lazy"><figcaption>Heldenauswahl und Kartenwahl</figcaption></figure>
+        <figure><img src="img/shots/menue.jpg" alt="Hauptmenü über einer lebenden Welt" loading="lazy"><figcaption>Das Hauptmenü über einer lebenden Welt</figcaption></figure>
+        <figure><img src="img/shots/welle.jpg" alt="Lyra am Kern kurz vor der ersten Welle" loading="lazy"><figcaption>Lyra am Kern, kurz vor der ersten Welle</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="steuerung">
+    <div class="wrap">
+      <div class="kopfzeile">
+        <h2>Steuerung</h2>
+        <p class="leise">Alle Tasten lassen sich in den Einstellungen umbelegen. Im Spiel erklärt dir ein Hinweisbalken die ersten Schritte.</p>
+      </div>
+      <dl class="steuerung">
+        <div><dt>Held bewegen</dt><dd>Klick oder Rechtsklick auf die Karte</dd></div>
+        <div><dt>Fähigkeiten</dt><dd><kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>W</kbd></dd></div>
+        <div><dt>Turm wählen</dt><dd><kbd>1</kbd> bis <kbd>9</kbd> oder Klick in die Turmleiste</dd></div>
+        <div><dt>Welle starten, Pause</dt><dd><kbd>Leertaste</kbd></dd></div>
+        <div><dt>Charakter, Laden</dt><dd><kbd>Tab</kbd> und <kbd>X</kbd></dd></div>
+        <div><dt>Turmübersicht</dt><dd><kbd>O</kbd></dd></div>
+        <div><dt>Kamera drehen</dt><dd><kbd>Q</kbd> <kbd>E</kbd>, Draufsicht mit <kbd>V</kbd></dd></div>
+        <div><dt>Zoomen, schwenken</dt><dd>Mausrad und mittlere Maustaste</dd></div>
+        <div><dt>Menü</dt><dd><kbd>Esc</kbd></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="schluss">
+    <div class="wrap">
+      <h2>Der Kern wartet auf dich</h2>
+      <p>Ein Klick genügt – das Spiel lädt direkt im Browser.</p>
+      <a class="knopf haupt" href="spielen/">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l13-7.5z"/></svg>
+        Jetzt im Browser spielen
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Kernwacht, ein Dark-Fantasy-Tower-Defense mit Helden. Gebaut mit Unity.</span>
+    <a href="https://github.com/GhostOFabian/Kernwacht">Quellcode auf GitHub</a>
+  </div>
+</footer>
+
 </body>
 </html>
