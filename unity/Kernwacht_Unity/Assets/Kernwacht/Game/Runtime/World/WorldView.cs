@@ -455,13 +455,16 @@ namespace Kernwacht.Game
                         {
                             switch (e.type)
                             {
-                                case "fire": fx.fire(ex, y - 0.1f, ey, 0.8f); break;
-                                case "frost": fx.sparks(ex, y, ey, 0xd8f4ff, 3, 0.7f, 0.1f); break;
-                                case "poison": for (int i = 0; i < 2; i++) fx.emit(ex, y, ey, 0.4f, 0xb0f060, vx: Rnd() - 0.5f, vy: 1, vz: Rnd() - 0.5f, grav: 4, s0: 0.12f, s1: 0.04f); break;
-                                case "arcane": fx.glow(ex, y, ey, 0.45f, col, 0.16f); break;
-                                case "sonic": fx.ring(ex, y - 0.3f, ey, 0.5f, col, 0.25f); break;
-                                default: fx.sparks(ex, y, ey, col, 2, 0.8f, 0.09f); break;
+                                case "fire": fx.fire(ex, y - 0.1f, ey, 0.9f); fx.sparks(ex, y, ey, 0xffb050, 3, 1f, 0.1f); break;
+                                case "frost": fx.sparks(ex, y, ey, 0xd8f4ff, 5, 0.8f, 0.11f); fx.ring(ex, y - 0.3f, ey, 0.45f, 0xb8e8ff, 0.3f, 0.08f); break;
+                                case "poison": for (int i = 0; i < 3; i++) fx.emit(ex, y, ey, 0.45f, 0xb0f060, vx: Rnd() - 0.5f, vy: 1, vz: Rnd() - 0.5f, grav: 4, s0: 0.13f, s1: 0.04f); break;
+                                case "arcane": fx.glow(ex, y, ey, 0.55f, col, 0.18f); fx.ring(ex, y - 0.3f, ey, 0.4f, col, 0.25f, 0.07f); break;
+                                case "sonic": fx.ring(ex, y - 0.3f, ey, 0.6f, col, 0.28f); break;
+                                case "lightning": fx.sparks(ex, y, ey, 0xe0f0ff, 5, 1.3f, 0.09f); break;
+                                default: fx.sparks(ex, y, ey, col, 4, 1f, 0.1f); break;
                             }
+                            // kurzer Aufprallblitz für jeden Treffer
+                            fx.glow(ex, y, ey, 0.38f, Col.Mix(col, 0xffffff, 0.4), 0.1f, 0.75f);
                         }
                         break;
                     }
@@ -523,7 +526,18 @@ namespace Kernwacht.Game
                         break;
                     }
                     case "meteor":
-                        fx.explosion(ex, gy(map, e.x, e.y), ey, (float)e.r, 0xff6a20, e.big);
+                    {
+                        float my0 = gy(map, e.x, e.y);
+                        fx.explosion(ex, my0, ey, (float)e.r, 0xff6a20, e.big);
+                        fx.pillar(ex, my0, ey, e.big ? 3.2f : 2.2f, 0xff8030, 0.45f, (float)e.r * 0.55f);
+                        fx.ring(ex, my0 + 0.05f, ey, (float)e.r * 1.7f, 0xfff0c0, 0.35f, 0.1f, 0.3f);
+                        fx.glow(ex, my0 + 0.6f, ey, (float)e.r * 2.4f, 0xff9040, 0.3f, 0.8f);
+                        for (int i = 0; i < 10 * fx.intensity; i++)
+                        {
+                            float ang = Rnd() * Mathf.PI * 2, vel = 2 + Rnd() * 3;
+                            fx.emit(ex, my0 + 0.3f, ey, 0.7f + Rnd() * 0.4f, 0xffd080, vx: Mathf.Cos(ang) * vel, vy: 3 + Rnd() * 4, vz: Mathf.Sin(ang) * vel, c1: 0x401008, s0: 0.14f, s1: 0.04f, shape: SHAPE.spark, stretch: 0.25f);
+                        }
+                    }
                         if (e.big)
                         {
                             Shake(ui, 0.25f);
@@ -1058,6 +1072,7 @@ namespace Kernwacht.Game
             if (s.he != null) drawHeroEndless(sim, ui, dt);
             else if (shopInst != null) { pool.Release(shopInst); shopInst = null; }
             drawProjectiles(sim);
+            drawResourceMarkers(sim, ui);
             drawWeather(sim, dt, ui);
             fx.update(dt, r);
 
@@ -1774,17 +1789,27 @@ namespace Kernwacht.Game
                     float mz = zz - hh * 0.2f;
                     float my = y + hh;
                     bool big = z.r >= 1.5;
-                    float size = big ? 0.55f : 0.32f;
-                    r.add("opaque", "gem", mx, my, mz, size, size, size, 0x4a2a20, 1, 0.4f, t * 5, t * 3);
-                    r.billboard(SPRITE_ADD, SHAPE.glow, mx, my, mz, size * 3, 0xff7a20, 0.9f);
+                    float size = big ? 0.7f : 0.42f;
+                    // Feuerschweif entgegen der Flugrichtung (von oben links)
+                    float tl = big ? 3.2f : 2.2f;
+                    float msx = mx - 0.35f * tl, msy = my + tl, msz = mz - 0.2f * tl;
+                    r.line(msx, msy, msz, mx, my, mz, size * 1.5f, 0xff5010, 0.35f);
+                    r.line(msx, msy, msz, mx, my, mz, size * 0.8f, 0xff9030, 0.55f);
+                    r.line(mx - 0.35f * tl * 0.4f, my + tl * 0.4f, mz - 0.2f * tl * 0.4f, mx, my, mz, size * 0.35f, 0xfff0c0, 0.85f);
+                    r.add("opaque", "gem", mx, my, mz, size, size, size, 0x3a2018, 1, 0.3f, t * 5, t * 3);
+                    r.add("opaque", "sphereLo", mx, my, mz, size * 0.72f, size * 0.72f, size * 0.72f, 0xff8a30, 1, 2.5f, t * 4);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, mx, my, mz, size * 3.6f, 0xff6a20, 0.95f);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, mx, my, mz, size * 1.4f, 0xfff0c0, 0.8f);
                     if (Rnd() < 0.8f * fx.intensity)
                     {
                         fx.emit(mx, my, mz, 0.4f, 0xffd080, vx: 0.3f, vy: 0.6f, vz: 0.2f, c1: 0xc02000, s0: size * 1.6f, s1: 0.1f);
                         if (Rnd() < 0.4f) fx.smoke(mx, my, mz, size * 1.5f, 0x3a3030, 0.35f, 0.9f);
                     }
                     float p = 1 - Mathf.Min(1, (float)z.armed / 1.2f);
-                    r.ground(SPRITE_ADD, SHAPE.ring, zx, y, zz, zr, 0xff5020, 0.5f + p * 0.4f, t, 0.3f, 0.08f);
-                    r.ground(false, SHAPE.disc, zx, y, zz, zr * Mathf.Max(0.1f, p), 0xff3010, 0.2f, 0, 0.5f);
+                    r.ground(SPRITE_ADD, SHAPE.ring, zx, y + 0.02f, zz, zr, 0xff5020, 0.55f + p * 0.4f, t, 0.3f, 0.08f);
+                    r.ground(SPRITE_ADD, SHAPE.ring, zx, y + 0.03f, zz, Mathf.Max(0.08f, zr * p), 0xffd080, 0.8f, -t * 2, 0.3f, 0.06f);
+                    r.ground(false, SHAPE.disc, zx, y, zz, zr * Mathf.Max(0.1f, p), 0xff3010, 0.22f, 0, 0.5f);
+                    r.ground(SPRITE_ADD, SHAPE.glow, zx, y + 0.04f, zz, zr * 0.9f, 0xff7020, 0.15f + p * 0.35f, 0, 0.5f);
                     continue;
                 }
                 if (z.armed > 0)
@@ -2594,44 +2619,97 @@ namespace Kernwacht.Game
             {
                 if (!p.alive) continue;
                 float px = (float)p.x, pz = (float)p.y;
-                float remaining = Mathf.Sqrt((float)((p.tx - p.x) * (p.tx - p.x) + (p.ty - p.y) * (p.ty - p.y)));
+                float dxT = (float)(p.tx - p.x), dzT = (float)(p.ty - p.y);
+                float remaining = Mathf.Sqrt(dxT * dxT + dzT * dzT);
+                float total = Mathf.Max(0.5f, (float)p.traveled + remaining);
                 float frac = (float)p.traveled / Mathf.Max(0.001f, (float)p.traveled + remaining);
                 float bse = Terrain.topAt(map, p.x, p.y);
                 bool lob = p.kind == "ember" || p.kind == "spore" || p.kind == "cannon";
                 float y = bse + 0.75f + (lob ? Mathf.Sin(frac * Mathf.PI) * 1.3f : 0.25f * (1 - frac));
                 float yaw = Mathf.Atan2(-(float)(p.ty - p.y), (float)(p.tx - p.x));
                 int col = Palette.damageColor(p.payload != null ? p.payload.type : null);
+                // Richtung und Schweifende (auf der Flugbahn ein Stück zurück)
+                float ux = remaining > 1e-4f ? dxT / remaining : (float)p.dirX;
+                float uz = remaining > 1e-4f ? dzT / remaining : (float)p.dirY;
+                float tail = p.kind == "ranger" ? 0.55f : p.kind == "ballista" ? 0.9f : p.kind == "cannon" ? 0.7f : 0.8f;
+                float tf = Mathf.Max(0, frac - tail / total);
+                float tx = px - ux * tail, tz = pz - uz * tail;
+                float ty = bse + 0.75f + (lob ? Mathf.Sin(tf * Mathf.PI) * 1.3f : 0.25f * (1 - tf));
                 switch (p.kind)
                 {
                     case "ranger":
+                        r.line(tx, ty, tz, px, y, pz, 0.03f, 0xfff0d0, 0.35f);
                         r.add("opaque", "rbox", px, y, pz, 0.42f, 0.04f, 0.04f, 0xe8dcc0, 1, 0.3f, yaw);
-                        r.billboard(SPRITE_ADD, SHAPE.spark, px, y, pz, 0.18f, 0xfff0d0, 0.4f, 0, 2);
+                        r.billboard(SPRITE_ADD, SHAPE.spark, px, y, pz, 0.2f, 0xfff0d0, 0.5f, 0, 2);
                         break;
                     case "ballista":
+                        r.line(tx, ty, tz, px, y, pz, 0.07f, 0xd8e8ff, 0.3f);
+                        r.line(tx, ty, tz, px, y, pz, 0.025f, 0xffffff, 0.6f);
                         r.add("opaque", "rbox", px, y, pz, 0.7f, 0.07f, 0.07f, 0xd0c0a0, 1, 0.3f, Mathf.Atan2(-(float)p.dirY, (float)p.dirX));
-                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.3f, 0xffffff, 0.35f);
+                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.4f, 0xffffff, 0.45f);
                         break;
                     case "ember":
-                        r.add("opaque", "sphere", px, y, pz, 0.26f, 0.26f, 0.26f, 0xffa040, 1, 1.4f);
-                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.7f, 0xff6020, 0.85f);
-                        if (Rnd() < 0.8f * fx.intensity) fx.fire(px, y, pz, 0.6f);
+                        r.line(tx, ty, tz, px, y, pz, 0.2f, 0xff6020, 0.45f);
+                        r.line(tx, ty, tz, px, y, pz, 0.08f, 0xffe0a0, 0.75f);
+                        r.add("opaque", "sphere", px, y, pz, 0.24f, 0.24f, 0.24f, 0xffd070, 1, 2.2f);
+                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.95f, 0xff6020, 0.9f);
+                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.4f, 0xfff0c0, 0.8f);
+                        if (Rnd() < 0.9f * fx.intensity) fx.fire(px, y, pz, 0.7f);
                         break;
                     case "spore":
-                        r.add("opaque", "sphere", px, y, pz, 0.22f, 0.22f, 0.22f, 0x9ae040, 1, 0.7f);
-                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.45f, 0x9ae040, 0.5f);
-                        if (Rnd() < 0.4f * fx.intensity) fx.emit(px, y, pz, 0.5f, 0xc0ff70, vy: -0.3f, s0: 0.1f, s1: 0.03f);
+                        r.line(tx, ty, tz, px, y, pz, 0.1f, 0x9ae040, 0.35f);
+                        r.add("opaque", "sphere", px, y, pz, 0.23f, 0.23f, 0.23f, 0xb0f050, 1, 1.1f);
+                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.6f, 0x9ae040, 0.6f);
+                        if (Rnd() < 0.5f * fx.intensity) fx.emit(px, y, pz, 0.6f, 0xc0ff70, vy: -0.4f, s0: 0.12f, s1: 0.03f);
                         break;
                     case "cannon":
-                        r.add("opaque", "sphere", px, y, pz, 0.24f, 0.24f, 0.24f, 0x2a2a2e, 1, 0);
-                        if (Rnd() < 0.5f * fx.intensity) fx.smoke(px, y, pz, 0.25f, 0x8a8480, 0.3f, 0.6f);
+                        r.line(tx, ty, tz, px, y, pz, 0.12f, 0x8a8480, 0.3f, false);
+                        r.add("opaque", "sphere", px, y, pz, 0.26f, 0.26f, 0.26f, 0x2a2a2e, 1, 0);
+                        r.billboard(SPRITE_ADD, SHAPE.spark, px - ux * 0.15f, y, pz - uz * 0.15f, 0.22f, 0xffb050, 0.6f);
+                        if (Rnd() < 0.6f * fx.intensity) fx.smoke(px, y, pz, 0.28f, 0x8a8480, 0.3f, 0.7f);
                         break;
                     default:
-                        r.add("opaque", "sphereLo", px, y, pz, 0.2f, 0.2f, 0.2f, col, 1, 1.2f);
-                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.55f, col, 0.8f);
-                        if (Rnd() < 0.5f * fx.intensity) fx.emit(px, y, pz, 0.3f, col, s0: 0.2f, s1: 0.03f);
+                        r.line(tx, ty, tz, px, y, pz, 0.14f, col, 0.45f);
+                        r.line(tx, ty, tz, px, y, pz, 0.05f, Col.Mix(col, 0xffffff, 0.6), 0.7f);
+                        r.add("opaque", "sphereLo", px, y, pz, 0.2f, 0.2f, 0.2f, Col.Mix(col, 0xffffff, 0.3), 1, 1.8f);
+                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.7f, col, 0.85f);
+                        if (Rnd() < 0.6f * fx.intensity) fx.emit(px, y, pz, 0.35f, col, s0: 0.2f, s1: 0.03f);
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gold- und Kristalladern (für Goldgräber) und Leylinien (verstärken Türme) deutlich markieren.
+        /// Dezent im normalen Spiel, kräftig mit Symbol, sobald der passende Turm zum Bau gewählt ist.
+        /// </summary>
+        void drawResourceMarkers(GameSimulation sim, ViewUiState ui)
+        {
+            var m = sim.s.map;
+            int w = (int)m.width;
+            float t = time;
+            float pulse = 0.5f + 0.5f * Mathf.Sin(t * 3f);
+            bool mine = ui.buildDef == "goldmine";
+            bool tower = ui.buildDef != null && !mine && ui.buildDef != "barricade" && ui.buildDef != "lanebarricade";
+            void mark(double ci, int color, bool strong, int shape)
+            {
+                if (sim.c.towerByCell.ContainsKey(ci)) return;
+                int x = (int)(ci % w), z = (int)Math.Floor(ci / w);
+                float cx = x + 0.5f, cz = z + 0.5f, top = (float)Terrain.cellTop(m, x, z);
+                // deckender Ring zuerst (auf hellem Boden wie Schnee sonst unsichtbar), darüber leuchtend
+                r.ground(false, SHAPE.ring, cx, top + 0.028f, cz, 0.47f, Col.Shade(color, 0.72), strong ? 0.9f : 0.55f, 0, 0.3f, strong ? 0.1f : 0.07f);
+                r.ground(SPRITE_ADD, SHAPE.ring, cx, top + 0.03f, cz, 0.47f, color, strong ? 0.75f + pulse * 0.25f : 0.32f + pulse * 0.12f, 0, 0.3f, strong ? 0.09f : 0.06f);
+                r.ground(SPRITE_ADD, SHAPE.disc, cx, top + 0.025f, cz, 0.44f, color, strong ? 0.18f + pulse * 0.08f : 0.06f, 0, 0.5f);
+                if (strong)
+                {
+                    float by = top + 0.7f + Mathf.Sin(t * 2.5f + (float)ci) * 0.08f;
+                    r.billboard(SPRITE_ADD, shape, cx, by, cz, 0.32f, color, 0.95f, t);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, cx, by, cz, 0.7f, color, 0.35f);
+                }
+            }
+            foreach (var vi in m.veins) mark(vi, 0xffc830, mine, SHAPE.star);
+            if (m.deposits != null) foreach (var di in m.deposits) mark(di, 0x7ae0ff, mine, SHAPE.star);
+            foreach (var li in m.ley) mark(li, 0xc070ff, tower, SHAPE.spark);
         }
 
         // ------------------------------------------------------------ Wetter
