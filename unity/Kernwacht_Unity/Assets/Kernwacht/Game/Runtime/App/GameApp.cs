@@ -793,6 +793,7 @@ namespace Kernwacht.Game
             if (setup.heroEndless != null)
             {
                 save.progress.heroMeta.lastChampion = setup.heroEndless.champion;
+                if (setup.heroEndless.doctrine != null) save.progress.heroMeta.lastDoctrine = setup.heroEndless.doctrine;
                 save.progress.heroMeta.startKit = new List<string>(setup.heroEndless.startKit);
             }
             commitPendingHeroRun();

@@ -101,6 +101,7 @@ namespace Kernwacht.Sim
                 foreach (object x in cm) if (x is double xd && U.IsFinite(xd) && seen.Add(xd)) claimed.Add(xd);
             }
             object lc = getv(raw, "lastChampion");
+            object ld = getv(raw, "lastDoctrine");
             return new HeroMetaProgress
             {
                 bestWave = bestWave,
@@ -110,6 +111,7 @@ namespace Kernwacht.Sim
                 committedRuns = getv(raw, "committedRuns") is List<object> cr ? U.Slice(cr.Where((x) => x is string).Select((x) => (string)x).ToList(), -50) : new List<string>(),
                 startKit = getv(raw, "startKit") is List<object> sk ? U.Slice(uniq(sk.Where((x) => x is string xs && items.Contains(xs)).Select((x) => (string)x)), 0, 6) : new List<string>(),
                 lastChampion = lc is string lcs && Champions.CHAMPIONS.ContainsKey(lcs) ? lcs : "lyra",
+                lastDoctrine = ld is string lds && Doctrines.DOCTRINES.ContainsKey(lds) ? lds : Doctrines.DEFAULT,
                 runs = U.Round(num(getv(raw, "runs"), 0, 0, 1e9)),
                 passive = PassiveTree.sanitizePassive(getv(raw, "passive"), bestWave),
                 champions = sanitizeChampionProgress(getv(raw, "champions")),

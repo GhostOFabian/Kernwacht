@@ -401,7 +401,13 @@ namespace Kernwacht.Sim
 
         public CommandResult championSkill(double slot, double tx, double ty)
         {
-            return this.heCmd(() => ChampionSystem.useChampionSkill(this, slot, tx, ty));
+            return this.heCmd(() =>
+            {
+                var r = ChampionSystem.useChampionSkill(this, slot, tx, ty);
+                // Ultimate (vierter Skill) ist zugleich ein Befehl: Sammelruf für alle Affinitätstürme
+                if (r.ok && slot == 3) HeroCommand.ultimateCommand(this);
+                return r;
+            });
         }
 
         /// <summary>Taktikladung zünden (Überlast, Brennpunkt, Kältewelle, Schwachstelle).</summary>
