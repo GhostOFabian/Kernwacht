@@ -55,7 +55,7 @@ namespace Kernwacht.Game.UI
                         var PA = Paragon.PARAGON;
                         var RR = Runes.RUNE_RULES;
                         var EC = Balance.ECONOMY;
-                        P(root, $"Im Helden-Endlosmodus steuerst du einen frei beweglichen Helden zusätzlich zu deinen Türmen. Nach {F(HE.prepTime)} s Vorbereitung startet die erste Welle automatisch, danach folgt jede Welle nach {F(HE.transitionTime)} s (mit Leertaste früher). Pause (P/Esc) hält alles an.");
+                        P(root, $"Im Helden-Endlosmodus steuerst du einen frei beweglichen Helden zusätzlich zu deinen Türmen. Nach {F(HE.prepTime)} s Vorbereitung startet die erste Welle automatisch, danach folgt jede Welle sofort, nach einer Bosswelle nach {F(HeroEndlessSystem.BOSS_PAUSE)} s Pause (mit Leertaste früher). Pause (P/Esc) hält alles an.");
                         H3(root, "Steuerung");
                         UL(root, new[]
                         {

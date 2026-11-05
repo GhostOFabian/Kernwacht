@@ -1282,6 +1282,11 @@ namespace Kernwacht.Sim
         public double chargesUsed;
         /// <summary>Doktrin des Laufs (Doctrines.DOCTRINES).</summary>
         public string doctrine;
+        /// <summary>Wellenübergang: war die zuletzt geschaffte Welle eine Bosswelle (dann 5 s Pause)?</summary>
+        public bool lastWaveBoss;
+        /// <summary>Wächter gegen hängende Wellen: Sekunden ohne Fortschritt der übrigen Gegner, letzter Fortschrittswert.</summary>
+        public double stallT;
+        public double stallSum = -1;
         /// <summary>TS: <c>{ x: number; y: number }</c>.</summary>
         public Vec2 shop;
         /// <summary>Countdown bis zum automatischen Wellenstart (s); &lt;0 = inaktiv</summary>

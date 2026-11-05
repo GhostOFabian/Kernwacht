@@ -278,6 +278,39 @@ namespace Kernwacht.Sim
         }
 
         /// <summary>Automatischer Wellentakt, Wellenbelohnungen und Ladenbestand. Läuft nur, wenn die Simulation läuft (Pause stoppt alles).</summary>
+        /// <summary>Pause nach einer Bosswelle (s).</summary>
+        public const double BOSS_PAUSE = 5;
+        /// <summary>Nach so vielen Sekunden ohne jeden Fortschritt der letzten Gegner rückt die nächste Welle nach.</summary>
+        public const double STALL_TIME = 8;
+
+        /// <summary>
+        /// Wächter gegen hängende Wellen: Sind alle Gegner erschienen und bewegt sich keiner der übrigen mehr
+        /// (festgesteckt, unerreichbar), wird die Welle wie bei einem vorzeitigen Ruf abgeschlossen.
+        /// </summary>
+        private static void checkStall(GameSimulation sim, double dt)
+        {
+            GameState s = sim.s;
+            HeroEndlessState he = s.he;
+            if (s.spawnQueue.Count > 0) { he.stallT = 0; he.stallSum = -1; return; }
+            double sum = 0;
+            int alive = 0;
+            foreach (var e in s.enemies)
+            {
+                if (!e.alive) continue;
+                alive++;
+                sum += e.remaining + (e.maxHp > 0 ? e.hp / e.maxHp * 4 : 0); // Schaden zählt auch als Fortschritt
+            }
+            if (alive == 0) { he.stallT = 0; he.stallSum = -1; return; }
+            if (he.stallSum < 0 || sum < he.stallSum - 0.05) { he.stallSum = sum; he.stallT = 0; return; }
+            he.stallT += dt;
+            if (he.stallT < STALL_TIME) return;
+            he.stallT = 0;
+            he.stallSum = -1;
+            if (WaveDirector.earlyCallState(s) != null) return; // z. B. Bosskampf läuft
+            sim.emit(new GameEvent { k = "message", text = "Die letzten Gegner kommen nicht weiter – die nächste Welle rückt nach.", severity = "info" });
+            WaveDirector.callNextWave(sim);
+        }
+
         public static void updateHeroEndless(GameSimulation sim, double dt)
         {
             GameState s = sim.s;
@@ -341,7 +374,8 @@ namespace Kernwacht.Sim
             if (s.phase == "build")
             {
                 he.profile = HeroEndless.profileForWave(s.seed.hash, s.wave + 1).id;
-                if (he.autoTimer < 0) he.autoTimer = HeroEndless.HERO_ENDLESS.transitionTime;
+                // Nächste Welle sofort, nach einer Bosswelle 5 s Verschnaufpause
+                if (he.autoTimer < 0) he.autoTimer = he.lastWaveBoss ? BOSS_PAUSE : 0;
                 he.autoTimer -= dt;
                 if (he.autoTimer <= 0)
                 {
@@ -352,6 +386,7 @@ namespace Kernwacht.Sim
             else if (s.phase == "combat")
             {
                 he.autoTimer = -1;
+                checkStall(sim, dt);
             }
             // 'choice' (Modifikatorauswahl) hält den Countdown an, bis gewählt wurde.
         }

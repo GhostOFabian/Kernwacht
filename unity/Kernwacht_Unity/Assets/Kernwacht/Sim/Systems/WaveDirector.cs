@@ -293,6 +293,7 @@ namespace Kernwacht.Sim
             GameState s = sim.s;
             ModAggregate mods = sim.c.mods;
             bool wasBoss = s.currentWave?.isBoss ?? false;
+            if (s.he != null) { s.he.lastWaveBoss = wasBoss; s.he.stallT = 0; s.he.stallSum = -1; }
             double bonus = U.Round((Balance.ECONOMY.waveBonusBase + Balance.ECONOMY.waveBonusPerWave * s.wave + (wasBoss ? Balance.ECONOMY.bossWaveBonus : 0)) * mods.waveGoldMul);
             double income = EconomySystem.collectIncome(sim);
             HeroSystem.onWaveCleared(sim);
