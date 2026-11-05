@@ -141,8 +141,12 @@ namespace Kernwacht.Sim
             double lo = HeroEndless.HERO_ENDLESS.depositCount[0];
             double hi = HeroEndless.HERO_ENDLESS.depositCount[1];
             double n = U.Min(cand.Count, lo + Math.Floor(rnd() * (hi - lo + 1)) + (m.size == "huge" ? 2 : m.size == "large" ? 1 : 0));
-            List<double> @out = new List<double>();
-            for (int k = 0; k < n && cand.Count > 0; k++) @out.Add(U.Splice(cand, Math.Floor(rnd() * cand.Count), 1)[0]);
+            // zufällige Reihenfolge der Kandidaten, dann 2×2-Blöcke (passend für den Goldgräber)
+            List<double> order = new List<double>();
+            while (cand.Count > 0) order.Add(U.Splice(cand, Math.Floor(rnd() * cand.Count), 1)[0]);
+            var taken = new HashSet<double>(m.veins);
+            foreach (var l in m.ley) taken.Add(l);
+            List<double> @out = WorldGenerator.pickBlocks(m, order, (int)n, taken, null);
             m.deposits = U.StableSort(@out, (a, b) => a - b);
         }
 

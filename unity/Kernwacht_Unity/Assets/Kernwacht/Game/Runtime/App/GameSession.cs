@@ -655,8 +655,30 @@ namespace Kernwacht.Game
             setHover(app.view.pickCell(px, py, sim.s.map));
         }
 
+        /// <summary>
+        /// Goldgräber (2×2) rastet auf einer Gold- oder Kristallader ein: Zeigt der Mauszeiger auf ein Aderfeld,
+        /// wird die Bauposition auf die linke obere Ecke dieser 2×2-Ader gelegt.
+        /// </summary>
+        GridPos snapToVein(GridPos cell)
+        {
+            if (cell == null || ui.buildDef != "goldmine") return cell;
+            var m = sim.s.map;
+            double w = m.width;
+            double ci = cell.y * w + cell.x;
+            foreach (var list in new[] { m.veins, m.deposits })
+            {
+                if (list == null || !list.Contains(ci)) continue;
+                double ax = cell.x, ay = cell.y;
+                while (ax > 0 && list.Contains(ay * w + ax - 1)) ax--;
+                while (ay > 0 && list.Contains((ay - 1) * w + ax)) ay--;
+                return new GridPos { x = ax, y = ay };
+            }
+            return cell;
+        }
+
         void setHover(GridPos cell)
         {
+            cell = snapToVein(cell);
             var prev = ui.hoverCell;
             if (prev != null && cell != null && prev.x == cell.x && prev.y == cell.y) return;
             ui.hoverCell = cell;
@@ -684,6 +706,7 @@ namespace Kernwacht.Game
         {
             var def = ui.buildDef;
             if (def == null) return;
+            cell = snapToVein(cell);
             double spec = N(hv.buildSpec);
             var r = sim.build(def, cell.x, cell.y, spec);
             if (!r.ok)
