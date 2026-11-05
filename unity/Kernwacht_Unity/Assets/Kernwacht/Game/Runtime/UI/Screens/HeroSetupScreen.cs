@@ -102,7 +102,7 @@ namespace Kernwacht.Game.UI
                     if (!ok)
                     {
                         t.btn.interactable = false;
-                        Ui.Get<CanvasGroup>(t.btn.gameObject).alpha = 0.55f;
+                        Common.dim(t.btn, 0.55f);
                     }
                     var ic = Ui.Row(t.col, 0, TextAnchor.MiddleCenter, false);
                     Common.modelIcon(ic.transform, d.model, 64);
@@ -353,7 +353,7 @@ namespace Kernwacht.Game.UI
                     string why = PassiveTree.passiveRaiseReason(passive, bestWave, n.id);
                     var t = Common.tile(row, () => onRaise?.Invoke(n.id), rank >= n.maxRank ? Theme.Gold : (editable && why == null ? Theme.Accent : (Color?)null), null, new RectOffset(8, 8, 6, 6), 2);
                     t.btn.interactable = editable && why == null;
-                    if (!open) Ui.Get<CanvasGroup>(t.btn.gameObject).alpha = 0.6f;
+                    if (!open) Common.dim(t.btn, 0.5f);
                     Ui.Tip(t.btn, () => $"{n.name}: {n.description} je Rang{(why != null && rank < n.maxRank ? $"\n{why}" : "")}");
                     Common.para(t.col, $"<b>{n.name}</b>  {U.Fmt(rank)}/{U.Fmt(n.maxRank)}", "small", TextAnchor.UpperCenter);
                     Common.para(t.col, $"{n.description} je Rang", "tiny", TextAnchor.UpperCenter);

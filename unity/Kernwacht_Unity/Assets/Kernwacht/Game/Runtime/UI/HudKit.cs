@@ -173,10 +173,23 @@ namespace Kernwacht.Game.UI
         {
             if (b == null) return;
             if (b.interactable != on) b.interactable = on;
+            // Abgeschaltet: dunkle Abdeckung statt Durchsichtigkeit (sonst blasses Lila mit weißer Schrift)
             var cg = b.GetComponent<CanvasGroup>();
-            if (cg == null) { if (on) return; cg = b.gameObject.AddComponent<CanvasGroup>(); }
-            float a = on ? 1f : 0.45f;
-            if (cg.alpha != a) cg.alpha = a;
+            if (cg != null && cg.alpha != 1f) cg.alpha = 1f;
+            Kernwacht.Game.UI.Common.dim(b, on ? 0f : 0.55f);
+        }
+
+        /// <summary>
+        /// Deckende Kastenfarbe: halbtransparente Farbe auf dem dunklen Fenstergrund vorgemischt. Unitys Outline kopiert
+        /// die ganze Fläche in Randfarbe – bei durchsichtigem Grund färbte z. B. der Goldrand den ganzen Kasten gelb.
+        /// </summary>
+        public static Color Solid(Color bg)
+        {
+            if (bg.a >= 0.99f) return bg;
+            var under = new Color(22 / 255f, 16 / 255f, 34 / 255f, 1f);
+            var c = Color.Lerp(under, new Color(bg.r, bg.g, bg.b, 1f), bg.a);
+            c.a = 1f;
+            return c;
         }
 
         /// <summary>Hervorhebung „.on“ (Goldrand).</summary>
@@ -216,7 +229,7 @@ namespace Kernwacht.Game.UI
         /// <summary>Kasten mit Hintergrund und Rand, senkrecht gestapelt (.upg, .rune-box, .group-box …).</summary>
         public static VerticalLayoutGroup Box(Transform p, Color bg, Color border, int padX = 9, int padY = 7, float spacing = 4)
         {
-            var img = Ui.Panel(p, "Box", bg, true, Theme.RoundSmall);
+            var img = Ui.Panel(p, "Box", Solid(bg), true, Theme.RoundSmall);
             img.GetComponent<Outline>().effectColor = border;
             var v = img.gameObject.AddComponent<VerticalLayoutGroup>();
             v.padding = new RectOffset(padX, padX, padY, padY);
@@ -228,7 +241,7 @@ namespace Kernwacht.Game.UI
 
         public static HorizontalLayoutGroup HBox(Transform p, Color bg, Color border, int padX = 9, int padY = 7, float spacing = 8)
         {
-            var img = Ui.Panel(p, "HBox", bg, true, Theme.RoundSmall);
+            var img = Ui.Panel(p, "HBox", Solid(bg), true, Theme.RoundSmall);
             img.GetComponent<Outline>().effectColor = border;
             var h = img.gameObject.AddComponent<HorizontalLayoutGroup>();
             h.padding = new RectOffset(padX, padX, padY, padY);

@@ -616,7 +616,7 @@ namespace Kernwacht.Game.UI
                     e.bg.color = locked ? Theme.Hex(0x15111f) : Theme.Hex(0x1a1428);
                     e.fill.enabled = !locked;
                     e.cd.color = locked ? Theme.Hex(0xc9bfe0) : Color.white;
-                    e.icon.color = locked ? HeroKit.A(Theme.Muted, 0.25f) : ready ? Color.white : Theme.Muted;
+                    e.icon.color = locked ? Color.clear : ready ? Color.white : Theme.Muted;
                     e.noMana.enabled = nomana;
                     e.target.enabled = tg;
                     if (!ready) { e.border.effectColor = Theme.LineStrong; e.glow.effectColor = Color.clear; }
@@ -1856,8 +1856,13 @@ namespace Kernwacht.Game.UI
         {
             Ui.SetKind(b, on ? Ui.BtnKind.On : Ui.BtnKind.Normal);
             Color c = on ? Theme.Gold : Theme.Text;
+            // Nur Schrift und Symbole einfärben – nicht die Knopffläche (sonst Gold auf Gold bzw. weiß auf gelb)
             foreach (var g in b.GetComponentsInChildren<Graphic>())
-                if (g.gameObject != b.gameObject) g.color = c;
+            {
+                if (g.gameObject == b.gameObject) continue;
+                if (g is Image im && (im.sprite == Theme.Round || im.sprite == null || im.type == Image.Type.Sliced)) continue;
+                g.color = c;
+            }
         }
 
         public static void Tip(Component c, string text)

@@ -22,6 +22,28 @@ namespace Kernwacht.Game.UI
         /// <summary>Breite von .screen-inner (CSS 1100 px × 1,2).</summary>
         public const float INNER_W = 1320;
 
+        /// <summary>
+        /// Gesperrte/abgeblendete Elemente: dunkle Abdeckung statt Durchsichtigkeit. Eine durchsichtige Kachel ließ
+        /// die helle Karte durchscheinen (blasses Lila/Rosa mit weißer Schrift = schlecht lesbar).
+        /// </summary>
+        public static void dim(Component c, float amount)
+        {
+            var t = c.transform.Find("Abdunklung");
+            Image ov;
+            if (t == null)
+            {
+                if (amount <= 0) return;
+                ov = Ui.Node("Abdunklung", c.transform).AddComponent<Image>();
+                ov.sprite = Theme.Round; ov.type = Image.Type.Sliced; ov.raycastTarget = false;
+                Ui.Fill(ov.rectTransform);
+                Ui.Get<LayoutElement>(ov.gameObject).ignoreLayout = true;
+            }
+            else ov = t.GetComponent<Image>();
+            ov.transform.SetAsLastSibling();
+            ov.color = new Color(0.05f, 0.035f, 0.09f, Mathf.Clamp01(amount));
+            ov.gameObject.SetActive(amount > 0);
+        }
+
         public static readonly Color CardBg = new Color(40 / 255f, 30 / 255f, 64 / 255f, 0.45f);
         public static readonly Color InnerBg = new Color(20 / 255f, 16 / 255f, 32 / 255f, 0.9f);
         public static readonly Color IconBg = new Color(0.13f, 0.1f, 0.21f, 1f);

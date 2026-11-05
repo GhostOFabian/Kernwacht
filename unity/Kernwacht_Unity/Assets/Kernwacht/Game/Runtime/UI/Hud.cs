@@ -542,7 +542,7 @@ namespace Kernwacht.Game.UI
             Ui.Fill(tb.fuseLbl.rectTransform);
             tb.fuseLbl.raycastTarget = false;
             fl.gameObject.SetActive(false);
-            if (banned) { tb.btn.interactable = false; tb.cg.alpha = 0.3f; }
+            if (banned) { tb.btn.interactable = false; Common.dim(tb.bg, 0.7f); }
             tb.btn.onClick.AddListener(() =>
             {
                 if (specPop != null && specPopTower == id) { closeSpecPop(); return; }
@@ -1029,13 +1029,15 @@ namespace Kernwacht.Game.UI
                 if (flags == tb.flags) continue;
                 tb.flags = flags;
                 bool poor = (flags & 2) != 0, active = (flags & 4) != 0;
-                if (tb.btn.interactable) tb.cg.alpha = locked ? 0.45f : poor ? 0.72f : 1f;
+                // Gesperrt/zu teuer: dunkle Abdeckung statt Durchsichtigkeit (sonst blasses Rosa mit weißer Schrift)
+                tb.cg.alpha = 1f;
+                Common.dim(tb.bg, !tb.btn.interactable ? 0.7f : locked ? 0.62f : poor ? 0.35f : 0f);
                 tb.bg.color = locked ? Theme.Hex(0x1e1a26) : Theme.Hex(0x28203c);
                 tb.cost.color = poor ? Theme.Bad : locked ? Theme.Hex(0xffd860) : Theme.Gold;
                 bool fusePartner = tb.fuseWith != null;
                 tb.outline.effectColor = active ? Theme.Gold : fusePartner ? FUSE_COL : Theme.LineStrong;
                 tb.outline.effectDistance = active || fusePartner ? new Vector2(3, -3) : new Vector2(1, -1);
-                if (fusePartner && tb.btn.interactable) tb.cg.alpha = 1f; // Partner immer gut sichtbar, auch wenn zu teuer
+                if (fusePartner && tb.btn.interactable) Common.dim(tb.bg, locked ? 0.4f : 0f); // Partner gut sichtbar, auch wenn zu teuer
                 tb.prespec.gameObject.SetActive((flags & 8) != 0);
                 tb.free.gameObject.SetActive((flags & 16) != 0);
             }
