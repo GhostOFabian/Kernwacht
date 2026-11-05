@@ -536,7 +536,10 @@ namespace Kernwacht.Game
             {
                 var inst = pool.Acquire(id, animate: false, at: IsoCamera.W(x, y, z));
                 inst.tr.rotation = Quaternion.Euler(0, -rot * Mathf.Rad2Deg, 0);
-                inst.Place(x, y, z, WorldModels.propHeight(kind) * s);
+                // Flache Hindernisse (Lavabecken, Nebelbank, Eis, Fels, Ruine) nicht breiter als ihr Feld –
+                // sonst wirkten sie wie große Flächen über vier Felder, obwohl nur eines blockiert ist
+                bool flat = kind == 1 || kind == 3 || kind == 4 || kind == 5 || kind == 7;
+                inst.Place(x, y, z, WorldModels.propHeight(kind) * s, 1, (flat ? 0.92f : 1.15f) * s);
                 props.Add(inst);
                 return;
             }
