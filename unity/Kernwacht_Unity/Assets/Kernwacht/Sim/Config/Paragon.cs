@@ -104,6 +104,39 @@ namespace Kernwacht.Sim
             new ParagonNode { id = "pg_mine", tree = "tower", name = "Goldader", icon = "⛏️", maxRank = 30, per = new Dictionary<string, double> { ["mineIncomePct"] = 0.005 }, description = "+0,5 % Goldgräber-Ertrag" },
         };
 
+        // ------------------------------------------------------------ Paragon-Pfade (Umbau Schritt 6)
+        // Nur die Pfade mit den meisten Punkten wirken: zwei, ab Bestwelle 200 drei. Das erzwingt eine Spezialisierung,
+        // statt mit der Zeit alles gleichmäßig zu steigern. Zurücksetzen bleibt kostenlos.
+
+        /// <summary>Bestwelle, ab der ein dritter Pfad aktiv sein darf.</summary>
+        public const double THIRD_PATH_WAVE = 200;
+
+        public static int pathLimit(double bestWave) { return bestWave >= THIRD_PATH_WAVE ? 3 : 2; }
+
+        /// <summary>Punkte je Pfad.</summary>
+        public static double treeSpent(Dictionary<string, double> points, string tree)
+        {
+            double n = 0;
+            if (points == null) return 0;
+            foreach (var node in PARAGON_NODES) if (node.tree == tree) n += U.Max(0, U.GetN(points, node.id) ?? 0);
+            return n;
+        }
+
+        /// <summary>Aktive Pfade: die mit den meisten Punkten (bei Gleichstand in Listenreihenfolge), höchstens <paramref name="limit"/>.</summary>
+        public static HashSet<string> activePaths(Dictionary<string, double> points, int limit)
+        {
+            var list = new List<KeyValuePair<string, double>>();
+            for (int i = 0; i < PARAGON_TREES.Count; i++)
+            {
+                double sp = treeSpent(points, PARAGON_TREES[i].id);
+                if (sp > 0) list.Add(new KeyValuePair<string, double>(PARAGON_TREES[i].id, sp - i * 1e-6));
+            }
+            list.Sort((a, b) => b.Value.CompareTo(a.Value));
+            var set = new HashSet<string>();
+            for (int i = 0; i < list.Count && i < limit; i++) set.Add(list[i].Key);
+            return set;
+        }
+
         public static double paragonXpToNext(double level)
         {
             return U.Round(PARAGON.xpBase * (1 + level * PARAGON.xpGrowth));

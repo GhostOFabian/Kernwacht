@@ -429,6 +429,10 @@ namespace Kernwacht.Sim
             HeroEndlessParagon p = (he.paragon ??= new HeroEndlessParagon { level = 0, xp = 0, points = new Dictionary<string, double>(), rev = 0 });
             if (paragonBudget(he) <= 0) return $"Paragonpunkte gibt es ab Heldenstufe 50 (alle 5 Stufen), ab Stufe {U.Fmt(Paragon.PARAGON.heroMaxLevel)} je Paragonstufe und durch Meilensteine";
             if (U.Get(p.points, node.id, 0) >= node.maxRank) return "Maximaler Rang";
+            int limit = Paragon.pathLimit(he.bestWaveAtStart);
+            if (Paragon.treeSpent(p.points, node.tree) <= 0 && Paragon.activePaths(p.points, 99).Count >= limit)
+                return limit < 3 ? $"Höchstens {limit} Paragon-Pfade aktiv (dritter Pfad ab Bestwelle {U.Fmt(Paragon.THIRD_PATH_WAVE)}) – zum Wechseln Paragon zurücksetzen"
+                                 : $"Höchstens {limit} Paragon-Pfade aktiv – zum Wechseln Paragon zurücksetzen";
             if (paragonFree(he) <= 0) return "Keine Paragonpunkte frei";
             return null;
         }

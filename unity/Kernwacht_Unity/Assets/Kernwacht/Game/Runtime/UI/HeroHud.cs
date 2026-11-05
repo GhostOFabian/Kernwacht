@@ -1207,9 +1207,12 @@ namespace Kernwacht.Game.UI
             var c = he.champion;
             var p = he.paragon ?? new HeroEndlessParagon { level = 0, xp = 0, points = new Dictionary<string, double>(), rev = 0 };
             double free = ChampionSystem.paragonFree(he);
-            var fx = PassiveTree.paragonEffects(p.points);
+            int pathLim = Paragon.pathLimit(he.bestWaveAtStart);
+            var activeP = Paragon.activePaths(p.points, pathLim);
+            var fx = PassiveTree.paragonEffects(p.points, null, activeP);
             var lines = PassiveTreeView.effectLines(fx);
             HeroKit.P(body, $"Paragon <b>{U.Fmt(p.level)}/{U.Fmt(Paragon.PARAGON.maxLevel)}</b> · frei <b>{U.Fmt(free)}</b> · gemeinsam für alle Helden, dauerhaft. Punkte: {U.Fmt(p.level)} aus Paragonstufen (ab Heldenstufe {U.Fmt(Paragon.PARAGON.heroMaxLevel)}) + {U.Fmt(Paragon.paragonPrePoints(c.level))} Vorab-Punkte (ab Stufe 50 alle 5 Stufen, jetzt Stufe {U.Fmt(c.level)}) + {U.Fmt(he.paragonBonus ?? 0)} aus Meilensteinen (W100/150/200/250/300).", 15, Theme.Text);
+            HeroKit.P(body, $"Pfade: höchstens <b>{pathLim}</b> wirken gleichzeitig (die mit den meisten Punkten){(pathLim < 3 ? $", ein dritter ab Bestwelle {U.Fmt(Paragon.THIRD_PATH_WAVE)}" : "")}. Spezialisiere dich – Zurücksetzen ist kostenlos.", 13, Theme.Muted);
             if (lines.Count > 0) HeroKit.P(body, $"Wirkung: {string.Join(" · ", lines)}", 13, Theme.Muted);
             var grid = new HeroGrid(body, BODY_W, 242, 10);
             foreach (var t in Paragon.PARAGON_TREES)
@@ -1225,7 +1228,9 @@ namespace Kernwacht.Game.UI
                 v.childControlWidth = true; v.childControlHeight = true; v.childForceExpandWidth = true; v.childForceExpandHeight = false;
                 var h = Ui.Row(box.transform, 5, TextAnchor.MiddleLeft, false);
                 HeroKit.Ic(h.transform, HeroKit.IconName(t.icon), 18, pc);
-                HeroKit.T(h.transform, $"<b>{HeroKit.Col(t.name, pc)}</b> <size=13>{HeroKit.Col($"{U.Fmt(spent)} Punkte", Theme.Muted)}</size>", 17, Theme.Text);
+                bool act = activeP.Contains(t.id);
+                string stTag = spent <= 0 ? "" : act ? " · aktiv" : " · ruht";
+                HeroKit.T(h.transform, $"<b>{HeroKit.Col(t.name, pc)}</b> <size=13>{HeroKit.Col($"{U.Fmt(spent)} Punkte{stTag}", act || spent <= 0 ? Theme.Muted : Theme.Bad)}</size>", 17, Theme.Text);
                 foreach (var n in nodes)
                 {
                     double r = U.Get(p.points, n.id, 0);

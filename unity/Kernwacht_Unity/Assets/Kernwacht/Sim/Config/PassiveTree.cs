@@ -284,12 +284,13 @@ namespace Kernwacht.Sim
         }
 
         /// <summary>Paragon-Wirkungen (gemeinsam für alle Helden). <paramref name="into"/> = null → frische Kopie von ZERO_PASSIVE.</summary>
-        public static PassiveEffects paragonEffects(Dictionary<string, double> points, PassiveEffects into = null)
+        public static PassiveEffects paragonEffects(Dictionary<string, double> points, PassiveEffects into = null, HashSet<string> activeTrees = null)
         {
             if (into == null) into = ZERO_PASSIVE.Copy();
             if (points == null) return into;
             foreach (ParagonNode node in Paragon.PARAGON_NODES)
             {
+                if (activeTrees != null && !activeTrees.Contains(node.tree)) continue;
                 double r = U.Max(0, U.Min(node.maxRank, U.GetN(points, node.id) ?? 0));
                 if (!U.Truthy(r)) continue;
                 foreach (KeyValuePair<string, double> kv in node.per) into[kv.Key] += kv.Value * r;
@@ -316,7 +317,8 @@ namespace Kernwacht.Sim
             double rev = he.paragon?.rev ?? 0;
             FxCacheEntry c;
             if (fxCache.TryGetValue(he, out c) && c != null && ReferenceEquals(c.passive, he.passive) && c.rev == rev) return c.fx;
-            PassiveEffects fx = paragonEffects(he.paragon?.points, passiveEffects(he.passive));
+            var active = Paragon.activePaths(he.paragon?.points, Paragon.pathLimit(he.bestWaveAtStart));
+            PassiveEffects fx = paragonEffects(he.paragon?.points, passiveEffects(he.passive), active);
             fxCache.Remove(he);
             fxCache.Add(he, new FxCacheEntry { passive = he.passive, rev = rev, fx = fx });
             return fx;
