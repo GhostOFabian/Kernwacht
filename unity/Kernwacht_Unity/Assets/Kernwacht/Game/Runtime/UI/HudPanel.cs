@@ -641,6 +641,9 @@ namespace Kernwacht.Game.UI
             }
             if (t.stunned > 0) P(body, $"✷ Außer Gefecht ({HK.fmtNum(t.stunned)} s)", HK.FS, Theme.Bad);
             if (t.disrupted > 0) P(body, $"✖ Netzwerk gestört ({HK.fmtNum(t.disrupted)} s)", HK.FS, Theme.Bad);
+            // Fusions-Erbe eines legendären Turms
+            if (t.fuseA > 0 || t.fuseB > 0)
+                Small(body, $"✦ Erbe: {FusionHeritage.describe(t.def, t.fuseA, t.fuseB)}", HK.StarGold);
             // Fusion: für jedes passende Rezept direkt zeigen, was noch fehlt
             var fus = EconomySystem.fusionOptions(sim, t);
             foreach (var r in Towers.FUSIONS)
@@ -669,6 +672,14 @@ namespace Kernwacht.Game.UI
                 HK.Grow(col);
                 Bold(col.transform, $"✦ Fusion: {ld.name}", 16);
                 Tiny(col.transform, ld.description);
+                // Ergebnis hängt von beiden Spezialisierungen ab (A+A, B+B oder gemischt)
+                if (selfOk && partnerOk)
+                {
+                    double sa = r.a == t.def ? t.spec : near.spec;
+                    double sb = r.a == t.def ? near.spec : t.spec;
+                    HK.T(col.transform, $"Erbe dieser Kombination: {FusionHeritage.describe(r.id, sa, sb)}", 14, HK.StarGold);
+                }
+                else Tiny(col.transform, "Die Spezialisierungen beider Türme bestimmen das Erbe: A+A, B+B oder gemischt ergeben verschiedene Varianten.");
                 var bad = Theme.Hex(0xffb0a0);
                 HK.T(col.transform, $"{ok(selfOk)} Dieser Turm: {(t.level >= 4 ? "Stufe 4 ✓" : $"Stufe {U.Fmt(t.level)}/4 – noch {U.Fmt(4 - t.level)}× aufwerten")}{(t.level >= 4 ? (U.Truthy(t.spec) ? ", spezialisiert ✓" : ", Spezialisierung fehlt") : ", danach spezialisieren")}", 14, selfOk ? Theme.Good : bad);
                 HK.T(col.transform, $"{ok(partnerOk)} Partner: {partnerText}", 14, partnerOk ? Theme.Good : bad);

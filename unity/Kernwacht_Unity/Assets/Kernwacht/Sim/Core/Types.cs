@@ -379,6 +379,8 @@ namespace Kernwacht.Sim
         public double cy;
         public double level;          // 1..4
         public double spec;           // 0 | 1 | 2 (0 = keine Spezialisierung)
+        /// <summary>Fusions-Erbe: Spezialisierung des Rezept-Elternturms a bzw. b (0 = keine).</summary>
+        public double fuseA, fuseB;
         /// <summary>3.6: Veredelung ★0–★10 (nur Endlos, voll ausgebaut).</summary>
         public double? stars;
         public double invested;
