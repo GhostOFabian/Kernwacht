@@ -302,7 +302,8 @@ namespace Kernwacht.Game
 
             var biome = Biomes.BIOMES.TryGetValue(map.biome ?? "forest", out var bd) ? bd : Biomes.BIOMES["forest"];
             var pal = biome.palette;
-            int skyHex = Col.Mix((int)pal.sky, (int)pal.fog, 0.5);
+            mood = Terrain.mood(map);
+            int skyHex = Col.Mix(Col.Mix((int)pal.sky, (int)pal.fog, 0.5), mood.tint, mood.tintAmt);
             float size = Mathf.Max((float)map.width, (float)map.height);
             lighting = new Lighting
             {
@@ -316,6 +317,9 @@ namespace Kernwacht.Game
             };
             lightCol = lighting.lightColor;
             lightDir = lighting.light;
+            // Erstes Bild: Licht sofort auf den Zielstand setzen. Vorher schwenkte die Sonne in den ersten Sekunden
+            // vom Standardwinkel zur Tageszeit – alle Schatten wanderten mit und das Gras flackerte stark.
+            lightSnap = true;
             SetupScene();
         }
 
@@ -341,6 +345,9 @@ namespace Kernwacht.Game
         }
 
         static bool shadowDistanceSet;
+        /// <summary>Stimmung der aktuellen Karte (aus Kartenaufbau/Seed).</summary>
+        Terrain.MapMood mood;
+        bool lightSnap;
 
         void SetupScene()
         {
@@ -1063,7 +1070,7 @@ namespace Kernwacht.Game
             var s = sim.s;
             var pal = Biomes.BIOMES.TryGetValue(map.biome ?? "forest", out var bd) ? bd.palette : Biomes.BIOMES["forest"].palette;
             // Tageszeit wandert mit den Wellen (10 Wellen = ein Tag)
-            float tod = (float)((s.wave % 10) / 10) * TOD.Length;
+            float tod = ((float)((s.wave % 10) / 10) * TOD.Length + (mood != null ? mood.todStart : 0)) % TOD.Length;
             int i0 = Mathf.FloorToInt(tod) % TOD.Length;
             int i1 = (i0 + 1) % TOD.Length;
             float f = tod - Mathf.Floor(tod);
@@ -1079,15 +1086,17 @@ namespace Kernwacht.Game
                 inten *= 0.92f;
             }
             if (s.phase == "build") inten *= 1.04f;
+            if (mood != null) col = Col.Mix(col, mood.tint, mood.tintAmt * 0.5f);
             var target = Rgb(col) * (0.88f * inten);
-            float k = Mathf.Min(1, dt * 1.2f);
+            float k = lightSnap ? 1 : Mathf.Min(1, dt * 1.2f);
+            lightSnap = false;
             lightCol += (target - lightCol) * k;
             L.lightColor = lightCol;
             float az = -2.4f + (float)(s.wave % 10) * 0.12f;
             var want = new Vector3(Mathf.Cos(az) * 0.7f, elev, Mathf.Sin(az) * 0.7f).normalized;
             lightDir += (want - lightDir) * k;
             L.light = lightDir.normalized;
-            int skyCol = Col.Mix(Col.Mix((int)pal.sky, 0xffffff, 0.55), boss ? 0xff8060 : col, 0.25);
+            int skyCol = Col.Mix(Col.Mix(Col.Mix((int)pal.sky, 0xffffff, 0.55), boss ? 0xff8060 : col, 0.25), mood != null ? mood.tint : 0xffffff, mood != null ? mood.tintAmt : 0);
             L.sky = Rgb(skyCol) * (0.55f * (0.7f + inten * 0.3f));
             string ev = s.currentWave != null ? s.currentWave.@event : null;
             float size = Mathf.Max((float)map.width, (float)map.height);
@@ -1393,7 +1402,17 @@ namespace Kernwacht.Game
                     vis.inst.tr.rotation = Quaternion.identity;
                 }
                 var inst = vis.inst;
-                inst.Place(x, by, z, Mathf.Max(0.05f, top * scale), squash);
+                // Türme größer und passend aufs Feld: Höhe so wählen, dass die Grundfläche ~88 % des Bauplatzes füllt
+                // (mindestens 18 % größer als bisher, höchstens 60 %), damit schmale und breite Modelle gleich gut sitzen.
+                float baseH = top * scale;
+                float towerH = baseH * 1.18f;
+                if (!inst.fallback && inst.nativeFoot > 0.05f && inst.nativeH > 0.05f)
+                {
+                    float lvlMul = (0.9f + (float)(tw.level - 1) * 0.035f + (tw.spec != 0 ? 0.04f : 0) + (legendary ? 0.08f : 0)) / 0.9f;
+                    float fitH = 0.88f * tsz * grow * lvlMul * inst.nativeH / inst.nativeFoot;
+                    towerH = Mathf.Clamp(fitH, baseH * 1.18f, baseH * 1.6f);
+                }
+                inst.Place(x, by, z, Mathf.Max(0.05f, towerH), squash, 0.94f * tsz);
                 if (stunned) inst.Tint(0x505058, 0.6f, 0);
                 else if (skinAmt > 0) inst.Tint(Ci(skin.tint), skinAmt, emitBoost);
                 else inst.Tint(defColor, 0, emitBoost);
@@ -1402,7 +1421,7 @@ namespace Kernwacht.Game
                     if (def.attack != "none" && def.attack != "economy")
                     {
                         float aim = (float)tw.aim;
-                        inst.tower.SetTarget(IsoCamera.W(x + Mathf.Cos(aim) * 4, by + top * scale * 0.6f, z + Mathf.Sin(aim) * 4));
+                        inst.tower.SetTarget(IsoCamera.W(x + Mathf.Cos(aim) * 4, by + towerH * 0.6f, z + Mathf.Sin(aim) * 4));
                     }
                     else inst.tower.ClearTarget();
                 }
@@ -1440,7 +1459,7 @@ namespace Kernwacht.Game
                     for (int k = 0; k < shown; k++)
                     {
                         float a = t * 0.8f + k * Mathf.PI * 2 / shown;
-                        r.billboard(SPRITE_ADD, SHAPE.star, x + Mathf.Cos(a) * 0.32f, by + top * scale + 0.25f, z + Mathf.Sin(a) * 0.32f, 0.11f, stars >= 10 ? 0xffe080 : 0xffd040, 0.9f);
+                        r.billboard(SPRITE_ADD, SHAPE.star, x + Mathf.Cos(a) * 0.32f, by + towerH + 0.25f, z + Mathf.Sin(a) * 0.32f, 0.11f, stars >= 10 ? 0xffe080 : 0xffd040, 0.9f);
                     }
                 }
                 if (age < 1) r.ground(SPRITE_ADD, SHAPE.ring, x, by + 0.03f, z, 0.3f + age * 0.6f, 0xffffff, 1 - age, 0, 0.3f, 0.12f);
@@ -1611,7 +1630,12 @@ namespace Kernwacht.Game
                     previewId = ghostDef;
                     previewInst.tr.rotation = Quaternion.identity;
                 }
-                previewInst.Place(hx + gc, top, hy + gc, WorldModels.towerTop(ghostDef) * 0.9f * UNIT * (gsz > 1 ? 1.75f : 1));
+                // Vorschau in derselben (größeren) Größe wie der gebaute Turm
+                float pBase = WorldModels.towerTop(ghostDef) * 0.9f * UNIT * (gsz > 1 ? 1.75f : 1);
+                float pH = pBase * 1.18f;
+                if (!previewInst.fallback && previewInst.nativeFoot > 0.05f && previewInst.nativeH > 0.05f)
+                    pH = Mathf.Clamp(0.88f * gsz * previewInst.nativeH / previewInst.nativeFoot, pBase * 1.18f, pBase * 1.6f);
+                previewInst.Place(hx + gc, top, hy + gc, pH, 1, 0.94f * gsz);
                 previewInst.Ghost(true, ghostMat, ok ? Col.Mix(defColor, 0xffffff, 0.35) : 0xff3030, 0.55f);
                 double baseRange = def.@base.TryGetValue("range", out var br) ? br : 0;
                 float range = (float)(baseRange * (map.heights[hy * (int)map.width + hx] >= 2 ? 1.12 : 1) * (sim.c.mods != null ? sim.c.mods.rangeMul : 1));

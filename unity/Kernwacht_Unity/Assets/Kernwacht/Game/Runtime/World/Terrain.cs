@@ -60,6 +60,57 @@ namespace Kernwacht.Game
 
         public static SeaInfo sea(string kind) => kind != null && SEA.TryGetValue(kind, out var s) ? s : SEA["water"];
 
+        /// <summary>
+        /// Zufallswert für das Aussehen einer Karte. Früher nur aus Name + Biom – dadurch sahen alle Karten
+        /// eines Bioms gleich aus. Jetzt fließt der komplette Kartenaufbau ein (Felder, Höhen, Start, Ziel),
+        /// der aus dem Seed entsteht: jede Welt bekommt eigene Dekoration, Hintergrund und Stimmung.
+        /// </summary>
+        public static double visualSalt(MapDefinition m)
+        {
+            double h = RngUtil.hashString((m.name ?? "") + m.biome);
+            int n = m.cells.Count;
+            for (int i = 0; i < n; i++)
+            {
+                double v = m.cells[i] * 7 + (i < m.heights.Count ? m.heights[i] : 0);
+                if (v != 0) h = RngUtil.mix32(h + v * 2654435761.0 + i * 40503);
+            }
+            if (m.goal != null) h = RngUtil.mix32(h + m.goal.x * 92821 + m.goal.y * 68917);
+            if (m.spawn != null) h = RngUtil.mix32(h + m.spawn.x * 51749 + m.spawn.y * 30011);
+            return h;
+        }
+
+        /// <summary>Stimmung einer Karte: Startzeit des Tageszyklus, Himmels-/Meerestönung, Art der Kulisse.</summary>
+        public sealed class MapMood
+        {
+            public double salt;
+            public float todStart;      // 0..4: Morgen, Tag, Abend, Nacht (TOD-Tabelle der WorldView)
+            public int tint;            // Tönung für Himmel/Hintergrund/Meer
+            public float tintAmt;       // 0..0.35
+            public float seaShade;      // 0.85..1.15
+            public int backdrop;        // 0 schlicht, 1 Inselchen, 2 Felsnadeln, 3 schwebende Splitter
+            public string name;         // für Anzeige/Debug
+        }
+
+        static readonly int[] MOOD_TINT = { 0xffc89a, 0xffffff, 0xff8a6a, 0x5a70c8, 0xc8f0e0, 0xe0a0ff };
+        static readonly string[] MOOD_NAME = { "Morgenrot", "Klarer Tag", "Abendglut", "Mondnacht", "Nebelgrün", "Violetter Dunst" };
+
+        public static MapMood mood(MapDefinition m)
+        {
+            double salt = visualSalt(m);
+            int pick = (int)(rnd(salt, 501) * MOOD_TINT.Length) % MOOD_TINT.Length;
+            var md = new MapMood
+            {
+                salt = salt,
+                tint = MOOD_TINT[pick],
+                name = MOOD_NAME[pick],
+                tintAmt = pick == 1 ? 0.04f : 0.14f + rnd(salt, 502) * 0.2f,
+                seaShade = 0.86f + rnd(salt, 503) * 0.3f,
+                todStart = pick == 0 ? 0 : pick == 2 ? 2 : pick == 3 ? 3 : pick == 1 ? 1 : rnd(salt, 504) * 4,
+                backdrop = (int)(rnd(salt, 505) * 4) % 4,
+            };
+            return md;
+        }
+
         internal static uint Mix32(double x) => (uint)RngUtil.mix32(x);
 
         internal static float rnd(double seed, double k) => (float)((RngUtil.mix32(seed * 7919 + k * 104729) % 10000) / 10000);
@@ -85,6 +136,9 @@ namespace Kernwacht.Game
         }
         readonly TBuf lit = new TBuf();
         readonly TBuf glow = new TBuf();
+        /// <summary>Kleine Bodendetails (Gras, Kiesel): empfangen Schatten, werfen aber keine – dünne Halme flackern sonst im Schatten.</summary>
+        readonly TBuf detailBuf = new TBuf();
+        bool addingDetail;
         const int PAL = 128;
         readonly Dictionary<int, int> texel = new Dictionary<int, int>();
         readonly Color32[] palPx = new Color32[PAL * PAL];
@@ -95,6 +149,7 @@ namespace Kernwacht.Game
         BiomeDefinition biome;
         BiomePalette pal;
         double salt;
+        public Terrain.MapMood mood;
         List<GlowPoint> glows;
         bool usePropModels;
 
@@ -146,7 +201,7 @@ namespace Kernwacht.Game
             if (glowMat || emit >= 0.8f) { b = glow; col = Col.Mix(col, 0xffffff, 0.08); }
             else
             {
-                b = lit;
+                b = addingDetail ? detailBuf : lit;
                 if (emit > 0.01f) col = Col.Mix(col, 0xffffff, Mathf.Min(0.4f, emit * 0.35f));
             }
             var uv = UV(col);
@@ -209,12 +264,15 @@ namespace Kernwacht.Game
             biome = Biomes.BIOMES.TryGetValue(m.biome ?? "forest", out var bd) ? bd : Biomes.BIOMES["forest"];
             pal = biome.palette;
             glows = new List<GlowPoint>();
-            lit.Clear(); glow.Clear();
+            lit.Clear(); glow.Clear(); detailBuf.Clear(); addingDetail = false;
             texel.Clear(); palN = 0;
             usePropModels = ModelPool.Catalog != null;
             var seaI = Terrain.sea(biome.sea);
             int w = (int)m.width, h = (int)m.height;
-            salt = RngUtil.hashString((m.name ?? "") + m.biome);
+            mood = Terrain.mood(m);
+            salt = mood.salt;
+            // Meer je Karte leicht anders getönt
+            seaI = new SeaInfo(seaI.y, seaI.floating, Col.Mix(Col.Shade(seaI.color, mood.seaShade), mood.tint, mood.tintAmt * 0.6f), seaI.mat);
             int cliff = (int)pal.cliff;
             int ground = (int)pal.ground, ground2 = (int)pal.ground2;
             int obstacle2 = (int)pal.obstacle2, accent = (int)pal.accent;
@@ -265,6 +323,8 @@ namespace Kernwacht.Game
                     Add("sphere", w / 2f + Mathf.Cos(a) * d, seaI.y - s * 0.3f, h / 2f + Mathf.Sin(a) * d, s * 1.8f, s * 0.55f, s, Col.Shade(seaI.color, 0.92 + Terrain.rnd(salt, k) * 0.12), 0, a);
                 }
             }
+
+            BuildBackdrop(seaI, w, h, cliff, obstacle2, accent);
 
             // --- Inselsockel
             if (seaI.floating)
@@ -359,7 +419,9 @@ namespace Kernwacht.Game
                         float b = Terrain.rnd(salt, i * 37 + k + 11);
                         float px = x + 0.15f + a * 0.7f;
                         float pz = y + 0.15f + b * 0.7f;
+                        addingDetail = true;
                         AddGroundDetail(m.biome, px, top, pz, Terrain.rnd(salt, i * 41 + k), capCol, accent);
+                        addingDetail = false;
                     }
                 }
             }
@@ -590,6 +652,69 @@ namespace Kernwacht.Game
             }
         }
 
+        // ------------------------------------------------------------ Kulisse je Karte
+
+        /// <summary>Zusätzliche, je Karte gewürfelte Kulisse rund um die Insel (rein kosmetisch).</summary>
+        void BuildBackdrop(SeaInfo sea, int w, int h, int cliff, int obstacle2, int accent)
+        {
+            int kind = mood.backdrop;
+            float R = Mathf.Max(w, h);
+            int ground = (int)pal.ground;
+            if (kind == 1 && !sea.floating)
+            {
+                // Kleine Nachbarinseln mit Bewuchs
+                int n = 4 + (int)(Terrain.rnd(salt, 610) * 6);
+                for (int k = 0; k < n; k++)
+                {
+                    float a = Terrain.rnd(salt, 620 + k) * Mathf.PI * 2;
+                    float d = R * 0.62f + Terrain.rnd(salt, 640 + k) * 14;
+                    float s = 1.4f + Terrain.rnd(salt, 660 + k) * 3.2f;
+                    float px = w / 2f + Mathf.Cos(a) * d, pz = h / 2f + Mathf.Sin(a) * d;
+                    Add("sphereLo", px, sea.y - s * 0.12f, pz, s * 1.5f, s * 0.38f, s * 1.2f, Col.Shade(ground, 0.8 + Terrain.rnd(salt, 680 + k) * 0.25), 0, a);
+                    Add("rbox", px, sea.y - 0.3f, pz, s * 1.2f, 0.5f, s, Col.Shade(cliff, 0.8), 0, a);
+                    int trees = 1 + (int)(Terrain.rnd(salt, 700 + k) * 4);
+                    for (int q = 0; q < trees; q++)
+                    {
+                        float ox = (Terrain.rnd(salt, 720 + k * 7 + q) - 0.5f) * s * 0.9f, oz = (Terrain.rnd(salt, 740 + k * 7 + q) - 0.5f) * s * 0.7f;
+                        float th = 0.8f + Terrain.rnd(salt, 760 + k * 7 + q) * 1.2f;
+                        Add("cone8", px + ox, sea.y + s * 0.2f, pz + oz, th * 0.45f, th, th * 0.45f, Col.Shade(obstacle2, 0.85 + Terrain.rnd(salt, 780 + q) * 0.3));
+                    }
+                }
+            }
+            else if (kind == 2)
+            {
+                // Felsnadeln / Säulen in der Ferne
+                int n = 6 + (int)(Terrain.rnd(salt, 810) * 10);
+                for (int k = 0; k < n; k++)
+                {
+                    float a = Terrain.rnd(salt, 820 + k) * Mathf.PI * 2;
+                    float d = R * 0.6f + Terrain.rnd(salt, 840 + k) * 18;
+                    float s = 0.6f + Terrain.rnd(salt, 860 + k) * 1.2f;
+                    float hh = 2 + Terrain.rnd(salt, 880 + k) * 5;
+                    float px = w / 2f + Mathf.Cos(a) * d, pz = h / 2f + Mathf.Sin(a) * d;
+                    float baseY = sea.floating ? sea.y + 1.5f - Terrain.rnd(salt, 890 + k) * 3 : sea.y - 0.2f;
+                    Add("cone8", px, baseY, pz, s, hh, s * 0.9f, Col.Shade(cliff, 0.75 + Terrain.rnd(salt, 900 + k) * 0.3), 0, a);
+                    if (sea.floating) Add("cone8", px, baseY, pz, s * 0.9f, -hh * 0.5f, s * 0.8f, Col.Shade(cliff, 0.6), 0, a);
+                }
+            }
+            else if (kind == 3)
+            {
+                // Schwebende, schwach leuchtende Splitter
+                int n = 8 + (int)(Terrain.rnd(salt, 910) * 10);
+                for (int k = 0; k < n; k++)
+                {
+                    float a = Terrain.rnd(salt, 920 + k) * Mathf.PI * 2;
+                    float d = R * 0.58f + Terrain.rnd(salt, 940 + k) * 16;
+                    float s = 0.3f + Terrain.rnd(salt, 960 + k) * 0.9f;
+                    float yy = sea.y + 1.5f + Terrain.rnd(salt, 980 + k) * 4;
+                    float px = w / 2f + Mathf.Cos(a) * d, pz = h / 2f + Mathf.Sin(a) * d;
+                    int c = Col.Mix(accent, mood.tint, 0.3);
+                    Add("octa", px, yy, pz, s, s * 2.2f, s, c, 0.9f, a, 0.3f);
+                    if (k % 2 == 0) glows.Add(new GlowPoint(px, yy, pz, 0.5f + s, c, k * 3));
+                }
+            }
+        }
+
         // ------------------------------------------------------------ Meer
 
         void BuildSea(SeaInfo s, int w, int h)
@@ -597,7 +722,7 @@ namespace Kernwacht.Game
             float span = Mathf.Max(w, h) + 70;
             float cx = w / 2f, cz = h / 2f;
             var pal2 = biome.palette;
-            int fogCol = Col.Mix((int)pal2.sky, (int)pal2.fog, 0.5);
+            int fogCol = Col.Mix(Col.Mix((int)pal2.sky, (int)pal2.fog, 0.5), mood.tint, mood.tintAmt);
             // Verlaufstextur: Meeresfarbe → Dunst am Rand
             var tex = new Texture2D(64, 1, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear, name = "kw_sea" };
             owned.Add(tex);
@@ -693,12 +818,14 @@ namespace Kernwacht.Game
             owned.Add(glowMat);
 
             MakeObject("Gelaende_Licht", lit, litMat, true);
+            MakeObject("Gelaende_Details", detailBuf, litMat, false, true);
             MakeObject("Gelaende_Leuchten", glow, glowMat, false);
             lit.Clear();
             glow.Clear();
+            detailBuf.Clear();
         }
 
-        void MakeObject(string name, TBuf b, Material mat, bool shadows)
+        void MakeObject(string name, TBuf b, Material mat, bool shadows, bool receive = false)
         {
             if (b.v.Count == 0) return;
             // In Stücke von höchstens ~60 000 Ecken teilen (16-Bit-Indizes, schneller auf schwachen GPUs)
@@ -727,7 +854,7 @@ namespace Kernwacht.Game
                 var mr = go.AddComponent<MeshRenderer>();
                 mr.sharedMaterial = mat;
                 mr.shadowCastingMode = shadows ? ShadowCastingMode.On : ShadowCastingMode.Off;
-                mr.receiveShadows = shadows;
+                mr.receiveShadows = shadows || receive;
                 objects.Add(go);
             }
         }

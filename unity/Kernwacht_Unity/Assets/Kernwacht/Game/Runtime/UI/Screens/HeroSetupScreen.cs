@@ -15,6 +15,33 @@ namespace Kernwacht.Game.UI
 {
     public static class HeroSetupScreen
     {
+        /// <summary>
+        /// Neuer Seed aus mehreren unabhängigen Zufallsquellen (Uhrzeit in Ticks, Guid, Unity-Zufall, Zähler).
+        /// Vorher: Millisekunden XOR ein Zufallswert, in 32 Bit gequetscht – kurz hintereinander gestartete Läufe
+        /// lagen dicht beieinander. Jetzt wird alles durchgemischt und jedes Zeichen einzeln gewürfelt.
+        /// </summary>
+        static int seedCounter;
+        public static string freshSeed()
+        {
+            var g = System.Guid.NewGuid().ToByteArray();
+            ulong h = 1469598103934665603UL;
+            void mix(ulong v) { h ^= v; h *= 1099511628211UL; h ^= h >> 29; }
+            mix((ulong)System.DateTime.UtcNow.Ticks);
+            mix((ulong)System.Environment.TickCount);
+            mix((ulong)(UnityEngine.Random.value * 4294967295.0));
+            mix((ulong)(++seedCounter));
+            for (int i = 0; i < g.Length; i++) mix(g[i]);
+            const string ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            var sb = new System.Text.StringBuilder(9);
+            for (int i = 0; i < 8; i++)
+            {
+                if (i == 4) sb.Append('-');
+                mix((ulong)i * 0x9E3779B97F4A7C15UL);
+                sb.Append(ALPHA[(int)(h % (ulong)ALPHA.Length)]);
+            }
+            return sb.ToString();
+        }
+
         public static RectTransform renderHeroSetup(GameApp app, MapDefinition heroMap = null)
         {
             var st = app.save.settings;
@@ -24,12 +51,12 @@ namespace Kernwacht.Game.UI
             var done = app.save.progress.campaignCompleted;
             string champion = meta.lastChampion != null && Champions.CHAMPIONS.ContainsKey(meta.lastChampion) && Champions.championUnlocked(meta.lastChampion, perks, meta.bestWave, done) ? meta.lastChampion : "lyra";
             List<string> kit = meta.startKit.Where((i) => meta.unlockedItems.Contains(i)).Take((int)slots).ToList();
-            double nowMs = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
             var setup = new RunSetup
             {
                 mode = "heroEndless",
-                seedText = RngUtil.randomSeedText(U.ToUint32(U.BitXor(nowMs, UnityEngine.Random.value * 1e9))),
-                variant = st.lastVariant, biome = st.lastBiome,
+                seedText = freshSeed(),
+                // Biom startet auf „Zufällig“, damit nicht jede Partie im zuletzt gespielten Biom beginnt
+                variant = st.lastVariant, biome = "random",
                 difficulty = st.lastDifficulty, size = st.lastSize == "normal" ? "large" : st.lastSize,
             };
             // 3.10: eigene Karte aus dem Karteneditor (direkt übergeben oder aus den gespeicherten Karten gewählt)
@@ -208,11 +235,20 @@ namespace Kernwacht.Game.UI
                 foreach (var b in Biomes.BIOME_ORDER) biomeOpts.Add((b, Biomes.BIOMES[b].name));
                 Common.select(Common.field(options, "Biom"), biomeOpts, setup.biome, (v) => { setup.biome = v; }, "Biom");
                 Common.seg(Common.field(options, "Schwierigkeit"), new[] { "easy", "normal", "hard" }.Select((d) => (d, Balance.DIFFICULTY[d].name)).ToList(), setup.difficulty, (x) => { setup.difficulty = x; }, "Schwierigkeit");
-                Common.input(Common.field(options, "Seed"), setup.seedText, 32, (f, v) =>
+                var seedRow = Ui.Row(Common.field(options, "Seed"), 6, TextAnchor.MiddleLeft, false);
+                var seedField = Common.input(seedRow.transform, setup.seedText, 32, (f, v) =>
                 {
                     setup.seedText = !string.IsNullOrEmpty(v) ? v : setup.seedText;
                     if (string.IsNullOrEmpty(v)) f.SetTextWithoutNotify(setup.seedText);
                 });
+                Ui.Get<LayoutElement>(seedField.gameObject).flexibleWidth = 1;
+                seedRow.childControlWidth = true; seedRow.childForceExpandWidth = false;
+                Common.btn(seedRow.transform, "Neu würfeln", () =>
+                {
+                    setup.seedText = freshSeed();
+                    seedField.SetTextWithoutNotify(setup.seedText);
+                    Common.sfx(app, "select");
+                }, Ui.BtnKind.Normal, "dice", true);
                 Common.space(options, 4);
                 var start = Common.bigButton(options, "play", "Lauf starten", null, () =>
                 {
