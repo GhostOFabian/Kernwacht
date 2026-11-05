@@ -68,6 +68,17 @@ namespace Kernwacht.Game
         {
             this.app = app;
             this.sim = sim;
+            // Bauphase im Takt erkennen – mit sofortigem Wellenstart dauert sie oft kürzer als ein Bild
+            sim.onEnterBuild = () =>
+            {
+                if (sim.s.he != null)
+                {
+                    var m = app.save.progress.heroMeta;
+                    m.bestWave = Math.Max(m.bestWave, sim.s.stats.wavesCleared);
+                    Progress.commitHeroProgress(app.save, sim.s);
+                }
+                saveResume();
+            };
             // PORT: Schalter __KW_E2E_NOLIMIT der automatisierten Browsertests entfällt.
             var st = app.save.settings;
             ui = new ViewUiState

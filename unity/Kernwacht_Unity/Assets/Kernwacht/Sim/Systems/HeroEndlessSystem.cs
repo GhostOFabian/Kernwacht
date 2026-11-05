@@ -375,8 +375,9 @@ namespace Kernwacht.Sim
             {
                 he.profile = HeroEndless.profileForWave(s.seed.hash, s.wave + 1).id;
                 // Nächste Welle sofort, nach einer Bosswelle 5 s Verschnaufpause
-                if (he.autoTimer < 0) he.autoTimer = he.lastWaveBoss ? BOSS_PAUSE : 0;
-                he.autoTimer -= dt;
+                // Erster Takt der Bauphase startet noch nicht – so ist der Zustand einen Takt lang sicherbar.
+                if (he.autoTimer < 0) he.autoTimer = he.lastWaveBoss ? BOSS_PAUSE : dt * 0.5;
+                else he.autoTimer -= dt;
                 if (he.autoTimer <= 0)
                 {
                     he.autoTimer = -1;

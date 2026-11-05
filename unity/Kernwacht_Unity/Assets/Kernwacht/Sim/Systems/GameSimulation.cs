@@ -582,7 +582,10 @@ namespace Kernwacht.Sim
             bool overBudget = false;
             while (this.acc >= Balance.SIM.dt && ticks < max)
             {
+                string before = this.s.phase;
                 this.step();
+                // Bauphase erreicht: sofort melden (sie kann nur einen Takt dauern, wenn die nächste Welle gleich startet)
+                if (this.s.phase == "build" && before != "build") this.onEnterBuild?.Invoke();
                 this.acc -= Balance.SIM.dt;
                 ticks++;
                 if (budgetWatch.Elapsed.TotalMilliseconds > FRAME_BUDGET_MS) { overBudget = true; break; }
@@ -591,6 +594,9 @@ namespace Kernwacht.Sim
             this.lastOverBudget = overBudget;
             return ticks;
         }
+
+        /// <summary>Wird direkt nach dem Takt aufgerufen, in dem die Bauphase beginnt (Spielstand sichern).</summary>
+        public Action onEnterBuild;
 
         /// <summary>Höchstens so viele Millisekunden Simulation je Bild.</summary>
         public const double FRAME_BUDGET_MS = 11;
