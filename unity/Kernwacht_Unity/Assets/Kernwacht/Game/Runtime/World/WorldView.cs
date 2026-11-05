@@ -126,6 +126,7 @@ namespace Kernwacht.Game
             public int color;
             public bool boss;
             public float scale;
+            public float fall; // Flieger stürzen zu Boden
         }
 
         class Ambient { public float x, y, z, vx, vy, vz, life, max, seed; }
@@ -303,6 +304,7 @@ namespace Kernwacht.Game
             var biome = Biomes.BIOMES.TryGetValue(map.biome ?? "forest", out var bd) ? bd : Biomes.BIOMES["forest"];
             var pal = biome.palette;
             mood = Terrain.mood(map);
+            PostFx.SetMood(mood.tint, mood.tintAmt);
             int skyHex = Col.Mix(Col.Mix((int)pal.sky, (int)pal.fog, 0.5), mood.tint, mood.tintAmt);
             float size = Mathf.Max((float)map.width, (float)map.height);
             lighting = new Lighting
@@ -913,6 +915,8 @@ namespace Kernwacht.Game
             onFloater(new Floater { text = text, x = x, y = y, z = z, color = color, big = big });
         }
 
+        readonly HashSet<double> aliveUids = new HashSet<double>();
+
         Corpse MakeCorpse(ModelInst inst, float x, float y, float z, float height, int color, bool boss)
         {
             float hold = 0;
@@ -925,11 +929,17 @@ namespace Kernwacht.Game
         void addCorpse(GameSimulation sim, float x, float y, string enemy, string boss, int color, float size)
         {
             // passende Glättung (Blickrichtung, Höhe) über die Position suchen
+            // Lebende Gegner derselben Sorte sind keine Kandidaten: nur Glättungen, deren Gegner nicht mehr existiert
+            // (sonst wurde gelegentlich das Modell eines Nachbarn zur Leiche und der Tote blieb stehen)
+            aliveUids.Clear();
+            foreach (var en in sim.s.enemies) if (en.hp > 0) aliveUids.Add(en.uid);
             Smooth best = null;
             float bd = 1.5f;
-            foreach (var s in smooth.Values)
+            foreach (var kv in smooth)
             {
-                if (s.def != enemy || s.boss != boss) continue;
+                var s = kv.Value;
+                if (s.def != enemy || s.boss != boss || s.inst == null) continue;
+                if (aliveUids.Contains(kv.Key)) continue;
                 float d = Mathf.Abs(s.x - x) + Mathf.Abs(s.y - y);
                 if (d < bd)
                 {
@@ -943,8 +953,10 @@ namespace Kernwacht.Game
             {
                 float height;
                 if (boss != null && Enemies.BOSSES.TryGetValue(boss, out var bdef)) height = WorldModels.bossHeight(boss) * (float)bdef.size * UNIT;
-                else height = size * 2 * UNIT;
-                corpses.Add(MakeCorpse(best.inst, best.x, h + (flying ? 1.1f : 0), best.y, height, color, boss != null));
+                else height = size * UNIT; // size kommt aus dem Ereignis bereits verdoppelt (inkl. Elite) – vorher doppelt so groß
+                var cp = MakeCorpse(best.inst, best.x, h + (flying ? 1.1f : 0), best.y, height, color, boss != null);
+                cp.fall = flying ? 1.1f : 0;
+                corpses.Add(cp);
                 best.inst = null;
                 if (corpses.Count > 60)
                 {
@@ -1149,8 +1161,7 @@ namespace Kernwacht.Game
             }
             float fl = ui.reducedMotion ? flash * 0.3f : flash;
             r.screenFx(fl * 0.8f, 0xffffff, vig, vigCol);
-            // PORT: Farbkorrektur (Tönung, Sättigung, Kontrast), Glühen, Tiefenunschärfe und Sonnendunst des Webspiels
-            // sind Nachbearbeitung (URP-Volume) und hier nicht nachgebildet.
+            // Glühen, Tonemapping und Farbkorrektur: siehe PostFx (URP-Volume, ab Qualität „Mittel“).
         }
 
         // ------------------------------------------------------------ Welt: Portale, Kern, Leuchtpunkte, Raster, Route
@@ -2195,6 +2206,7 @@ namespace Kernwacht.Game
                 }
                 float p = Mathf.Max(0, c.t - c.hold) / c.max;
                 float sink = p * (c.boss ? 1.2f : 0.35f);
+                if (c.fall > 0) { float q = Mathf.Min(1, c.t / 0.45f); sink += c.fall * q * q; }
                 if (c.inst != null)
                 {
                     c.inst.Place(c.x, c.y - sink, c.z, c.height * (1 - p * 0.25f), 1 - p * 0.4f);

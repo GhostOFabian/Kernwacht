@@ -412,7 +412,8 @@ namespace Kernwacht.Game
                     }
                     // Bewuchs / Bodendetails
                     if (detail <= 0) continue;
-                    int tufts = lush ? (detail >= 2 ? 3 : 2) : detail >= 2 ? 2 : 1;
+                    // dichter bewachsen (Bodendetails werfen keine Schatten mehr und sind dadurch günstig)
+                    int tufts = lush ? (detail >= 2 ? 5 : 3) : detail >= 2 ? 3 : 2;
                     for (int k = 0; k < tufts; k++)
                     {
                         float a = Terrain.rnd(salt, i * 31 + k);

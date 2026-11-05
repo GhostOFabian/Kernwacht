@@ -350,6 +350,8 @@ namespace Kernwacht.Game
         void setQuality(QualityTier t)
         {
             if (mainCamera != null) mainCamera.allowMSAA = t.msaa > 0;
+            // Nachbearbeitung (Glühen, Tonemapping, Farbkorrektur) ab „Mittel“
+            PostFx.SetQuality(mainCamera, t.bloom);
             QualitySettings.antiAliasing = t.msaa;
             if (sun != null) sun.shadows = t.shadowSize > 0 ? LightShadows.Soft : LightShadows.None;
             QualitySettings.shadows = t.shadowSize > 0 ? ShadowQuality.All : ShadowQuality.Disable;

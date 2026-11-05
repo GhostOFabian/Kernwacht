@@ -254,12 +254,12 @@ namespace Kernwacht.Sim
         public static readonly List<WaveProfile> WAVE_PROFILES = new List<WaveProfile>
         {
             new WaveProfile { id = "mixed", name = "Gemischt", weights = new Dictionary<string, double>(), budgetMul = 1, capMul = 1, extraTypes = 1, speedMul = 1, extraElites = 0 },
-            new WaveProfile { id = "swarm", name = "Schwarm", weights = new Dictionary<string, double> { ["swarm"] = 4, ["runner"] = 3, ["broodmother"] = 2 }, budgetMul = 1.05, capMul = 1.5, extraTypes = 0, speedMul = 1.05, extraElites = 0 },
-            new WaveProfile { id = "armor", name = "Panzerzug", weights = new Dictionary<string, double> { ["brute"] = 4, ["shield"] = 3, ["golem"] = 3, ["siege"] = 3 }, budgetMul = 1.1, capMul = 0.8, extraTypes = 0, speedMul = 0.95, extraElites = 0 },
-            new WaveProfile { id = "air", name = "Luftangriff", weights = new Dictionary<string, double> { ["flyer"] = 5, ["griffin"] = 5 }, budgetMul = 0.95, capMul = 1, extraTypes = 0, speedMul = 1, extraElites = 0 },
-            new WaveProfile { id = "shadow", name = "Schatten", weights = new Dictionary<string, double> { ["stalker"] = 4, ["phase"] = 3, ["tunneler"] = 3, ["saboteur"] = 2 }, budgetMul = 1, capMul = 1, extraTypes = 0, speedMul = 1.05, extraElites = 0 },
-            new WaveProfile { id = "elite", name = "Elitetrupp", weights = new Dictionary<string, double> { ["shaman"] = 3 }, budgetMul = 0.85, capMul = 0.8, extraTypes = 0, speedMul = 1, extraElites = 2 },
-            new WaveProfile { id = "rush", name = "Ansturm", weights = new Dictionary<string, double> { ["runner"] = 3, ["scout"] = 2, ["griffin"] = 2 }, budgetMul = 0.9, capMul = 1.2, extraTypes = 0, speedMul = 1.2, extraElites = 0 },
+            new WaveProfile { id = "swarm", name = "Schwarm", weights = new Dictionary<string, double> { ["swarm"] = 4, ["runner"] = 3, ["broodmother"] = 2 }, budgetMul = 1.05, capMul = 1.5, extraTypes = 1, speedMul = 1.05, extraElites = 0 },
+            new WaveProfile { id = "armor", name = "Panzerzug", weights = new Dictionary<string, double> { ["brute"] = 4, ["shield"] = 3, ["golem"] = 3, ["siege"] = 3 }, budgetMul = 1.1, capMul = 0.8, extraTypes = 1, speedMul = 0.95, extraElites = 0 },
+            new WaveProfile { id = "air", name = "Luftangriff", weights = new Dictionary<string, double> { ["flyer"] = 5, ["griffin"] = 5 }, budgetMul = 0.95, capMul = 1, extraTypes = 1, speedMul = 1, extraElites = 0 },
+            new WaveProfile { id = "shadow", name = "Schatten", weights = new Dictionary<string, double> { ["stalker"] = 4, ["phase"] = 3, ["tunneler"] = 3, ["saboteur"] = 2 }, budgetMul = 1, capMul = 1, extraTypes = 1, speedMul = 1.05, extraElites = 0 },
+            new WaveProfile { id = "elite", name = "Elitetrupp", weights = new Dictionary<string, double> { ["shaman"] = 3 }, budgetMul = 0.85, capMul = 0.8, extraTypes = 1, speedMul = 1, extraElites = 2 },
+            new WaveProfile { id = "rush", name = "Ansturm", weights = new Dictionary<string, double> { ["runner"] = 3, ["scout"] = 2, ["griffin"] = 2 }, budgetMul = 0.9, capMul = 1.2, extraTypes = 1, speedMul = 1.2, extraElites = 0 },
         };
 
         /// <summary>Deterministische Profilwahl je Welle (keine reine Lineare – Profile wechseln, ab Welle 3).</summary>

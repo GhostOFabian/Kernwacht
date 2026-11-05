@@ -52,9 +52,10 @@ namespace Kernwacht.Sim
 
         private static readonly Dictionary<string, Dictionary<string, MapDims>> DIMS = new Dictionary<string, Dictionary<string, MapDims>>
         {
-            { "normal", new Dictionary<string, MapDims> { { "classic", new MapDims(22, 14) }, { "mazing", new MapDims(20, 14) } } },
-            { "large", new Dictionary<string, MapDims> { { "classic", new MapDims(32, 20) }, { "mazing", new MapDims(30, 20) } } },
-            { "huge", new Dictionary<string, MapDims> { { "classic", new MapDims(42, 26) }, { "mazing", new MapDims(40, 26) } } },
+            // Unity 1.1: alle Größen etwas größer (≈ +12–15 % Kantenlänge)
+            { "normal", new Dictionary<string, MapDims> { { "classic", new MapDims(24, 16) }, { "mazing", new MapDims(22, 16) } } },
+            { "large", new Dictionary<string, MapDims> { { "classic", new MapDims(36, 22) }, { "mazing", new MapDims(34, 22) } } },
+            { "huge", new Dictionary<string, MapDims> { { "classic", new MapDims(48, 30) }, { "mazing", new MapDims(46, 30) } } },
         };
 
         public static MapDims mapDims(string variant, string size = "normal")

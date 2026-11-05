@@ -67,10 +67,16 @@ namespace Kernwacht.Game
         private class SfxEntry { public readonly List<AudioClip> clips = new List<AudioClip>(); public bool noisy; }
         private class CachedClip { public AudioClip clip; public int samples; public double lastEnd; }
 
+        private readonly Queue<double> recent = new Queue<double>();
+        private readonly Dictionary<string, double> repeatHeat = new Dictionary<string, double>();
+        private readonly System.Random pitchRng = new System.Random();
+        private static readonly HashSet<string> IMPORTANT = new HashSet<string> { "wave", "boss", "levelup", "defeat", "victory", "upgrade", "build", "select", "error", "click", "leak" };
+
         private static readonly Dictionary<string, double> minGap = new Dictionary<string, double>
         {
-            ["hit"] = 0.05, ["shot_ranger"] = 0.06, ["zap"] = 0.07, ["kill"] = 0.04, ["pulse_frost"] = 0.1,
-            ["pulse_sonic"] = 0.12, ["explosion"] = 0.08, ["gold"] = 0.06, ["beam"] = 0.07, ["reaction"] = 0.12,
+            // Unity 1.1: größere Mindestabstände für Dauerfeuer-Klänge (weniger Geknatter in vollen Wellen)
+            ["hit"] = 0.09, ["shot_ranger"] = 0.1, ["zap"] = 0.11, ["kill"] = 0.07, ["pulse_frost"] = 0.14,
+            ["pulse_sonic"] = 0.16, ["explosion"] = 0.14, ["gold"] = 0.1, ["beam"] = 0.12, ["reaction"] = 0.16,
         };
 
         private bool ready => ctx && host != null;
@@ -178,6 +184,13 @@ namespace Kernwacht.Game
             double prev = last.TryGetValue(id, out var p) ? p : -1;
             double gap = minGap.TryGetValue(id, out var g) ? g : 0.02;
             if (now - prev < gap) return;
+            // Unity 1.1: höchstens 7 Effekte je 120 ms; gehäufte gleiche Klänge werden leiser
+            while (recent.Count > 0 && now - recent.Peek() > 0.12) recent.Dequeue();
+            if (recent.Count >= 7 && !IMPORTANT.Contains(id)) return;
+            recent.Enqueue(now);
+            double rep = repeatHeat.TryGetValue(id, out var rh) ? Math.Max(0, rh - (now - (prev < 0 ? now : prev)) * 2.5) : 0;
+            repeatHeat[id] = rep + 1;
+            volume *= 1 / (1 + 0.18 * rep);
             int voice = -1;
             for (int i = 0; i < sfxSources.Length; i++) if (!sfxSources[i].isPlaying) { voice = i; break; }
             if (voice < 0) return;   // entspricht "active > 48"
@@ -188,6 +201,8 @@ namespace Kernwacht.Game
             sfxVol[voice] = volume;
             src.clip = clip;
             src.volume = (float)Clamp01(sfxGain * volume);
+            // leichte Tonhöhenstreuung, damit Wiederholungen nicht mechanisch klingen
+            src.pitch = IMPORTANT.Contains(id) ? 1f : 0.94f + (float)pitchRng.NextDouble() * 0.12f;
             src.Play();
         }
 
@@ -345,14 +360,16 @@ namespace Kernwacht.Game
             }
             // PORT: Schutz gegen lange Pausen (Tab im Hintergrund stoppt Update, dspTime läuft weiter): nicht alle verpassten Schläge nachholen.
             if (nextBeat < now - 0.5) nextBeat = now + 0.05;
-            double bpm = intensity >= 2 ? 104 : intensity >= 1 ? 92 : 78;
+            double bpm = intensity >= 2 ? 100 : intensity >= 1 ? 86 : 78;
             double spb = 60 / bpm;
             while (nextBeat < now + 0.3)
             {
                 double t = nextBeat;
                 int b = beat;
                 int bar = (int)Math.Floor(b / 8.0) % 4;
-                int prog = new[] { 0, 3, 4, 2 }[bar];
+                // Unity 1.1: zwei abwechselnde Akkordfolgen (8 Takte) statt einer Viertaktschleife
+                int phrase = (int)Math.Floor(b / 32.0) % 4;
+                int prog = (phrase % 2 == 0 ? new[] { 0, 3, 4, 2 } : new[] { 5, 3, 0, 4 })[bar];
                 if (b % 8 == 0)
                 {
                     // Flächenklang
@@ -360,10 +377,16 @@ namespace Kernwacht.Game
                     musicTone(midi(deg(prog, -2)), t, spb * 4, "sine", 0.12, attack: 0.05);
                 }
                 if (b % 8 == 4) musicTone(midi(deg(prog, -2)), t, spb * 4, "sine", 0.1, attack: 0.05);
-                if (intensity >= 1 && b % 2 == 0)
+                // Kampfmelodie: weicher (Dreieck statt Rechteck), leiser und nur in jeder zweiten Phrase; Muster wechselt
+                if (intensity >= 1 && b % 2 == 0 && phrase != 1)
                 {
-                    int step = new[] { 0, 2, 4, 2, 1, 3, 4, 5 }[b % 8];
-                    musicTone(midi(deg(prog + step, 0)), t, spb * 0.9, "square", 0.025, filter: 1800);
+                    int[] pat = phrase == 3 ? new[] { 4, 2, 0, 1, 2, 4, 5, 4 } : new[] { 0, 2, 4, 2, 1, 3, 4, 5 };
+                    if (!(phrase == 2 && b % 8 >= 6)) musicTone(midi(deg(prog + pat[b % 8], 0)), t, spb * 0.9, "triangle", 0.018, filter: 1100);
+                }
+                else if (intensity >= 1 && phrase == 1 && b % 4 == 2)
+                {
+                    int step = new[] { 4, 2, 5, 3 }[bar];
+                    musicTone(midi(deg(prog + step, 1)), t, spb * 2, "sine", 0.026, attack: 0.05);
                 }
                 else if (intensity == 0 && b % 4 == 2)
                 {
@@ -372,15 +395,15 @@ namespace Kernwacht.Game
                 }
                 if (intensity >= 1)
                 {
-                    if (b % 4 == 0) musicTone(55, t, 0.18, "sine", 0.2, slide: 40);
-                    if (b % 2 == 1) musicNoise(t, 0.05, 0.03, "highpass", 6000);
+                    if (b % 4 == 0) musicTone(55, t, 0.18, "sine", 0.14, slide: 40);
+                    if (b % 4 == 3) musicNoise(t, 0.04, 0.014, "highpass", 6500);
                 }
                 if (intensity >= 2 && b % 8 == 0) musicTone(midi(deg(prog, -3)), t, spb * 8, "sawtooth", 0.04, filter: 400, attack: 1);
                 if (intensity >= 2)
                 {
                     // Kriegstrommeln im Bosskampf
-                    if (b % 4 == 0 || b % 8 == 3) musicTone(48, t, 0.3, "sine", 0.26, slide: 30);
-                    if (b % 4 == 2) musicNoise(t, 0.12, 0.07, "bandpass", 900);
+                    if (b % 4 == 0 || b % 8 == 3) musicTone(48, t, 0.3, "sine", 0.2, slide: 30);
+                    if (b % 4 == 2) musicNoise(t, 0.12, 0.045, "bandpass", 900);
                 }
                 // Arpeggio-Glitzer mit Echo (leise, in allen Phasen) – nur über die Echoleitung hörbar
                 if (b % 4 == 1 && (bar + (int)Math.Floor(b / 32.0)) % 2 == 0)

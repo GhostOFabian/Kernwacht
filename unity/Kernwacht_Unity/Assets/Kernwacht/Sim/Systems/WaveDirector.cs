@@ -43,7 +43,9 @@ namespace Kernwacht.Sim
             }
             List<string> pool = Enemies.WAVE_ENEMIES.Where((id) => Enemies.ENEMIES[id].minWave <= n)
                 .Where((id) => id != "scout" || s.map.variant == "mazing").ToList();
-            double typeCount = U.Min(pool.Count, 1 + (n >= 4 ? 1 : 0) + (n >= 10 ? 1 : 0) + (endless && n >= 20 ? 1 : 0) + (sizeMul > 1 && n >= 7 ? 1 : 0) + (profile != null && n >= 6 ? profile.extraTypes : 0));
+            double typeCount = U.Min(pool.Count, 1 + (n >= 4 ? 1 : 0) + (n >= 10 ? 1 : 0) + (endless && n >= 20 ? 1 : 0) + (sizeMul > 1 && n >= 7 ? 1 : 0) + (profile != null && n >= 6 ? profile.extraTypes : 0)
+                // Unity 1.1: Helden-Endlos mischt früher mehrere Sorten
+                + (s.mode == "heroEndless" && n >= 2 ? 1 : 0) + (s.mode == "heroEndless" && n >= 14 ? 1 : 0));
             List<string> chosen = new List<string>();
             List<string> avail = new List<string>(pool);
             for (int k = 0; k < typeCount && avail.Count > 0; k++)
@@ -63,6 +65,10 @@ namespace Kernwacht.Sim
             double cap = U.Round(Balance.waveCountCap(n) * sizeMul * (profile != null ? profile.capMul : 1));
             double total = 0;
             double share = budget / U.Max(1, chosen.Count);
+            // Unity 1.1: Budget nach Bedrohung^0,6 verteilen – teure Sorten bekommen mehr, billige weniger.
+            // Vorher gleiche Budgetanteile: 32 Splitterschwärme neben einer einzelnen Aschenschwinge.
+            double wSum = 0;
+            foreach (string id in chosen) wSum += Math.Pow(Enemies.ENEMIES[id].threat, 0.6);
             // 3.11: Späte Endloswellen stoßen an die Mengenobergrenze – dann bestimmte bisher allein der Gegnertyp die Wellen-LP
             // (90 Aschenschwingen ≈ 16 Mio., 90 Höhlengolems ≈ 88 Mio.). Ab Welle 100 wird die Menge stattdessen nach Lebenspunkten
             // verteilt: jede Gruppe erhält denselben LP-Anteil, Splitter beim Tod zählen mit.
@@ -80,7 +86,8 @@ namespace Kernwacht.Sim
             {
                 // Neu eingeführte Gegnertypen erscheinen zunächst in kleinerer Zahl.
                 double fresh = n - Enemies.ENEMIES[id].minWave < 2 && chosen.Count > 1 ? 0.6 : 1;
-                double count = U.Max(1, Math.Floor((share * fresh) / Enemies.ENEMIES[id].threat));
+                double myShare = wSum > 0 ? budget * Math.Pow(Enemies.ENEMIES[id].threat, 0.6) / wSum : share;
+                double count = U.Max(1, Math.Floor((myShare * fresh) / Enemies.ENEMIES[id].threat));
                 if (total + count > cap) count = U.Max(1, cap - total);
                 total += count;
                 groups.Add(new WaveGroup { enemy = id, count = count, elite = false, boss = null });
@@ -154,20 +161,39 @@ namespace Kernwacht.Sim
         {
             List<SpawnEntry> q = new List<SpawnEntry>();
             double t = 1.0;
+            Func<WaveGroup, SpawnEntry> entry = (g) => new SpawnEntry
+            {
+                at = t, enemy = g.enemy, elite = g.elite, boss = g.boss, mutation = g.mutation ?? null,
+                miniBoss = g.miniBoss == true ? (bool?)true : null,
+                challenge = g.challenge == true ? (bool?)true : null,
+            };
+            // Bosse zuerst (wie bisher)
             foreach (WaveGroup g in wave.groups)
             {
-                double gap = !string.IsNullOrEmpty(g.boss) ? 3 : U.GetN(SPACING, g.enemy) ?? 0.8;
-                for (int i = 0; i < g.count; i++)
-                {
-                    q.Add(new SpawnEntry
-                    {
-                        at = t, enemy = g.enemy, elite = g.elite, boss = g.boss, mutation = g.mutation ?? null,
-                        miniBoss = g.miniBoss == true ? (bool?)true : null,
-                        challenge = g.challenge == true ? (bool?)true : null,
-                    });
-                    t += g.elite ? 2 : gap;
-                }
+                if (string.IsNullOrEmpty(g.boss)) continue;
+                for (int i = 0; i < g.count; i++) { q.Add(entry(g)); t += 3; }
                 t += 2.2;
+            }
+            // Unity 1.1: übrige Gruppen ineinander verzahnt statt nacheinander – jede Welle ist durchgehend gemischt.
+            // Reihenfolge: immer die Gruppe, von der anteilig am meisten übrig ist (gleichmäßig über die Welle verteilt).
+            List<WaveGroup> rest = wave.groups.Where((g) => string.IsNullOrEmpty(g.boss) && g.count > 0).ToList();
+            double[] left = rest.Select((g) => g.count).ToArray();
+            while (true)
+            {
+                int best = -1;
+                double bestFrac = 0;
+                for (int i = 0; i < rest.Count; i++)
+                {
+                    if (left[i] <= 0) continue;
+                    double frac = left[i] / rest[i].count;
+                    if (best < 0 || frac > bestFrac + 1e-9) { best = i; bestFrac = frac; }
+                }
+                if (best < 0) break;
+                WaveGroup g = rest[best];
+                q.Add(entry(g));
+                left[best]--;
+                double gap = U.GetN(SPACING, g.enemy) ?? 0.8;
+                t += g.elite ? 1.6 : gap;
             }
             return q;
         }
