@@ -575,15 +575,28 @@ namespace Kernwacht.Sim
             this.acc += clamped * this.s.speed;
             double ticks = 0;
             double max = Balance.SIM.maxTicksPerFrame * this.s.speed;
+            // Zeitbudget je Bild: Bei hohem Tempo (5×/8×) und vielen Türmen würde die Simulation sonst mehr Zeit
+            // brauchen, als ein Bild hat – jedes Bild wird länger, es staut sich immer mehr auf (Ruckeln bis Standbild).
+            // Reicht das Budget nicht, läuft das Spiel stattdessen etwas langsamer als eingestellt, bleibt aber flüssig.
+            budgetWatch.Restart();
+            bool overBudget = false;
             while (this.acc >= Balance.SIM.dt && ticks < max)
             {
                 this.step();
                 this.acc -= Balance.SIM.dt;
                 ticks++;
+                if (budgetWatch.Elapsed.TotalMilliseconds > FRAME_BUDGET_MS) { overBudget = true; break; }
             }
-            if (ticks >= max) this.acc = 0;
+            if (ticks >= max || overBudget) this.acc = U.Min(this.acc, Balance.SIM.dt);
+            this.lastOverBudget = overBudget;
             return ticks;
         }
+
+        /// <summary>Höchstens so viele Millisekunden Simulation je Bild.</summary>
+        public const double FRAME_BUDGET_MS = 11;
+        private static readonly System.Diagnostics.Stopwatch budgetWatch = new System.Diagnostics.Stopwatch();
+        /// <summary>Lief die Simulation im letzten Bild ins Zeitbudget (Spiel läuft langsamer als eingestellt)?</summary>
+        public bool lastOverBudget;
 
         /// <summary>Ein fester Simulationsschritt.</summary>
         public void step()

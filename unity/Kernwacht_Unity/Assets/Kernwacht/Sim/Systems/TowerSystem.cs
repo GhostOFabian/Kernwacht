@@ -307,6 +307,27 @@ namespace Kernwacht.Sim
             return U.Slice(scored, 0, n).Select((x) => x.e).ToList();
         }
 
+        /// <summary>
+        /// Wie pickTargets(…, 1), aber ohne Listen anzulegen (läuft für jeden Turm, sobald er kein Ziel hat –
+        /// mit vielen Türmen hunderte Male pro Sekunde). Gleiches Ergebnis: Flieger zuerst bei preferAir,
+        /// Zufall bei „random“, sonst beste Prioritätswertung mit UID als Gleichstandsauflösung.
+        /// </summary>
+        public static EnemyInstance pickBest(GameSimulation sim, TowerInstance t, Dictionary<string, double> st)
+        {
+            if (t.priority == "random") { var r = pickTargets(sim, t, st, 1); return r.Count > 0 ? r[0] : null; }
+            bool preferAir = st["preferAir"] > 0;
+            EnemyInstance best = null, bestAir = null;
+            double bs = 0, bsAir = 0;
+            foreach (var e in sim.s.enemies)
+            {
+                if (!canHit(st, e) || !inRange(t, st, e)) continue;
+                double sc = priorityScore(t.priority, t, e);
+                if (best == null || sc < bs || (sc == bs && e.uid < best.uid)) { best = e; bs = sc; }
+                if (preferAir && e.flying && (bestAir == null || sc < bsAir || (sc == bsAir && e.uid < bestAir.uid))) { bestAir = e; bsAir = sc; }
+            }
+            return bestAir ?? best;
+        }
+
         public static HitPayload towerPayload(TowerInstance t, Dictionary<string, double> st)
         {
             return payload(t, st);
@@ -461,8 +482,7 @@ namespace Kernwacht.Sim
                 if (target == null || !canHit(st, target) || !inRange(t, st, target) || t.retarget <= 0)
                 {
                     t.retarget = Balance.SIM.retargetInterval;
-                    var picked = pickTargets(sim, t, st, 1);
-                    target = picked.Count > 0 ? picked[0] : null;
+                    target = pickBest(sim, t, st);
                     t.target = target != null ? target.uid : 0;
                 }
                 // PORT: Math.atan2 kann sich im letzten Bit von V8 (fdlibm) unterscheiden.

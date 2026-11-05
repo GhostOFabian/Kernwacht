@@ -130,6 +130,8 @@ namespace Kernwacht.Game.UI
         string startSig;
         bool startCountdown;
         readonly Button speedBtn;
+        float throttleAvg;
+        bool throttledShown;
         double speedV = double.NaN;
         readonly Button pauseBtn;
         readonly Button towerListBtn;
@@ -294,7 +296,7 @@ namespace Kernwacht.Game.UI
             upAllBtn = HK.B(cRt, "Alle aufwerten", () => a.upgradeAll(), Ui.BtnKind.Normal, 16, 40, "up");
             Ui.Tip(upAllBtn, () => upAllTitle);
             speedBtn = HK.B(cRt, "1×", () => a.cycleSpeed(), Ui.BtnKind.Normal, 17, 40, "speed");
-            HK.Tip(speedBtn, "Spielgeschwindigkeit 1× / 2× / 3× / 5× / 8× (F)");
+            Ui.Tip(speedBtn, () => throttledShown ? "Spielgeschwindigkeit (F) – ⚠ gedrosselt: Bei so vielen Türmen und Gegnern schafft der Rechner dieses Tempo nicht ganz, das Spiel läuft etwas langsamer, bleibt dafür flüssig." : "Spielgeschwindigkeit 1× / 2× / 3× / 5× / 8× (F)");
             miniBtn = HK.B(cRt, "Pause", () => a.miniPause(), Ui.BtnKind.Normal, 16, 40, "pause");
             HK.Tip(miniBtn, "Spiel anhalten, ohne das Menü zu öffnen – Bauen und Aufwerten bleiben möglich (Leertaste im Kampf)");
             pauseBtn = null; // PORT: zweite Pause-Taste entfernt – das Menü (☰, Esc/P) pausiert bereits
@@ -964,7 +966,14 @@ namespace Kernwacht.Game.UI
             bool mini = s.paused && v.miniPaused && !sim.isOver();
             HK.On(miniBtn, mini);
             HK.Show(miniBadge, mini);
-            if (s.speed != speedV) { speedV = s.speed; HK.SetBtnText(speedBtn, $"{U.Fmt(s.speed)}×"); }
+            // Gedrosselt: Die Simulation schafft das Tempo nicht im Zeitbudget (viele Türme bei 5×/8×)
+            throttleAvg += ((sim.lastOverBudget ? 1f : 0f) - throttleAvg) * Mathf.Min(1, Time.unscaledDeltaTime * 2);
+            bool throttled = throttleAvg > 0.5f;
+            if (s.speed != speedV || throttled != throttledShown)
+            {
+                speedV = s.speed; throttledShown = throttled;
+                HK.SetBtnText(speedBtn, throttled ? $"{U.Fmt(s.speed)}× ⚠" : $"{U.Fmt(s.speed)}×");
+            }
             if (s.paused != pauseShown) { pauseShown = s.paused; if (pauseBtn != null) HK.SetIcon(pauseBtn, s.paused ? "play" : "pause"); }
             updateTowerBtns();
             updateStrip();

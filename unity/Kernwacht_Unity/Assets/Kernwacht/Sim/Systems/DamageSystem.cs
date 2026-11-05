@@ -125,6 +125,9 @@ namespace Kernwacht.Sim
             return dealt;
         }
 
+        /// <summary>Höchstens so viel Prozent-LP-Zusatzschaden, als Vielfaches des normalen Treffers.</summary>
+        public const double MAX_HP_PCT_CAP = 3;
+
         /// <summary>Vollständiger Treffer eines Turmangriffs inkl. Kritisch, Reaktionen und Statuseffekten.</summary>
         public static void applyHit(GameSimulation sim, EnemyInstance e, HitPayload p, double mult = 1)
         {
@@ -133,7 +136,9 @@ namespace Kernwacht.Sim
             double dmg = p.damage * mult;
             if (e.flying && st["airDmgMul"] != 1) dmg *= st["airDmgMul"];
             if (st["critChance"] > 0 && sim.rand() < st["critChance"]) dmg *= st["critMult"];
-            if (st["maxHpPct"] > 0) dmg += e.maxHp * st["maxHpPct"] * (U.Truthy(e.boss) ? 0.25 : 1);
+            // Kolossjäger: Zusatzschaden nach max. LP – gedeckelt auf das 3-Fache des eigenen Treffers,
+            // damit er mit dem Turm wächst und nicht allein mit den immer zäheren Gegnern
+            if (st["maxHpPct"] > 0) dmg += U.Min(e.maxHp * st["maxHpPct"] * (U.Truthy(e.boss) ? 0.25 : 1), dmg * MAX_HP_PCT_CAP);
             if (dmg > 0)
             {
                 dmg = ElementSystem.react(sim, e, p.type, dmg, p.tower);
