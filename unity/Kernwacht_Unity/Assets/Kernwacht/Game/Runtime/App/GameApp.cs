@@ -724,7 +724,7 @@ namespace Kernwacht.Game
         // ------------------------------------------------------------ Partien
 
         /// <summary>Baut die Startdaten eines Helden-Endloslaufs aus dem gespeicherten Fortschritt (neue runId).</summary>
-        public HeroEndlessSetup heroEndlessSetup(string champion, List<string> startKit)
+        public HeroEndlessSetup heroEndlessSetup(string champion, List<string> startKit, string doctrine = null)
         {
             var m = save.progress.heroMeta;
             Dictionary<string, double> tree = null;
@@ -732,6 +732,7 @@ namespace Kernwacht.Game
             return new HeroEndlessSetup
             {
                 champion = champion,
+                doctrine = doctrine,
                 startKit = new List<string>(startKit ?? new List<string>()),
                 meta = new HeroEndlessSetupMeta
                 {

@@ -1268,6 +1268,16 @@ namespace Kernwacht.Sim
         public List<ChampionZone> zones = new List<ChampionZone>();
         public Dictionary<string, double> resources = new Dictionary<string, double>();   // Record<ResourceId, number>
         public List<TowerBuff> towerBuffs = new List<TowerBuff>();
+        /// <summary>Befehlsbanner des Helden (null = nicht gesetzt) und Abklingzeit bis zum nächsten Versetzen (s).</summary>
+        public HeroBanner banner;
+        public double bannerCd;
+        /// <summary>Taktikladungen: Vorrat, gemeinsame Abklingzeit, Restdauer von „Schwachstelle“, Anzahl genutzt.</summary>
+        public double charges;
+        public double chargeCd;
+        public double exposeT;
+        public double chargesUsed;
+        /// <summary>Doktrin des Laufs (Doctrines.DOCTRINES).</summary>
+        public string doctrine;
         /// <summary>TS: <c>{ x: number; y: number }</c>.</summary>
         public Vec2 shop;
         /// <summary>Countdown bis zum automatischen Wellenstart (s); &lt;0 = inaktiv</summary>

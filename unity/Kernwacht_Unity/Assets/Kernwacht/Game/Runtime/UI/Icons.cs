@@ -37,6 +37,9 @@ namespace Kernwacht.Game.UI
             ["map"] = @"<path d=""M3.5 6.5l5.5-2 6 2 5.5-2v13l-5.5 2-6-2-5.5 2z""/><path d=""M9 4.5v13M15 6.5v13""/>",
             ["sword"] = @"<path d=""M14.5 3.5h6v6L10 20l-3-3z""/><path d=""M5 15l4 4M3.5 20.5l2.5-2.5""/>",
             ["shield"] = @"<path d=""M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5-4.3-1.5-7.5-5-7.5-9.5V6z""/>",
+            ["snow"] = @"<path d=""M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9""/><path d=""M9.5 4.5L12 6l2.5-1.5M9.5 19.5L12 18l2.5 1.5""/>",
+            ["target"] = @"<circle cx=""12"" cy=""12"" r=""8""/><circle cx=""12"" cy=""12"" r=""3.5""/><path d=""M12 2v4M12 18v4M2 12h4M18 12h4""/>",
+            ["flag"] = @"<path d=""M6 21V4""/><path d=""M6 4.5h11l-2.5 4 2.5 4H6""/>",
             ["hold"] = @"<path d=""M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5-4.3-1.5-7.5-5-7.5-9.5V6z""/><path d=""M8.5 12h7""/>",
             ["advance"] = @"<path d=""M5 12h12M12 6l6 6-6 6""/>",
             ["retreat"] = @"<path d=""M19 12H7M12 6l-6 6 6 6""/>",
@@ -568,6 +571,16 @@ namespace Kernwacht.Game.UI
                 light.shadows = LightShadows.None;
                 // LIGHT.light = [-0.5, 0.8, 0.35] (Richtung zur Lichtquelle)
                 light.transform.rotation = Quaternion.LookRotation(-new Vector3(-0.5f, 0.8f, -0.35f).normalized);
+                // Kantenlicht von hinten oben: hebt dunkle Modelle vom dunklen Knopfgrund ab
+                var rimGo = new GameObject("KW_IconRim") { hideFlags = HideFlags.HideAndDontSave };
+                rimGo.transform.SetParent(rig.transform, false);
+                var rim = rimGo.AddComponent<Light>();
+                rim.type = LightType.Directional;
+                rim.color = new Color(0.72f, 0.86f, 1f);
+                rim.intensity = 0.9f;
+                rim.cullingMask = 1 << ICON_LAYER;
+                rim.shadows = LightShadows.None;
+                rim.transform.rotation = Quaternion.LookRotation(new Vector3(tc.x, -0.55f, tc.z).normalized);
 
                 var desc = new RenderTextureDescriptor(size, size, RenderTextureFormat.ARGB32, 24) { msaaSamples = 4, sRGB = QualitySettings.activeColorSpace == ColorSpace.Linear };
                 rt = RenderTexture.GetTemporary(desc);

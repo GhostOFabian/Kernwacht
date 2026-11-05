@@ -32,6 +32,10 @@ namespace Kernwacht.Game.UI
         void toggleTopDown();
         void toggleHold();
         void moveToShop();
+        /// <summary>Befehlsbanner setzen (atCursor: Feld unter dem Mauszeiger, sonst Position des Helden).</summary>
+        void placeBanner(bool atCursor);
+        /// <summary>Taktikladung zünden.</summary>
+        void useCharge(string id);
     }
 
     public class HeroHud
@@ -77,9 +81,9 @@ namespace Kernwacht.Game.UI
         private static string statName(string k) { string n; return Champions.STAT_NAMES.TryGetValue(k, out n) ? n : k; }
 
         /// <summary>Abstand der Heldenleiste vom unteren Rand (über der Turmleiste), falls sie nicht umgehängt wird.</summary>
-        public static float dockBottom = 82;
+        public static float dockBottom = 96;
         /// <summary>Höhe von Kopfzeile/Turmleiste (Hud: TOP_H/BAR_H), solange das Fenster direkt unter einer Ebene liegt.</summary>
-        public static float stageTop = 52, stageBottom = 76;
+        public static float stageTop = 52, stageBottom = 90;
 
         // ------------------------------------------------------------ Zustand
 
@@ -128,9 +132,80 @@ namespace Kernwacht.Game.UI
         private readonly List<PotionEl> potionEls = new List<PotionEl>();
         private Text noPotions;
         private ulong potionSig; private bool potionDirty = true;
-        private Button sheetBtn, shopBtn, followBtn, holdBtn, topBtn;
+        private Button sheetBtn, shopBtn, followBtn, holdBtn, topBtn, bannerBtn;
+
+        /// <summary>Hinweis zum Befehl des Helden: welche Türme er anführt und wie es um das Banner steht.</summary>
+        private string bannerTip()
+        {
+            var he = sim.s.he;
+            if (he == null) return "";
+            var p = HeroCommand.profileOf(he.champion.id);
+            string aff = p != null ? p.label : "–";
+            string cd = he.bannerCd > 0 ? $"Versetzen in {U.Fmt(Math.Ceiling(he.bannerCd))} s" : "bereit";
+            return $"Befehlsbanner (Punkt-Taste: unter den Mauszeiger, Klick: hier)\nWirkt mit halber Stärke wie der Befehl des Helden.\nAffinität: {aff} (voller Bonus, andere Türme ¼)\nBanner: {cd}";
+        }
         private bool nearLast;
         private int dockState = -1;
+
+        // ------------------------------------------------------------ Taktikladungen (rechts neben dem Dock)
+
+        private class ChargeEl { public string id; public Button b; public Image bg, icon, cdFill; public Outline border; public int state = -1; }
+        private readonly List<ChargeEl> chargeEls = new List<ChargeEl>();
+        private Text chargeCount;
+        private double chargeLast = -1;
+
+        private void buildCharges(RectTransform dockRt)
+        {
+            var box = HeroKit.Box(dockRt, new Color(20 / 255f, 15 / 255f, 32 / 255f, 0.92f), Theme.LineStrong, Theme.Round);
+            box.name = "Taktikladungen";
+            Ui.Get<LayoutElement>(box.gameObject).ignoreLayout = true;
+            Ui.Place(box.rectTransform, new Vector2(1, 0), new Vector2(0, 0), new Vector2(8, 0), new Vector2(4 * 50 + 3 * 5 + 14, 84));
+            chargeCount = HeroKit.T(box.transform, "Taktik", 13, Theme.Text, FontStyle.Bold, TextAnchor.MiddleLeft);
+            Ui.Place(chargeCount.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(8, -3), new Vector2(210, 20));
+            chargeCount.horizontalOverflow = HorizontalWrapMode.Overflow;
+            for (int i = 0; i < TacticalCharges.ORDER.Count; i++)
+            {
+                string id = TacticalCharges.ORDER[i];
+                var d = TacticalCharges.CHARGES[id];
+                var el = new ChargeEl { id = id };
+                el.b = HeroKit.CardBtn(box.transform, new Color(40 / 255f, 32 / 255f, 60 / 255f, 1f), Theme.LineStrong, () => a.useCharge(id), out el.bg, out el.border);
+                Ui.Get<LayoutElement>(el.bg.gameObject).ignoreLayout = true;
+                Ui.Place(el.bg.rectTransform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(7 + i * 55, 7), new Vector2(50, 50));
+                el.icon = HeroKit.Ic(el.bg.transform, d.icon, 28, Theme.Hex(d.color));
+                Ui.Get<LayoutElement>(el.icon.gameObject).ignoreLayout = true;
+                Ui.Place(el.icon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(28, 28));
+                el.cdFill = HeroKit.Box(el.bg.transform, new Color(0, 0, 0, 0.55f), null);
+                el.cdFill.raycastTarget = false;
+                Ui.Get<LayoutElement>(el.cdFill.gameObject).ignoreLayout = true;
+                var cr = el.cdFill.rectTransform; cr.anchorMin = Vector2.zero; cr.anchorMax = new Vector2(1, 0); cr.pivot = new Vector2(0.5f, 0); cr.sizeDelta = new Vector2(0, 0); cr.anchoredPosition = Vector2.zero;
+                string tip = $"{d.name}: {d.description}\nKostet 1 Taktikladung. Neue Ladungen alle {U.Fmt(Doctrines.of(sim.s.he).chargeEvery)} Wellen (Bosswellen +1), höchstens {U.Fmt(Doctrines.of(sim.s.he).chargeMax)}.";
+                HeroKit.Tip(el.bg, tip);
+                chargeEls.Add(el);
+            }
+        }
+
+        private void updateCharges(HeroEndlessState he)
+        {
+            if (chargeCount == null) return;
+            if (he.charges != chargeLast)
+            {
+                chargeLast = he.charges;
+                double mx = Doctrines.of(he).chargeMax;
+                chargeCount.text = $"Taktikladungen  <color=#ffd860>{U.Fmt(he.charges)}/{U.Fmt(mx)}</color>";
+            }
+            float cdFrac = he.chargeCd > 0 ? (float)(he.chargeCd / TacticalCharges.SHARED_CD) : 0f;
+            foreach (var el in chargeEls)
+            {
+                bool ready = he.charges >= 1 && he.chargeCd <= 0;
+                int st = ready ? 1 : 0;
+                el.cdFill.rectTransform.sizeDelta = new Vector2(0, 50 * Mathf.Clamp01(cdFrac));
+                if (st == el.state) continue;
+                el.state = st;
+                el.icon.color = ready ? Theme.Hex(TacticalCharges.CHARGES[el.id].color) : new Color(0.45f, 0.42f, 0.5f, 1f);
+                el.border.effectColor = ready ? Theme.Hex(TacticalCharges.CHARGES[el.id].color, 0.8f) : Theme.LineStrong;
+                el.bg.color = ready ? new Color(46 / 255f, 36 / 255f, 70 / 255f, 1f) : new Color(28 / 255f, 22 / 255f, 38 / 255f, 1f);
+            }
+        }
 
         // Fenster
         private ScrollRect bodyScroll;
@@ -317,11 +392,14 @@ namespace Kernwacht.Game.UI
             Ui.Tip(shopBtn, () => nearLast ? "Laden & Schmiede öffnen (X)" : "Laden (X): der Held muss beim Laden stehen – Klick zeigt das Angebot");
             holdBtn = HeroKit.Btn(btnRow, null, () => a.toggleHold(), Ui.BtnKind.Normal, true, "hold", 16, 42);
             HeroKit.Tip(holdBtn, "Position festsetzen (Z): Klicks bewegen den Helden nicht mehr, er verfolgt keine Gegner");
+            bannerBtn = HeroKit.Btn(btnRow, null, () => a.placeBanner(false), Ui.BtnKind.Normal, true, "flag", 16, 42);
+            Ui.Tip(bannerBtn, bannerTip);
             followBtn = HeroKit.Btn(btnRow, null, () => a.toggleFollow(), Ui.BtnKind.Normal, true, "advance", 16, 42);
             HeroKit.Tip(followBtn, "Kamera folgt dem Helden (Y)");
             topBtn = HeroKit.Btn(btnRow, null, () => a.toggleTopDown(), Ui.BtnKind.Normal, true, "map", 16, 42);
             HeroKit.Tip(topBtn, "Draufsicht / Isometrie umschalten (V)");
             footRow2.gameObject.SetActive(false);
+            buildCharges(rt);
             return rt;
         }
 
@@ -437,6 +515,7 @@ namespace Kernwacht.Game.UI
             var c = he.champion;
             var st = ChampionSystem.championStats(he);
             float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * Mathf.PI * 2f / 1.2f);
+            updateCharges(he);
 
             foreach (string r in HeroEndless.RESOURCE_ORDER)
             {
@@ -1126,9 +1205,12 @@ namespace Kernwacht.Game.UI
             var c = he.champion;
             var p = he.paragon ?? new HeroEndlessParagon { level = 0, xp = 0, points = new Dictionary<string, double>(), rev = 0 };
             double free = ChampionSystem.paragonFree(he);
-            var fx = PassiveTree.paragonEffects(p.points);
+            int pathLim = Paragon.pathLimit(he.bestWaveAtStart);
+            var activeP = Paragon.activePaths(p.points, pathLim);
+            var fx = PassiveTree.paragonEffects(p.points, null, activeP);
             var lines = PassiveTreeView.effectLines(fx);
             HeroKit.P(body, $"Paragon <b>{U.Fmt(p.level)}/{U.Fmt(Paragon.PARAGON.maxLevel)}</b> · frei <b>{U.Fmt(free)}</b> · gemeinsam für alle Helden, dauerhaft. Punkte: {U.Fmt(p.level)} aus Paragonstufen (ab Heldenstufe {U.Fmt(Paragon.PARAGON.heroMaxLevel)}) + {U.Fmt(Paragon.paragonPrePoints(c.level))} Vorab-Punkte (ab Stufe 50 alle 5 Stufen, jetzt Stufe {U.Fmt(c.level)}) + {U.Fmt(he.paragonBonus ?? 0)} aus Meilensteinen (W100/150/200/250/300).", 15, Theme.Text);
+            HeroKit.P(body, $"Pfade: höchstens <b>{pathLim}</b> wirken gleichzeitig (die mit den meisten Punkten){(pathLim < 3 ? $", ein dritter ab Bestwelle {U.Fmt(Paragon.THIRD_PATH_WAVE)}" : "")}. Spezialisiere dich – Zurücksetzen ist kostenlos.", 13, Theme.Muted);
             if (lines.Count > 0) HeroKit.P(body, $"Wirkung: {string.Join(" · ", lines)}", 13, Theme.Muted);
             var grid = new HeroGrid(body, BODY_W, 242, 10);
             foreach (var t in Paragon.PARAGON_TREES)
@@ -1144,7 +1226,9 @@ namespace Kernwacht.Game.UI
                 v.childControlWidth = true; v.childControlHeight = true; v.childForceExpandWidth = true; v.childForceExpandHeight = false;
                 var h = Ui.Row(box.transform, 5, TextAnchor.MiddleLeft, false);
                 HeroKit.Ic(h.transform, HeroKit.IconName(t.icon), 18, pc);
-                HeroKit.T(h.transform, $"<b>{HeroKit.Col(t.name, pc)}</b> <size=13>{HeroKit.Col($"{U.Fmt(spent)} Punkte", Theme.Muted)}</size>", 17, Theme.Text);
+                bool act = activeP.Contains(t.id);
+                string stTag = spent <= 0 ? "" : act ? " · aktiv" : " · ruht";
+                HeroKit.T(h.transform, $"<b>{HeroKit.Col(t.name, pc)}</b> <size=13>{HeroKit.Col($"{U.Fmt(spent)} Punkte{stTag}", act || spent <= 0 ? Theme.Muted : Theme.Bad)}</size>", 17, Theme.Text);
                 foreach (var n in nodes)
                 {
                     double r = U.Get(p.points, n.id, 0);

@@ -2515,11 +2515,27 @@ namespace Kernwacht.Game
             r.billboard(SPRITE_ADD, SHAPE.glow, sm.x, sm.h + 0.6f, sm.y, 1.1f, acc, 0.15f, t);
             if (storm) for (int q = 0; q < 2; q++) r.ground(SPRITE_ADD, SHAPE.ring, sm.x, sm.h + 0.3f + q * 0.15f, sm.y, 1.6f + q * 0.3f, 0xffffff, 0.35f, t * 8, 0.3f, 0.05f);
             bool champSel = ui.champSelected == true;
-            float supR = (float)st.supportRadius;
-            if (def.aura != null || champSel)
+            // Befehlsradius: jeder Held führt die Türme um sich herum an (Ring immer sichtbar, ausgewählt kräftiger)
+            float supR = (float)HeroCommand.commandRadius(st, he);
+            if (c.dead <= 0)
             {
-                r.ground(SPRITE_ADD, SHAPE.ring, sm.x, sm.h + 0.035f, sm.y, supR, acc, champSel ? 0.5f : 0.22f, 0, 0.3f, 0.02f);
-                r.ground(SPRITE_ADD, SHAPE.disc, sm.x, sm.h + 0.03f, sm.y, supR, acc, 0.04f + Mathf.Sin(t * 2) * 0.015f, 0, 0.5f);
+                r.ground(SPRITE_ADD, SHAPE.ring, sm.x, sm.h + 0.035f, sm.y, supR, acc, champSel ? 0.55f : 0.26f, 0, 0.3f, 0.02f);
+                r.ground(SPRITE_ADD, SHAPE.disc, sm.x, sm.h + 0.03f, sm.y, supR, acc, 0.035f + Mathf.Sin(t * 2) * 0.012f, 0, 0.5f);
+            }
+            // Befehlsbanner: Mast mit Wimpel, halber Befehlsbonus im selben Radius
+            var bn = he.banner;
+            if (bn != null && c.dead <= 0)
+            {
+                float bx = (float)bn.x, bz = (float)bn.y, bh = Terrain.topAt(map, bx, bz);
+                float rdy = he.bannerCd > 0 ? 0.6f : 1f;
+                r.ground(SPRITE_ADD, SHAPE.ring, bx, bh + 0.035f, bz, supR, acc, (champSel ? 0.4f : 0.18f) * rdy, 0, 0.3f, 0.015f);
+                r.ground(SPRITE_ADD, SHAPE.disc, bx, bh + 0.03f, bz, supR, acc, 0.025f, 0, 0.5f);
+                r.ground(SPRITE_ADD, SHAPE.ring, bx, bh + 0.05f, bz, 0.3f, acc, 0.8f, t, 0.3f, 0.12f);
+                r.line(bx, bh, bz, bx, bh + 1.6f, bz, 0.07f, 0xd8c8a0, 1f, false);
+                float wave = Mathf.Sin(t * 3f) * 0.06f;
+                RightVector(out float flx, out float flz);
+                r.line(bx, bh + 1.45f, bz, bx + flx * 0.7f, bh + 1.3f + wave, bz + flz * 0.7f, 0.34f, acc, 1f, false);
+                r.billboard(SPRITE_ADD, SHAPE.glow, bx, bh + 1.4f, bz, 0.9f, acc, 0.3f, t);
             }
             if (champSel)
             {

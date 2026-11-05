@@ -511,7 +511,7 @@ namespace Kernwacht.Sim
             return new GroupSpecializeResult { ok = true, message = $"{U.Fmt(count)}× auf {name} gestellt für {U.Fmt(spent)} Gold{(U.Truthy(left) ? $" ({U.Fmt(left)} fehlen noch – zu wenig Gold)" : "")}", count = count, spent = spent, left = left };
         }
 
-        private static void markDirty(GameSimulation sim)
+        internal static void markDirty(GameSimulation sim)
         {
             sim.c.networkDirty = true;
             sim.c.statsDirty = true;
@@ -534,6 +534,8 @@ namespace Kernwacht.Sim
                 double inc = U.Round(sim.stats(t)["income"]);
                 // Goldvorkommen: zusätzlicher Abbau neben dem normalen Ertrag
                 if (onVein(sim, t)) inc += veinBonus(sim.s.wave);
+                // Befehl (z. B. Mira): Befehlsbonus des Helden erhöht den Goldertrag
+                if (sim.c.champBuff.TryGetValue(t.uid, out var cb) && cb != null && cb.dmg > 0) inc = U.Round(inc * (1 + cb.dmg));
                 t.goldEarned += inc;
                 total += inc;
                 sim.emit(new GameEvent { k = "gold", amount = inc, x = t.cx + 0.5, y = t.cy + 0.5 });

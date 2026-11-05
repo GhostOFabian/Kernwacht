@@ -74,6 +74,7 @@ namespace Kernwacht.Sim
                 A("follow", "Kamera folgt dem Helden", "Helden-Endlos", "y", "hero"),
                 A("topdown", "Draufsicht", "Helden-Endlos", "v", "hero"),
                 A("hold", "Held festsetzen", "Helden-Endlos", "z", "hero"),
+                A("banner", "Befehlsbanner setzen (Feld unter dem Mauszeiger)", "Helden-Endlos", ".", "hero"),
                 A("nextWave", "Nächste Welle rufen", "Helden-Endlos", "enter", "hero"),
             };
             // Die Lane-Barrikade (3.8) teilt sich die Taste mit der Mazing-Barrikade – je nach Kartenvariante gibt es nur eine davon

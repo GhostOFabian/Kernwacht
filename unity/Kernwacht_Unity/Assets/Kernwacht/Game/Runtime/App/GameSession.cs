@@ -626,8 +626,12 @@ namespace Kernwacht.Game
             }
         }
 
+        /// <summary>Letzte Zeigerposition über der Karte (für das Banner per Taste).</summary>
+        float lastPx = -1, lastPy = -1;
+
         void hover(float px, float py)
         {
+            lastPx = px; lastPy = py;
             hv.touchMode = false;
             if (movingTower != 0)
             {
@@ -1297,7 +1301,7 @@ namespace Kernwacht.Game
             }
             app.startRun(new RunSetup
             {
-                heroEndless = s.he != null ? app.heroEndlessSetup(s.he.champion.id, app.save.progress.heroMeta.startKit) : null,
+                heroEndless = s.he != null ? app.heroEndlessSetup(s.he.champion.id, app.save.progress.heroMeta.startKit, s.he.doctrine) : null,
                 mode = s.mode, seedText = s.seed.text, variant = s.map.variant, biome = s.map.biome, difficulty = s.difficulty,
                 missionId = s.missionId, customMap = s.mode == "custom" ? s.map : null, size = s.map.size ?? "normal", heroes = s.heroes.Select((x) => x.id).ToList(),
             });
@@ -1424,6 +1428,43 @@ namespace Kernwacht.Game
             hud.forcePanelRefresh();
         }
 
+        /// <summary>Taktikladung zünden (Knopfleiste neben dem Heldendock).</summary>
+        public void useCharge(string id)
+        {
+            var r = sim.useCharge(id);
+            if (!r.ok)
+            {
+                app.audio.play("error");
+                app.toast(r.reason ?? "Nicht möglich", "warn", 1500);
+                return;
+            }
+            app.audio.play("heroAbility", 0.9f);
+            heroHud?.refresh();
+        }
+
+        /// <summary>Befehlsbanner setzen: per Taste auf das Feld unter dem Mauszeiger, per Knopf an die Position des Helden.</summary>
+        public void placeBanner(bool atCursor)
+        {
+            var he = sim.s.he;
+            if (he == null) return;
+            double x = he.champion.x, y = he.champion.y;
+            if (atCursor)
+            {
+                var cell = ui.hoverCell ?? (lastPx >= 0 ? app.view.pickCell(lastPx, lastPy, sim.s.map) : null);
+                if (cell != null) { x = cell.x + 0.5; y = cell.y + 0.5; }
+            }
+            var r = sim.placeBanner(x, y);
+            if (!r.ok)
+            {
+                app.audio.play("error");
+                app.toast(r.reason ?? "Nicht möglich", "warn", 1500);
+                return;
+            }
+            app.audio.play("build");
+            app.toast($"Banner gesetzt – Türme in der Nähe erhalten den halben Befehlsbonus ({U.Fmt(HeroCommand.BANNER_CD)} s bis zum Versetzen)", "info", 1800);
+            heroHud?.refresh();
+        }
+
         public void toggleHold()
         {
             var c = sim.s.he?.champion;
@@ -1484,6 +1525,7 @@ namespace Kernwacht.Game
                 case "y": e.preventDefault(); toggleFollow(); return true;
                 case "v": e.preventDefault(); toggleTopDown(); return true;
                 case "z": e.preventDefault(); toggleHold(); return true;
+                case ".": e.preventDefault(); placeBanner(true); return true;
                 default: return false;
             }
         }

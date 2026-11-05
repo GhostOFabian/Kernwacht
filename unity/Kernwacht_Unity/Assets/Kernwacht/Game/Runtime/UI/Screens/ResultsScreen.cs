@@ -43,7 +43,7 @@ namespace Kernwacht.Game.UI
             {
                 app.startRun(new RunSetup
                 {
-                    heroEndless = he != null ? app.heroEndlessSetup(he.champion.id, app.save.progress.heroMeta.startKit) : null,
+                    heroEndless = he != null ? app.heroEndlessSetup(he.champion.id, app.save.progress.heroMeta.startKit, he.doctrine) : null,
                     mode = s.mode, seedText = s.seed.text, variant = s.map.variant, biome = s.map.biome, difficulty = s.difficulty,
                     missionId = s.missionId, customMap = s.mode == "custom" ? s.map : null, size = s.map.size ?? "normal", heroes = s.heroes.Select((x) => x.id).ToList(),
                 });
