@@ -912,6 +912,8 @@ namespace Kernwacht.Sim
         /// <summary>Gewählte Startausrüstung aus der Sammlung.</summary>
         public List<string> startKit = new List<string>();   // ItemId[]
         public string lastChampion;   // ChampionId
+        /// <summary>Zuletzt gewählte Doktrin (Doctrines.DOCTRINES).</summary>
+        public string lastDoctrine;
         public double runs;
         /// <summary>Passiver Baum: Knoten-ID → Rang.</summary>
         public Dictionary<string, double> passive = new Dictionary<string, double>();

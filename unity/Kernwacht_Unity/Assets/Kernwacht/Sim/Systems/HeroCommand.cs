@@ -122,6 +122,31 @@ namespace Kernwacht.Sim
             return U.Max(1, Math.Pow(Balance.waveHpMul(w, true), 0.5)) * doc;
         }
 
+        /// <summary>Sammelruf: Das Ultimate jedes Helden stärkt zusätzlich alle Türme seiner Affinität auf der ganzen Karte.</summary>
+        public const double ULT_DMG = 0.3, ULT_SPEED = 0.2, ULT_DUR = 10;
+
+        public static void ultimateCommand(GameSimulation sim)
+        {
+            var he = sim.s.he;
+            if (he == null) return;
+            var prof = profileOf(he.champion.id);
+            if (prof == null) return;
+            double k = Doctrines.of(he).commandMul;
+            if (prof.types.Length > 0 && prof.types[0] == "*") k *= 0.6; // Lyra führt alle Türme an – dafür schwächer
+            if (k <= 0) return;
+            int n = 0;
+            foreach (var t in sim.s.towers)
+            {
+                var a = Towers.TOWERS[t.def].attack;
+                if (a == "economy" || a == "none" || !affine(he, t.def)) continue;
+                ChampionSystem.applyTowerBuff(sim, t.uid, "ult:command", new TowerBuffValues { dmg = ULT_DMG * k, speed = ULT_SPEED * k }, ULT_DUR);
+                n++;
+            }
+            if (n > 0)
+                sim.emit(new GameEvent { k = "message", text = $"Sammelruf: {U.Fmt(n)} Türme ({prof.label}) +{U.Fmt(Math.Round(ULT_DMG * k * 100))} % Schaden, +{U.Fmt(Math.Round(ULT_SPEED * k * 100))} % Tempo für {U.Fmt(ULT_DUR)} s", severity = "info" });
+            sim.c.champBuffSig = "";
+        }
+
         /// <summary>Banner setzen bzw. versetzen (Taste B).</summary>
         public static CommandResult placeBanner(GameSimulation sim, double x, double y)
         {

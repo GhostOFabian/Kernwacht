@@ -452,6 +452,11 @@ namespace Kernwacht.Game.UI
                 string k = skillKey(slot);
                 string tgt = sk.target == "self" ? "selbst" : sk.target == "tower" ? "Turm" : "Bereich";
                 string t = $"{sk.name} ({k}) – {sk.description}\nAbklingzeit {U.Fmt(sk.cooldown)} s · Mana {U.Fmt(sk.mana)} · Ziel: {tgt}{(sk.unlockLevel > 1 ? $" · ab Stufe {U.Fmt(sk.unlockLevel)}" : "")}";
+                if (slot == 3)
+                {
+                    var prof = HeroCommand.profileOf(sim.s.he?.champion.id);
+                    if (prof != null) t += $"\nSammelruf: zusätzlich alle Türme der Affinität ({prof.label}) auf der Karte +{U.Fmt(HeroCommand.ULT_DMG * 100)} % Schaden und +{U.Fmt(HeroCommand.ULT_SPEED * 100)} % Tempo für {U.Fmt(HeroCommand.ULT_DUR)} s";
+                }
                 // PORT: zusätzlich der Grund, warum die Fähigkeit gerade nicht geht (TS zeigt ihn nur über Klassen)
                 var chk = ChampionSystem.skillState(sim, slot);
                 if (!chk.ok && !string.IsNullOrEmpty(chk.reason)) t += "\n" + HeroKit.Col(chk.reason, Theme.Bad);

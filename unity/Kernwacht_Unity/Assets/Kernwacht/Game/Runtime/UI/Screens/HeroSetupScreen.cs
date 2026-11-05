@@ -50,7 +50,7 @@ namespace Kernwacht.Game.UI
             double slots = HeroEndless.carrySlots(perks);
             var done = app.save.progress.campaignCompleted;
             string champion = meta.lastChampion != null && Champions.CHAMPIONS.ContainsKey(meta.lastChampion) && Champions.championUnlocked(meta.lastChampion, perks, meta.bestWave, done) ? meta.lastChampion : "lyra";
-            string doctrine = Doctrines.DEFAULT;
+            string doctrine = meta.lastDoctrine != null && Doctrines.DOCTRINES.ContainsKey(meta.lastDoctrine) ? meta.lastDoctrine : Doctrines.DEFAULT;
             List<string> kit = meta.startKit.Where((i) => meta.unlockedItems.Contains(i)).Take((int)slots).ToList();
             var setup = new RunSetup
             {
