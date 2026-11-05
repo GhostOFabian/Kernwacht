@@ -404,6 +404,12 @@ namespace Kernwacht.Sim
             return this.heCmd(() => ChampionSystem.useChampionSkill(this, slot, tx, ty));
         }
 
+        /// <summary>Befehlsbanner des Helden setzen bzw. versetzen.</summary>
+        public CommandResult placeBanner(double x, double y)
+        {
+            return this.heCmd(() => HeroCommand.placeBanner(this, x, y));
+        }
+
         public CommandResult learnSkill(string nodeId)
         {
             return this.heCmd(() => ChampionSystem.spendSkillPoint(this, nodeId));

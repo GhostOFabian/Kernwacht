@@ -32,6 +32,8 @@ namespace Kernwacht.Game.UI
         void toggleTopDown();
         void toggleHold();
         void moveToShop();
+        /// <summary>Befehlsbanner setzen (atCursor: Feld unter dem Mauszeiger, sonst Position des Helden).</summary>
+        void placeBanner(bool atCursor);
     }
 
     public class HeroHud
@@ -128,7 +130,18 @@ namespace Kernwacht.Game.UI
         private readonly List<PotionEl> potionEls = new List<PotionEl>();
         private Text noPotions;
         private ulong potionSig; private bool potionDirty = true;
-        private Button sheetBtn, shopBtn, followBtn, holdBtn, topBtn;
+        private Button sheetBtn, shopBtn, followBtn, holdBtn, topBtn, bannerBtn;
+
+        /// <summary>Hinweis zum Befehl des Helden: welche Türme er anführt und wie es um das Banner steht.</summary>
+        private string bannerTip()
+        {
+            var he = sim.s.he;
+            if (he == null) return "";
+            var p = HeroCommand.profileOf(he.champion.id);
+            string aff = p != null ? p.label : "–";
+            string cd = he.bannerCd > 0 ? $"Versetzen in {U.Fmt(Math.Ceiling(he.bannerCd))} s" : "bereit";
+            return $"Befehlsbanner (Punkt-Taste: unter den Mauszeiger, Klick: hier)\nWirkt mit halber Stärke wie der Befehl des Helden.\nAffinität: {aff} (voller Bonus, andere Türme ¼)\nBanner: {cd}";
+        }
         private bool nearLast;
         private int dockState = -1;
 
@@ -317,6 +330,8 @@ namespace Kernwacht.Game.UI
             Ui.Tip(shopBtn, () => nearLast ? "Laden & Schmiede öffnen (X)" : "Laden (X): der Held muss beim Laden stehen – Klick zeigt das Angebot");
             holdBtn = HeroKit.Btn(btnRow, null, () => a.toggleHold(), Ui.BtnKind.Normal, true, "hold", 16, 42);
             HeroKit.Tip(holdBtn, "Position festsetzen (Z): Klicks bewegen den Helden nicht mehr, er verfolgt keine Gegner");
+            bannerBtn = HeroKit.Btn(btnRow, null, () => a.placeBanner(false), Ui.BtnKind.Normal, true, "flag", 16, 42);
+            Ui.Tip(bannerBtn, bannerTip);
             followBtn = HeroKit.Btn(btnRow, null, () => a.toggleFollow(), Ui.BtnKind.Normal, true, "advance", 16, 42);
             HeroKit.Tip(followBtn, "Kamera folgt dem Helden (Y)");
             topBtn = HeroKit.Btn(btnRow, null, () => a.toggleTopDown(), Ui.BtnKind.Normal, true, "map", 16, 42);

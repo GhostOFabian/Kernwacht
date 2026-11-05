@@ -588,6 +588,7 @@ namespace Kernwacht.Sim
             if (he == null) return;
             bool changed = false;
             foreach (TowerBuff b in he.towerBuffs) b.t -= dt;
+            if (he.bannerCd > 0) he.bannerCd = U.Max(0, he.bannerCd - dt);
             int before = he.towerBuffs.Count;
             he.towerBuffs = he.towerBuffs.Where((b) => b.t > 0 && sim.c.towerByUid.ContainsKey(b.tower)).ToList();
             if (he.towerBuffs.Count != before) changed = true;
@@ -626,22 +627,34 @@ namespace Kernwacht.Sim
             var def = Champions.CHAMPIONS[c.id];
             if (c.dead <= 0)
             {
+                // Befehl: Held (volle Stärke) und Banner (halbe Stärke) – je Turm zählt die stärkere Quelle.
+                // Affinitätstürme erhalten den vollen Bonus, alle anderen ein Viertel. Eigene Obergrenze für Befehlsboni.
                 ChampionStats st = championStats(he);
                 SkillMods sm = skillModsOf(c);
-                double auraDmg = ((def.aura != null ? N(def.aura.dmg) : 0) + sm.auraDmg) * st.supportPower;
-                double auraSpd = ((def.aura != null ? N(def.aura.speed) : 0) + sm.auraSpeed) * st.supportPower;
-                if (auraDmg > 0 || auraSpd > 0 || sm.auraRange > 0 || sm.auraCrit > 0)
+                CommandProfile prof = HeroCommand.profileOf(c.id);
+                double baseDmg = ((def.aura != null ? N(def.aura.dmg) : 0) + sm.auraDmg + (prof != null ? prof.dmg : 0)) * st.supportPower;
+                double baseSpd = ((def.aura != null ? N(def.aura.speed) : 0) + sm.auraSpeed + (prof != null ? prof.speed : 0)) * st.supportPower;
+                double baseRange = sm.auraRange + (prof != null ? prof.range : 0);
+                double baseCrit = sm.auraCrit + (prof != null ? prof.crit : 0);
+                if (baseDmg > 0 || baseSpd > 0 || baseRange > 0 || baseCrit > 0)
                 {
-                    double r2 = pow2(st.supportRadius);
+                    double rad = HeroCommand.commandRadius(st);
+                    double r2 = pow2(rad);
+                    HeroBanner bn = he.banner;
                     foreach (TowerInstance t in sim.s.towers)
                     {
-                        if (Towers.TOWERS[t.def].attack == "economy" || Towers.TOWERS[t.def].attack == "none") continue;
-                        if (dist2(t.cx + 0.5, t.cy + 0.5, c.x, c.y) > r2) continue;
+                        if (Towers.TOWERS[t.def].attack == "economy" && !HeroCommand.affine(c.id, t.def)) continue;
+                        if (Towers.TOWERS[t.def].attack == "none") continue;
+                        double k = 0;
+                        if (dist2(t.cx + 0.5, t.cy + 0.5, c.x, c.y) <= r2) k = 1;
+                        else if (bn != null && dist2(t.cx + 0.5, t.cy + 0.5, bn.x, bn.y) <= r2) k = HeroCommand.BANNER_POWER;
+                        if (k <= 0) continue;
+                        k *= HeroCommand.affinityShare(c.id, t.def);
                         ChampTowerBuff a = get(t.uid);
-                        a.dmg += auraDmg;
-                        a.speed += auraSpd;
-                        a.range += sm.auraRange;
-                        a.crit += sm.auraCrit;
+                        a.dmg += U.Min(HeroCommand.CAP_DMG, baseDmg * k);
+                        a.speed += U.Min(HeroCommand.CAP_SPEED, baseSpd * k);
+                        a.range += U.Min(HeroCommand.CAP_RANGE, baseRange * k);
+                        a.crit += U.Min(HeroCommand.CAP_CRIT, baseCrit * k);
                     }
                 }
             }
@@ -1058,7 +1071,7 @@ namespace Kernwacht.Sim
         {
             ChampionState c = he.champion;
             ChampionStats st = championStats(he);
-            double dmg = amount;
+            double dmg = amount * HeroCommand.heroWaveMul(sim);
             if (canCrit && sim.rand() < st.critChance) dmg *= st.critDamage;
             double dealt = DamageSystem.dealDamage(sim, e, dmg, Champions.CHAMPIONS[c.id].damageType, CHAMPION_UID);
             c.damageDealt += dealt;
@@ -1285,7 +1298,7 @@ namespace Kernwacht.Sim
                     {
                         EnemyInstance e = sim.s.enemies[i];
                         if (!e.alive || e.stealthed || e.burrowed || dist2(e.x, e.y, z.x, z.y) > z.r * z.r) continue;
-                        double dealt = DamageSystem.dealDamage(sim, e, z.power, "physical", CHAMPION_UID);
+                        double dealt = DamageSystem.dealDamage(sim, e, z.power * HeroCommand.heroWaveMul(sim), "physical", CHAMPION_UID);
                         he.champion.damageDealt += dealt;
                     }
                     sim.emit(new GameEvent { k = "champSkill", skill = "volleyTick", x = z.x, y = z.y, tx = z.x, ty = z.y, r = z.r, color = Champions.CHAMPIONS[he.champion.id].accent });

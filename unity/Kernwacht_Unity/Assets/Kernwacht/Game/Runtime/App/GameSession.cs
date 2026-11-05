@@ -1424,6 +1424,25 @@ namespace Kernwacht.Game
             hud.forcePanelRefresh();
         }
 
+        /// <summary>Befehlsbanner setzen: per Taste auf das Feld unter dem Mauszeiger, per Knopf an die Position des Helden.</summary>
+        public void placeBanner(bool atCursor)
+        {
+            var he = sim.s.he;
+            if (he == null) return;
+            double x = he.champion.x, y = he.champion.y;
+            if (atCursor && ui.hoverCell != null) { x = ui.hoverCell.x + 0.5; y = ui.hoverCell.y + 0.5; }
+            var r = sim.placeBanner(x, y);
+            if (!r.ok)
+            {
+                app.audio.play("error");
+                app.toast(r.reason ?? "Nicht möglich", "warn", 1500);
+                return;
+            }
+            app.audio.play("build");
+            app.toast($"⚑ Banner gesetzt – Türme in der Nähe erhalten den halben Befehlsbonus ({U.Fmt(HeroCommand.BANNER_CD)} s bis zum Versetzen)", "info", 1800);
+            heroHud?.refresh();
+        }
+
         public void toggleHold()
         {
             var c = sim.s.he?.champion;
@@ -1484,6 +1503,7 @@ namespace Kernwacht.Game
                 case "y": e.preventDefault(); toggleFollow(); return true;
                 case "v": e.preventDefault(); toggleTopDown(); return true;
                 case "z": e.preventDefault(); toggleHold(); return true;
+                case ".": e.preventDefault(); placeBanner(true); return true;
                 default: return false;
             }
         }

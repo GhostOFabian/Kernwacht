@@ -169,6 +169,7 @@ namespace Kernwacht.Game.UI
             public LayoutElement le;
             public Image icon, elem;
             public bool chip;
+            public Image cmd;
         }
         readonly Dictionary<string, TowerBtn> towerBtns = new Dictionary<string, TowerBtn>();
         readonly List<TowerBtn> towerBtnList = new List<TowerBtn>();
@@ -539,6 +540,16 @@ namespace Kernwacht.Game.UI
             Ui.Place(tb.free.rectTransform, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-4, -1), new Vector2(16, 14));
             tb.free.gameObject.SetActive(false);
             // Fusionsmarke (Symbol + Beschriftung über dem Knopf), standardmäßig aus
+            // Befehlsmarke: Turm gehört zur Affinität des Helden (voller Befehlsbonus)
+            var heS = sim.s.he;
+            if (commandMarked(id))
+            {
+                var fg = HK.Img(tb.bg.transform, Icons.Get("flag"), 15, Theme.Hex(Champions.CHAMPIONS[heS.champion.id].accent));
+                fg.raycastTarget = false;
+                Ui.Place(fg.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(4, -21), new Vector2(15, 15));
+                fg.gameObject.AddComponent<Shadow>().effectColor = new Color(0, 0, 0, 0.9f);
+                tb.cmd = fg;
+            }
             tb.fuse = HK.Img(tb.bg.transform, Icons.Get("fuse"), 20);
             tb.fuse.color = FUSE_COL;
             tb.fuse.raycastTarget = false;
@@ -588,9 +599,19 @@ namespace Kernwacht.Game.UI
             Ui.Place(tb.icon.rectTransform, new Vector2(0.5f, chip ? 0.5f : 1), new Vector2(0.5f, chip ? 0.5f : 1), chip ? new Vector2(0, 6) : new Vector2(0, -3), new Vector2(ic, ic));
             tb.icon.color = chip ? new Color(0.62f, 0.62f, 0.68f, 1f) : Color.white;
             tb.key.gameObject.SetActive(!chip);
+            if (tb.cmd != null) tb.cmd.gameObject.SetActive(!chip);
             tb.cost.fontSize = chip ? 11 : 13;
             tb.cost.rectTransform.sizeDelta = new Vector2(w, 17);
             tb.elem.rectTransform.sizeDelta = new Vector2(chip ? -8 : -12, chip ? 3 : 4);
+        }
+
+        /// <summary>Turm gehört zur Affinität des Helden (Lyra führt alle an – dann keine Marke).</summary>
+        bool commandMarked(string id)
+        {
+            var he = sim.s.he;
+            var prof = he != null ? HeroCommand.profileOf(he.champion.id) : null;
+            if (prof == null || (prof.types.Length > 0 && prof.types[0] == "*")) return false;
+            return HeroCommand.affine(he.champion.id, id);
         }
 
         string towerTitle(string id)
@@ -608,7 +629,8 @@ namespace Kernwacht.Game.UI
             string dmg = d.damageType != null ? $" · {HudText.Dmg(d.damageType)}" : "";
             string lim = s.he != null && s.rules.endless && !Scaling.countsTowardLimit(id) ? " · zählt nicht zum Turmlimit" : "";
             string fz = towerBtns.TryGetValue(id, out var tbx) && tbx.fuseWith != null ? $"\n✦ Fusionspartner: neben {tbx.fuseWith} stellen" : "";
-            return $"{d.name} ({towerKey(id)}) – {d.role}{dmg}{lim}{fz}";
+            string cmd = commandMarked(id) ? $"\n⚑ Befehl: {Champions.CHAMPIONS[s.he.champion.id].name} führt diesen Turm mit vollem Bonus an" : "";
+            return $"{d.name} ({towerKey(id)}) – {d.role}{dmg}{lim}{fz}{cmd}";
         }
 
         static readonly Color FUSE_COL = new Color(0.48f, 0.88f, 1f, 1f);
