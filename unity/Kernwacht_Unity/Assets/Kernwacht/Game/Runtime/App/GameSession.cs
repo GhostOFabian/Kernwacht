@@ -1424,6 +1424,20 @@ namespace Kernwacht.Game
             hud.forcePanelRefresh();
         }
 
+        /// <summary>Taktikladung zünden (Knopfleiste neben dem Heldendock).</summary>
+        public void useCharge(string id)
+        {
+            var r = sim.useCharge(id);
+            if (!r.ok)
+            {
+                app.audio.play("error");
+                app.toast(r.reason ?? "Nicht möglich", "warn", 1500);
+                return;
+            }
+            app.audio.play("heroAbility", 0.9f);
+            heroHud?.refresh();
+        }
+
         /// <summary>Befehlsbanner setzen: per Taste auf das Feld unter dem Mauszeiger, per Knopf an die Position des Helden.</summary>
         public void placeBanner(bool atCursor)
         {

@@ -54,6 +54,7 @@ namespace Kernwacht.Sim
             if (tether != null) dmg *= 1 + tether.power;
             var vm = ElementSystem.getStatus(e, "voidMark");
             if (vm != null) dmg *= 1 + vm.power;
+            dmg *= TacticalCharges.damageTakenMul(sim);
             if (e.phaseShift > 0 && type == "physical")
             {
                 if (sim.s.tick % 6 == 0) sim.emit(new GameEvent { k = "immune", x = e.x, y = e.y });

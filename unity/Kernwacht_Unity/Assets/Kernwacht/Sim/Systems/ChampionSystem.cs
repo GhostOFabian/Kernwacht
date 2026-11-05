@@ -615,13 +615,29 @@ namespace Kernwacht.Sim
                 }
                 return a;
             };
+            // Taktikladungen haben eine eigene Obergrenze je Turm
+            Dictionary<double, ChampTowerBuff> chg = new Dictionary<double, ChampTowerBuff>();
             foreach (TowerBuff b in he.towerBuffs)
             {
+                if (b.src != null && b.src.StartsWith("charge:"))
+                {
+                    if (!chg.TryGetValue(b.tower, out var cg)) chg[b.tower] = cg = new ChampTowerBuff();
+                    cg.dmg += b.dmg; cg.speed += b.speed; cg.range += b.range; cg.crit += b.crit;
+                    continue;
+                }
                 ChampTowerBuff a = get(b.tower);
                 a.dmg += b.dmg;
                 a.speed += b.speed;
                 a.range += b.range;
                 a.crit += b.crit;
+            }
+            foreach (var kv in chg)
+            {
+                ChampTowerBuff a = get(kv.Key);
+                a.dmg += U.Min(TacticalCharges.CAP_DMG, kv.Value.dmg);
+                a.speed += U.Min(TacticalCharges.CAP_SPEED, kv.Value.speed);
+                a.range += kv.Value.range;
+                a.crit += kv.Value.crit;
             }
             ChampionState c = he.champion;
             var def = Champions.CHAMPIONS[c.id];

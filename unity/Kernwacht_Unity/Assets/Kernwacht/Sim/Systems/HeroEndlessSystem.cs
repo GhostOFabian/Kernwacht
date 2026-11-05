@@ -194,6 +194,7 @@ namespace Kernwacht.Sim
                 stockWave = 0,
                 profile = HeroEndless.profileForWave(state.seed.hash, 1).id,
                 rewardedWave = 0,
+                charges = TacticalCharges.START,
                 stats = new HeroEndlessRunStats { xpCollected = 0, itemsCrafted = 0, itemsFound = 0, potionsUsed = 0, resourcesEarned = 0, levelUps = 0 },
             };
             state.he = he;
@@ -275,6 +276,7 @@ namespace Kernwacht.Sim
             GameState s = sim.s;
             HeroEndlessState he = s.he;
             if (he == null) return;
+            TacticalCharges.update(sim, dt);
             // 3.0: Nachrückende Wellen – ab Welle 120 rückt nach 45 s Kampf die nächste Welle nach
             if (s.phase == "combat" && s.wave >= Scaling.SCALING.overrunFrom)
             {
@@ -295,6 +297,7 @@ namespace Kernwacht.Sim
             while (he.rewardedWave < s.stats.wavesCleared)
             {
                 he.rewardedWave++;
+                TacticalCharges.onWaveCleared(sim, he.rewardedWave);
                 if (he.rewardedWave >= Runes.RUNE_RULES.splinterFrom && LootSystem.lootRand(sim) < Runes.RUNE_RULES.waveChance) RuneSystem.dropRune(sim, s.map.goal.x + 0.5, s.map.goal.y + 0.5);
                 Dictionary<string, double> r = HeroEndless.HERO_ENDLESS.waveResources(he.rewardedWave);
                 double total = 0;
