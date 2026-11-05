@@ -626,8 +626,12 @@ namespace Kernwacht.Game
             }
         }
 
+        /// <summary>Letzte Zeigerposition über der Karte (für das Banner per Taste).</summary>
+        float lastPx = -1, lastPy = -1;
+
         void hover(float px, float py)
         {
+            lastPx = px; lastPy = py;
             hv.touchMode = false;
             if (movingTower != 0)
             {
@@ -1444,7 +1448,11 @@ namespace Kernwacht.Game
             var he = sim.s.he;
             if (he == null) return;
             double x = he.champion.x, y = he.champion.y;
-            if (atCursor && ui.hoverCell != null) { x = ui.hoverCell.x + 0.5; y = ui.hoverCell.y + 0.5; }
+            if (atCursor)
+            {
+                var cell = ui.hoverCell ?? (lastPx >= 0 ? app.view.pickCell(lastPx, lastPy, sim.s.map) : null);
+                if (cell != null) { x = cell.x + 0.5; y = cell.y + 0.5; }
+            }
             var r = sim.placeBanner(x, y);
             if (!r.ok)
             {
@@ -1453,7 +1461,7 @@ namespace Kernwacht.Game
                 return;
             }
             app.audio.play("build");
-            app.toast($"⚑ Banner gesetzt – Türme in der Nähe erhalten den halben Befehlsbonus ({U.Fmt(HeroCommand.BANNER_CD)} s bis zum Versetzen)", "info", 1800);
+            app.toast($"Banner gesetzt – Türme in der Nähe erhalten den halben Befehlsbonus ({U.Fmt(HeroCommand.BANNER_CD)} s bis zum Versetzen)", "info", 1800);
             heroHud?.refresh();
         }
 

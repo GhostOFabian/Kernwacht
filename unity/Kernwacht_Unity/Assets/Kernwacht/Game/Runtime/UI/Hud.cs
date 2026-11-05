@@ -629,7 +629,7 @@ namespace Kernwacht.Game.UI
             string dmg = d.damageType != null ? $" · {HudText.Dmg(d.damageType)}" : "";
             string lim = s.he != null && s.rules.endless && !Scaling.countsTowardLimit(id) ? " · zählt nicht zum Turmlimit" : "";
             string fz = towerBtns.TryGetValue(id, out var tbx) && tbx.fuseWith != null ? $"\n✦ Fusionspartner: neben {tbx.fuseWith} stellen" : "";
-            string cmd = commandMarked(id) ? $"\n⚑ Befehl: {Champions.CHAMPIONS[s.he.champion.id].name} führt diesen Turm mit vollem Bonus an" : "";
+            string cmd = commandMarked(id) ? $"\nBefehl: {Champions.CHAMPIONS[s.he.champion.id].name} führt diesen Turm mit vollem Bonus an" : "";
             return $"{d.name} ({towerKey(id)}) – {d.role}{dmg}{lim}{fz}{cmd}";
         }
 

@@ -190,10 +190,8 @@ namespace Kernwacht.Game.UI
             if (he.charges != chargeLast)
             {
                 chargeLast = he.charges;
-                string pips = "";
                 double mx = Doctrines.of(he).chargeMax;
-                for (int i = 0; i < mx; i++) pips += i < he.charges ? "◆" : "◇";
-                chargeCount.text = $"Taktikladungen  {pips}";
+                chargeCount.text = $"Taktikladungen  <color=#ffd860>{U.Fmt(he.charges)}/{U.Fmt(mx)}</color>";
             }
             float cdFrac = he.chargeCd > 0 ? (float)(he.chargeCd / TacticalCharges.SHARED_CD) : 0f;
             foreach (var el in chargeEls)

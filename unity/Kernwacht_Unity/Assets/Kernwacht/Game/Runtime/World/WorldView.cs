@@ -2531,11 +2531,11 @@ namespace Kernwacht.Game
                 r.ground(SPRITE_ADD, SHAPE.ring, bx, bh + 0.035f, bz, supR, acc, (champSel ? 0.4f : 0.18f) * rdy, 0, 0.3f, 0.015f);
                 r.ground(SPRITE_ADD, SHAPE.disc, bx, bh + 0.03f, bz, supR, acc, 0.025f, 0, 0.5f);
                 r.ground(SPRITE_ADD, SHAPE.ring, bx, bh + 0.05f, bz, 0.3f, acc, 0.8f, t, 0.3f, 0.12f);
-                r.line(bx, bh, bz, bx, bh + 1.1f, bz, 0.035f, 0xe8dcc0, 0.95f);
-                float wave = Mathf.Sin(t * 3f) * 0.05f;
+                r.line(bx, bh, bz, bx, bh + 1.6f, bz, 0.07f, 0xd8c8a0, 1f, false);
+                float wave = Mathf.Sin(t * 3f) * 0.06f;
                 RightVector(out float flx, out float flz);
-                r.line(bx, bh + 1.05f, bz, bx + flx * 0.42f, bh + 0.92f + wave, bz + flz * 0.42f, 0.12f, acc, 0.95f);
-                r.billboard(SPRITE_ADD, SHAPE.glow, bx, bh + 1.0f, bz, 0.6f, acc, 0.25f, t);
+                r.line(bx, bh + 1.45f, bz, bx + flx * 0.7f, bh + 1.3f + wave, bz + flz * 0.7f, 0.34f, acc, 1f, false);
+                r.billboard(SPRITE_ADD, SHAPE.glow, bx, bh + 1.4f, bz, 0.9f, acc, 0.3f, t);
             }
             if (champSel)
             {
