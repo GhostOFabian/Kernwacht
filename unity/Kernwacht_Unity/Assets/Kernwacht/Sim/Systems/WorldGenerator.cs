@@ -467,9 +467,72 @@ namespace Kernwacht.Sim
             rng.shuffle(candidates);
             double k = Math.Sqrt((map.width * map.height) / (22 * 14));
             double veins = U.Round(rng.@int(3, 6) * k);
-            map.veins = U.StableSort(U.Slice(candidates, 0, veins), (a, b) => a - b);
             double ley = U.Round(rng.@int(2, 4) * k);
-            map.ley = U.StableSort(U.Slice(candidates, veins, veins + ley), (a, b) => a - b);
+            // Goldadern als 2×2-Flächen, damit ein Goldgräber (2×2) genau darauf passt
+            var taken = new HashSet<double>();
+            map.veins = U.StableSort(pickBlocks(map, candidates, (int)veins, taken, null), (a, b) => a - b);
+            var leyList = new List<double>();
+            foreach (var c in candidates)
+            {
+                if (leyList.Count >= ley) break;
+                if (taken.Contains(c)) continue;
+                leyList.Add(c);
+                taken.Add(c);
+            }
+            map.ley = U.StableSort(leyList, (a, b) => a - b);
+        }
+
+        /// <summary>
+        /// Wählt bis zu <paramref name="count"/> 2×2-Blöcke aus ebenen, bebaubaren Feldern (Reihenfolge der Kandidaten).
+        /// Liefert alle Zellen der Blöcke; belegte Zellen kommen in <paramref name="taken"/>.
+        /// </summary>
+        public static List<double> pickBlocks(MapDefinition map, List<double> candidates, int count, HashSet<double> taken, Func<int, bool> extraOk)
+        {
+            int w = (int)map.width, h = (int)map.height;
+            var cand = new HashSet<double>(candidates);
+            var outCells = new List<double>();
+            int blocks = 0;
+            foreach (var seed in candidates)
+            {
+                if (blocks >= count) break;
+                if (taken.Contains(seed)) continue;
+                int sx = (int)(seed % w), sy = (int)Math.Floor(seed / w);
+                // die vier möglichen 2×2-Blöcke, die dieses Feld enthalten
+                for (int o = 0; o < 4; o++)
+                {
+                    int ax = sx - (o & 1), ay = sy - (o >> 1);
+                    if (ax < 0 || ay < 0 || ax + 1 >= w || ay + 1 >= h) continue;
+                    bool ok = true;
+                    double hgt = map.heights.Count > ay * w + ax ? map.heights[ay * w + ax] : 0;
+                    for (int dy = 0; dy < 2 && ok; dy++)
+                        for (int dx = 0; dx < 2 && ok; dx++)
+                        {
+                            int ci = (ay + dy) * w + ax + dx;
+                            if (!cand.Contains(ci) || taken.Contains(ci) || !Pathfinding.isBuildableCell(map, ci)) ok = false;
+                            else if (map.heights.Count > ci && map.heights[ci] != hgt) ok = false;
+                            else if (extraOk != null && !extraOk(ci)) ok = false;
+                        }
+                    // ein Feld Abstand zu anderen Blöcken, damit jede Ader als eigene Fläche erkennbar bleibt
+                    for (int dy = -1; dy <= 2 && ok; dy++)
+                        for (int dx = -1; dx <= 2 && ok; dx++)
+                        {
+                            int nx = ax + dx, ny = ay + dy;
+                            if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+                            if (taken.Contains(ny * w + nx)) ok = false;
+                        }
+                    if (!ok) continue;
+                    for (int dy = 0; dy < 2; dy++)
+                        for (int dx = 0; dx < 2; dx++)
+                        {
+                            double ci = (ay + dy) * w + ax + dx;
+                            outCells.Add(ci);
+                            taken.Add(ci);
+                        }
+                    blocks++;
+                    break;
+                }
+            }
+            return outCells;
         }
 
         /// <summary>PORT: BiomeDefinition.decorKinds als List&lt;double&gt; angenommen.</summary>

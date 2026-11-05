@@ -435,7 +435,7 @@ namespace Kernwacht.Game
                 Add("gem", x + 0.25f, top + 0.06f, y + 0.3f, 0.2f, 0.16f, 0.2f, 0xf0c040, 0.5f, 0.3f);
                 Add("gem", x + 0.72f, top + 0.05f, y + 0.66f, 0.15f, 0.13f, 0.15f, 0xf0c040, 0.5f, 1.1f);
                 Add("gem", x + 0.7f, top + 0.04f, y + 0.24f, 0.12f, 0.1f, 0.12f, 0xffe080, 0.5f);
-                Add("disc", x + 0.5f, top + 0.012f, y + 0.5f, 0.42f, 1, 0.42f, 0x6a5020);
+                Add("plane", x + 0.5f, top + 0.012f, y + 0.5f, 1f, 1, 1f, 0x6a5020);
                 Add("gem", x + 0.3f, top + 0.04f, y + 0.72f, 0.1f, 0.08f, 0.1f, 0xffd860, 0.6f, 0.7f);
                 glows.Add(new GlowPoint(x + 0.5f, top + 0.15f, y + 0.5f, 0.35f, 0xffd060, (float)vi));
             }
@@ -447,7 +447,7 @@ namespace Kernwacht.Game
                     Add("octa", x + 0.3f, top + 0.12f, y + 0.35f, 0.16f, 0.3f, 0.16f, 0x7ae0ff, 0.35f, 0.3f, 0.2f);
                     Add("octa", x + 0.68f, top + 0.1f, y + 0.62f, 0.13f, 0.24f, 0.13f, 0x5ac0f0, 0.35f, 1.1f, -0.25f);
                     Add("octa", x + 0.62f, top + 0.08f, y + 0.26f, 0.1f, 0.18f, 0.1f, 0xb0f0ff, 0.35f, 0.6f, 0.3f);
-                    Add("disc", x + 0.5f, top + 0.015f, y + 0.5f, 0.42f, 1, 0.42f, 0x2a5a7a);
+                    Add("plane", x + 0.5f, top + 0.015f, y + 0.5f, 1f, 1, 1f, 0x2a5a7a);
                     glows.Add(new GlowPoint(x + 0.5f, top + 0.15f, y + 0.5f, 0.3f, 0x7ae0ff, (float)(di * 1.3)));
                 }
             foreach (var li in m.ley)

@@ -2707,8 +2707,34 @@ namespace Kernwacht.Game
                     r.billboard(SPRITE_ADD, SHAPE.glow, cx, by, cz, 0.7f, color, 0.35f);
                 }
             }
-            foreach (var vi in m.veins) mark(vi, 0xffc830, mine, SHAPE.star);
-            if (m.deposits != null) foreach (var di in m.deposits) mark(di, 0x7ae0ff, mine, SHAPE.star);
+            // Adern sind 2×2-Flächen (Platz für genau einen Goldgräber): eine gemeinsame Fläche statt vier Kreisen
+            void block(List<double> cells, int color, bool strong)
+            {
+                if (cells == null) return;
+                var set = new HashSet<double>(cells);
+                foreach (var ci in cells)
+                {
+                    int x = (int)(ci % w), z = (int)Math.Floor(ci / w);
+                    // Anker = linke obere Zelle eines Blocks
+                    if (x > 0 && set.Contains(ci - 1)) continue;
+                    if (z > 0 && set.Contains(ci - w)) continue;
+                    bool full = set.Contains(ci + 1) && set.Contains(ci + w) && set.Contains(ci + w + 1);
+                    if (!full) { mark(ci, color, strong, SHAPE.star); continue; }
+                    if (sim.c.towerByCell.ContainsKey(ci)) continue; // Goldgräber steht schon darauf
+                    float cx = x + 1f, cz = z + 1f, top = (float)Terrain.cellTop(m, x, z);
+                    r.ground(false, SHAPE.square, cx, top + 0.026f, cz, 0.96f, Col.Shade(color, 0.6), strong ? 0.42f : 0.26f);
+                    r.ground(SPRITE_ADD, SHAPE.square, cx, top + 0.03f, cz, 0.96f, color, strong ? 0.25f + pulse * 0.15f : 0.08f + pulse * 0.04f);
+                    r.ground(SPRITE_ADD, SHAPE.ring, cx, top + 0.032f, cz, 1.1f, color, strong ? 0.6f + pulse * 0.3f : 0.18f, 0, 0.3f, 0.04f);
+                    if (strong)
+                    {
+                        float by = top + 0.9f + Mathf.Sin(t * 2.5f + (float)ci) * 0.1f;
+                        r.billboard(SPRITE_ADD, SHAPE.star, cx, by, cz, 0.45f, color, 1f, t);
+                        r.billboard(SPRITE_ADD, SHAPE.glow, cx, by, cz, 1f, color, 0.4f);
+                    }
+                }
+            }
+            block(m.veins, 0xffc830, mine);
+            block(m.deposits, 0x7ae0ff, mine);
             foreach (var li in m.ley) mark(li, 0xc070ff, tower, SHAPE.spark);
         }
 
