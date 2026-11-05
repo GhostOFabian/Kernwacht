@@ -31,6 +31,8 @@ namespace Kernwacht.Sim
         /// <summary>Schnappschuss des dauerhaften Fortschritts beim Start.</summary>
         public HeroEndlessSetupMeta meta;
         public string runId;
+        /// <summary>Gewählte Doktrin (Doctrines.DOCTRINES), null = Gleichgewicht.</summary>
+        public string doctrine;
     }
 
     public static partial class HeroEndlessSystem
@@ -195,6 +197,7 @@ namespace Kernwacht.Sim
                 profile = HeroEndless.profileForWave(state.seed.hash, 1).id,
                 rewardedWave = 0,
                 charges = TacticalCharges.START,
+                doctrine = setup.doctrine != null && Doctrines.DOCTRINES.ContainsKey(setup.doctrine) ? setup.doctrine : Doctrines.DEFAULT,
                 stats = new HeroEndlessRunStats { xpCollected = 0, itemsCrafted = 0, itemsFound = 0, potionsUsed = 0, resourcesEarned = 0, levelUps = 0 },
             };
             state.he = he;

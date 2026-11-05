@@ -648,13 +648,15 @@ namespace Kernwacht.Sim
                 ChampionStats st = championStats(he);
                 SkillMods sm = skillModsOf(c);
                 CommandProfile prof = HeroCommand.profileOf(c.id);
-                double baseDmg = ((def.aura != null ? N(def.aura.dmg) : 0) + sm.auraDmg + (prof != null ? prof.dmg : 0)) * st.supportPower;
-                double baseSpd = ((def.aura != null ? N(def.aura.speed) : 0) + sm.auraSpeed + (prof != null ? prof.speed : 0)) * st.supportPower;
-                double baseRange = sm.auraRange + (prof != null ? prof.range : 0);
-                double baseCrit = sm.auraCrit + (prof != null ? prof.crit : 0);
-                if (baseDmg > 0 || baseSpd > 0 || baseRange > 0 || baseCrit > 0)
+                DoctrineDefinition doc = Doctrines.of(he);
+                double baseDmg = ((def.aura != null ? N(def.aura.dmg) : 0) + sm.auraDmg + (prof != null ? prof.dmg : 0)) * st.supportPower * doc.commandMul;
+                double baseSpd = ((def.aura != null ? N(def.aura.speed) : 0) + sm.auraSpeed + (prof != null ? prof.speed : 0)) * st.supportPower * doc.commandMul;
+                double baseRange = (sm.auraRange + (prof != null ? prof.range : 0)) * doc.commandMul;
+                double baseCrit = (sm.auraCrit + (prof != null ? prof.crit : 0)) * doc.commandMul;
+                bool coreGuard = doc.coreGuardDmg > 0 && Doctrines.heroAtCore(sim);
+                if (baseDmg > 0 || baseSpd > 0 || baseRange > 0 || baseCrit > 0 || coreGuard || doc.outsidePenalty > 0)
                 {
-                    double rad = HeroCommand.commandRadius(st);
+                    double rad = HeroCommand.commandRadius(st, he);
                     double r2 = pow2(rad);
                     HeroBanner bn = he.banner;
                     foreach (TowerInstance t in sim.s.towers)
@@ -664,6 +666,9 @@ namespace Kernwacht.Sim
                         double k = 0;
                         if (dist2(t.cx + 0.5, t.cy + 0.5, c.x, c.y) <= r2) k = 1;
                         else if (bn != null && dist2(t.cx + 0.5, t.cy + 0.5, bn.x, bn.y) <= r2) k = HeroCommand.BANNER_POWER;
+                        // Doktrinen: Baumeister (Held am Kern → alle Türme), Feldherr (außerhalb des Befehls schwächer)
+                        if (coreGuard && Towers.TOWERS[t.def].attack != "economy") get(t.uid).dmg += doc.coreGuardDmg;
+                        if (k <= 0 && doc.outsidePenalty > 0 && Towers.TOWERS[t.def].attack != "economy") get(t.uid).dmg -= doc.outsidePenalty;
                         if (k <= 0) continue;
                         k *= HeroCommand.affinityShare(he, t.def);
                         ChampTowerBuff a = get(t.uid);

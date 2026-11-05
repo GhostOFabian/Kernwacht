@@ -50,6 +50,7 @@ namespace Kernwacht.Game.UI
             double slots = HeroEndless.carrySlots(perks);
             var done = app.save.progress.campaignCompleted;
             string champion = meta.lastChampion != null && Champions.CHAMPIONS.ContainsKey(meta.lastChampion) && Champions.championUnlocked(meta.lastChampion, perks, meta.bestWave, done) ? meta.lastChampion : "lyra";
+            string doctrine = Doctrines.DEFAULT;
             List<string> kit = meta.startKit.Where((i) => meta.unlockedItems.Contains(i)).Take((int)slots).ToList();
             var setup = new RunSetup
             {
@@ -235,6 +236,15 @@ namespace Kernwacht.Game.UI
                 foreach (var b in Biomes.BIOME_ORDER) biomeOpts.Add((b, Biomes.BIOMES[b].name));
                 Common.select(Common.field(options, "Biom"), biomeOpts, setup.biome, (v) => { setup.biome = v; }, "Biom");
                 Common.seg(Common.field(options, "Schwierigkeit"), new[] { "easy", "normal", "hard" }.Select((d) => (d, Balance.DIFFICULTY[d].name)).ToList(), setup.difficulty, (x) => { setup.difficulty = x; }, "Schwierigkeit");
+                // Doktrin: Spielweise des Laufs (Vorteil mit Preis)
+                var docField = Common.field(options, "Doktrin");
+                Text docHint = null;
+                Common.seg(docField, Doctrines.ORDER.Select((d) => (d, Doctrines.DOCTRINES[d].name)).ToList(), doctrine, (x) =>
+                {
+                    doctrine = x;
+                    if (docHint != null) docHint.text = Doctrines.DOCTRINES[x].description;
+                }, "Doktrin");
+                docHint = Common.para(options, Doctrines.DOCTRINES[doctrine].description, "tiny muted");
                 var seedRow = Ui.Row(Common.field(options, "Seed"), 6, TextAnchor.MiddleLeft, false);
                 var seedField = Common.input(seedRow.transform, setup.seedText, 32, (f, v) =>
                 {
@@ -258,7 +268,7 @@ namespace Kernwacht.Game.UI
                     {
                         mode = setup.mode, seedText = setup.seedText, variant = setup.variant, biome = setup.biome, difficulty = setup.difficulty,
                         missionId = setup.missionId, customMap = setup.customMap, size = setup.size, heroes = setup.heroes,
-                        heroEndless = app.heroEndlessSetup(champion, kit),
+                        heroEndless = app.heroEndlessSetup(champion, kit, doctrine),
                     });
                 }, Ui.BtnKind.Primary);
                 start.gameObject.name = "start-hero";

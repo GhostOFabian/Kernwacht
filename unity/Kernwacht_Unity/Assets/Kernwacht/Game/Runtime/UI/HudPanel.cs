@@ -219,6 +219,12 @@ namespace Kernwacht.Game.UI
             var body = panelBody;
             HK.T(body, HudText.MODE_NAMES.TryGetValue(s.mode, out var mode) ? mode : s.mode, HK.H3, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
             P(body, $"{s.map.name} · Seed {s.seed.text}", HK.FS, Theme.Muted);
+            if (s.he != null)
+            {
+                var doc = Doctrines.of(s.he);
+                var prof = HeroCommand.profileOf(s.he.champion.id);
+                P(body, $"Doktrin: {doc.name}" + (prof != null ? $" · Befehl: {prof.label}" : ""), HK.FS, Theme.Text);
+            }
             // Aufgeräumt: Bedienhinweise stehen im Hinweisbalken unten und unter Hilfe – hier nur, was diese Partie betrifft
             if (s.he == null)
                 P(body, s.phase == "build"

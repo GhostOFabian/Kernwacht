@@ -2516,7 +2516,7 @@ namespace Kernwacht.Game
             if (storm) for (int q = 0; q < 2; q++) r.ground(SPRITE_ADD, SHAPE.ring, sm.x, sm.h + 0.3f + q * 0.15f, sm.y, 1.6f + q * 0.3f, 0xffffff, 0.35f, t * 8, 0.3f, 0.05f);
             bool champSel = ui.champSelected == true;
             // Befehlsradius: jeder Held führt die Türme um sich herum an (Ring immer sichtbar, ausgewählt kräftiger)
-            float supR = (float)HeroCommand.commandRadius(st);
+            float supR = (float)HeroCommand.commandRadius(st, he);
             if (c.dead <= 0)
             {
                 r.ground(SPRITE_ADD, SHAPE.ring, sm.x, sm.h + 0.035f, sm.y, supR, acc, champSel ? 0.55f : 0.26f, 0, 0.3f, 0.02f);

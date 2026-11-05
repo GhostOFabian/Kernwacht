@@ -178,7 +178,7 @@ namespace Kernwacht.Game.UI
                 el.cdFill.raycastTarget = false;
                 Ui.Get<LayoutElement>(el.cdFill.gameObject).ignoreLayout = true;
                 var cr = el.cdFill.rectTransform; cr.anchorMin = Vector2.zero; cr.anchorMax = new Vector2(1, 0); cr.pivot = new Vector2(0.5f, 0); cr.sizeDelta = new Vector2(0, 0); cr.anchoredPosition = Vector2.zero;
-                string tip = $"{d.name}: {d.description}\nKostet 1 Taktikladung. Neue Ladungen alle {U.Fmt(TacticalCharges.EVERY)} Wellen (Bosswellen +1), höchstens {U.Fmt(TacticalCharges.MAX_STORED)}.";
+                string tip = $"{d.name}: {d.description}\nKostet 1 Taktikladung. Neue Ladungen alle {U.Fmt(Doctrines.of(sim.s.he).chargeEvery)} Wellen (Bosswellen +1), höchstens {U.Fmt(Doctrines.of(sim.s.he).chargeMax)}.";
                 HeroKit.Tip(el.bg, tip);
                 chargeEls.Add(el);
             }
@@ -191,7 +191,8 @@ namespace Kernwacht.Game.UI
             {
                 chargeLast = he.charges;
                 string pips = "";
-                for (int i = 0; i < TacticalCharges.MAX_STORED; i++) pips += i < he.charges ? "◆" : "◇";
+                double mx = Doctrines.of(he).chargeMax;
+                for (int i = 0; i < mx; i++) pips += i < he.charges ? "◆" : "◇";
                 chargeCount.text = $"Taktikladungen  {pips}";
             }
             float cdFrac = he.chargeCd > 0 ? (float)(he.chargeCd / TacticalCharges.SHARED_CD) : 0f;

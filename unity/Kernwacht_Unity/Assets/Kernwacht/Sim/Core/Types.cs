@@ -1276,6 +1276,8 @@ namespace Kernwacht.Sim
         public double chargeCd;
         public double exposeT;
         public double chargesUsed;
+        /// <summary>Doktrin des Laufs (Doctrines.DOCTRINES).</summary>
+        public string doctrine;
         /// <summary>TS: <c>{ x: number; y: number }</c>.</summary>
         public Vec2 shop;
         /// <summary>Countdown bis zum automatischen Wellenstart (s); &lt;0 = inaktiv</summary>

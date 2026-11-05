@@ -46,14 +46,15 @@ namespace Kernwacht.Sim
         {
             var he = sim.s.he;
             if (he == null) return;
+            var doc = Doctrines.of(he);
             double gain = 0;
-            if (wave % EVERY == 0) gain++;
+            if (wave % doc.chargeEvery == 0) gain++;
             if (wave % 10 == 0) gain++;
             if (gain <= 0) return;
             double before = he.charges;
-            he.charges = U.Min(MAX_STORED, he.charges + gain);
+            he.charges = U.Min(doc.chargeMax, he.charges + gain);
             if (he.charges > before)
-                sim.emit(new GameEvent { k = "message", text = $"Taktikladung erhalten ({U.Fmt(he.charges)}/{U.Fmt(MAX_STORED)}) – für schwere Wellen aufsparen", severity = "info" });
+                sim.emit(new GameEvent { k = "message", text = $"Taktikladung erhalten ({U.Fmt(he.charges)}/{U.Fmt(doc.chargeMax)}) – für schwere Wellen aufsparen", severity = "info" });
         }
 
         public static CommandResult check(GameSimulation sim, string id)
@@ -61,7 +62,7 @@ namespace Kernwacht.Sim
             var he = sim.s.he;
             if (he == null) return CommandResult.Fail("Kein Held");
             if (id == null || !CHARGES.ContainsKey(id)) return CommandResult.Fail("Unbekannte Ladung");
-            if (he.charges < 1) return CommandResult.Fail($"Keine Taktikladung – neue alle {U.Fmt(EVERY)} Wellen");
+            if (he.charges < 1) return CommandResult.Fail($"Keine Taktikladung – neue alle {U.Fmt(Doctrines.of(he).chargeEvery)} Wellen");
             if (he.chargeCd > 0) return CommandResult.Fail($"Bereit in {U.Fmt(Math.Ceiling(he.chargeCd))} s");
             if (id == "focus" && he.champion.dead > 0 && he.banner == null) return CommandResult.Fail("Held ist besiegt und kein Banner gesetzt");
             return CommandResult.Ok();
@@ -85,7 +86,7 @@ namespace Kernwacht.Sim
                 case "focus":
                 {
                     var st = ChampionSystem.championStats(he);
-                    double r2 = Math.Pow(HeroCommand.commandRadius(st), 2);
+                    double r2 = Math.Pow(HeroCommand.commandRadius(st, he), 2);
                     var c = he.champion;
                     foreach (var t in sim.s.towers)
                     {

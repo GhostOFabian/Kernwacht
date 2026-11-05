@@ -108,17 +108,18 @@ namespace Kernwacht.Sim
             return affine(he, towerDef) ? 1 : OFF_AFFINITY;
         }
 
-        public static double commandRadius(ChampionStats st)
+        public static double commandRadius(ChampionStats st, HeroEndlessState he = null)
         {
-            return st.supportRadius + RADIUS_BONUS;
+            return st.supportRadius + RADIUS_BONUS + (he != null ? Doctrines.of(he).commandRadius : 0);
         }
 
         /// <summary>Heldenschaden wächst mit der Welle mit (Wurzel der Lebenspunktkurve), damit der Held auch spät spürbar bleibt.</summary>
         public static double heroWaveMul(GameSimulation sim)
         {
             double w = sim.s.wave;
-            if (w <= 1) return 1;
-            return U.Max(1, Math.Pow(Balance.waveHpMul(w, true), 0.5));
+            double doc = Doctrines.of(sim.s.he).heroDmgMul;
+            if (w <= 1) return doc;
+            return U.Max(1, Math.Pow(Balance.waveHpMul(w, true), 0.5)) * doc;
         }
 
         /// <summary>Banner setzen bzw. versetzen (Taste B).</summary>
