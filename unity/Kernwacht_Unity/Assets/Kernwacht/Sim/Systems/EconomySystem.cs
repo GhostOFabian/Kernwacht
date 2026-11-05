@@ -511,7 +511,7 @@ namespace Kernwacht.Sim
             return new GroupSpecializeResult { ok = true, message = $"{U.Fmt(count)}× auf {name} gestellt für {U.Fmt(spent)} Gold{(U.Truthy(left) ? $" ({U.Fmt(left)} fehlen noch – zu wenig Gold)" : "")}", count = count, spent = spent, left = left };
         }
 
-        private static void markDirty(GameSimulation sim)
+        internal static void markDirty(GameSimulation sim)
         {
             sim.c.networkDirty = true;
             sim.c.statsDirty = true;

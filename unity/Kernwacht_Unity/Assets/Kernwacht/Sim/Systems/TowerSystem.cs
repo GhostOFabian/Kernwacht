@@ -343,10 +343,15 @@ namespace Kernwacht.Sim
             }
         }
 
-        /// <summary>3.8: Lane-Barrikaden verlangsamen Bodengegner, die über sie laufen.</summary>
-        private static void updateLaneBarricades(GameSimulation sim)
+        /// <summary>
+        /// Lane-Barrikaden halten Bodengegner auf: wer sie erreicht, bleibt stehen, bis die Barrikade insgesamt
+        /// holdTime Sekunden lang Gegner aufgehalten hat – dann zerbricht sie. Bosse werden nur stark verlangsamt.
+        /// t.charge zählt die verbrauchte Haltezeit.
+        /// </summary>
+        private static void updateLaneBarricades(GameSimulation sim, double dt)
         {
             var s = sim.s;
+            List<TowerInstance> broken = null;
             foreach (var t in s.towers)
             {
                 if (t.def != "lanebarricade") continue;
@@ -354,14 +359,32 @@ namespace Kernwacht.Sim
                 double r2 = st["range"] * st["range"];
                 double cx = t.cx + 0.5;
                 double cy = t.cy + 0.5;
+                bool held = false;
                 foreach (var e in s.enemies)
                 {
                     if (!e.alive || e.flying || e.burrowed) continue;
                     if (Sq(e.x - cx) + Sq(e.y - cy) > r2) continue;
-                    var c = ElementSystem.addStatus(e, "chill", st["chillDur"], st["chillPct"], t.uid, 1);
-                    c.flag = U.Max(c.flag, U.Round(st["chillPct"] * 100));
+                    if (U.Truthy(e.boss))
+                    {
+                        var c = ElementSystem.addStatus(e, "chill", st["chillDur"], st["chillPct"], t.uid, 1);
+                        c.flag = U.Max(c.flag, U.Round(st["chillPct"] * 100));
+                    }
+                    else ElementSystem.addStatus(e, "root", 0.2, 1, t.uid);
+                    held = true;
                 }
+                if (!held) continue;
+                t.charge += dt;
+                if (t.charge >= st["holdTime"]) (broken ??= new List<TowerInstance>()).Add(t);
             }
+            if (broken == null) return;
+            foreach (var t in broken)
+            {
+                s.towers = s.towers.Where((x) => x.uid != t.uid).ToList();
+                sim.emit(new GameEvent { k = "sell", tower = t.def, x = t.cx + 0.5, y = t.cy + 0.5, refund = 0 });
+                sim.emit(new GameEvent { k = "message", text = "Lane-Barrikade zerbrochen", severity = "info" });
+            }
+            sim.reindex();
+            EconomySystem.markDirty(sim);
         }
 
         /// <summary>Leere Liste gleichen Elementtyps (TS: <c>sim.pendingActives = []</c>).</summary>
@@ -381,7 +404,7 @@ namespace Kernwacht.Sim
                 }
             }
             updateTeslaArcs(sim, dt);
-            if (s.phase == "combat" && s.tick % 3 == 0) updateLaneBarricades(sim);
+            if (s.phase == "combat" && s.tick % 3 == 0) updateLaneBarricades(sim, dt * 3);
             if (s.phase == "combat" && s.tick % 6 == 0) autoTriggerActives(sim);
             // PORT: Index-Schleife über die erfasste Liste = JS for…of (z. B. zurückgegebene verschluckte Türme werden mit durchlaufen).
             var towers = s.towers;
