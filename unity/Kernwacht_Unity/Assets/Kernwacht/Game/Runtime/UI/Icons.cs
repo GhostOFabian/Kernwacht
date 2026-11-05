@@ -568,6 +568,16 @@ namespace Kernwacht.Game.UI
                 light.shadows = LightShadows.None;
                 // LIGHT.light = [-0.5, 0.8, 0.35] (Richtung zur Lichtquelle)
                 light.transform.rotation = Quaternion.LookRotation(-new Vector3(-0.5f, 0.8f, -0.35f).normalized);
+                // Kantenlicht von hinten oben: hebt dunkle Modelle vom dunklen Knopfgrund ab
+                var rimGo = new GameObject("KW_IconRim") { hideFlags = HideFlags.HideAndDontSave };
+                rimGo.transform.SetParent(rig.transform, false);
+                var rim = rimGo.AddComponent<Light>();
+                rim.type = LightType.Directional;
+                rim.color = new Color(0.72f, 0.86f, 1f);
+                rim.intensity = 0.9f;
+                rim.cullingMask = 1 << ICON_LAYER;
+                rim.shadows = LightShadows.None;
+                rim.transform.rotation = Quaternion.LookRotation(new Vector3(tc.x, -0.55f, tc.z).normalized);
 
                 var desc = new RenderTextureDescriptor(size, size, RenderTextureFormat.ARGB32, 24) { msaaSamples = 4, sRGB = QualitySettings.activeColorSpace == ColorSpace.Linear };
                 rt = RenderTexture.GetTemporary(desc);

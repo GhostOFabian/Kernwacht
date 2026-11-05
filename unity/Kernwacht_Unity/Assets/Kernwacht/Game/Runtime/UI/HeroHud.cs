@@ -77,9 +77,9 @@ namespace Kernwacht.Game.UI
         private static string statName(string k) { string n; return Champions.STAT_NAMES.TryGetValue(k, out n) ? n : k; }
 
         /// <summary>Abstand der Heldenleiste vom unteren Rand (über der Turmleiste), falls sie nicht umgehängt wird.</summary>
-        public static float dockBottom = 82;
+        public static float dockBottom = 96;
         /// <summary>Höhe von Kopfzeile/Turmleiste (Hud: TOP_H/BAR_H), solange das Fenster direkt unter einer Ebene liegt.</summary>
-        public static float stageTop = 52, stageBottom = 76;
+        public static float stageTop = 52, stageBottom = 90;
 
         // ------------------------------------------------------------ Zustand
 

@@ -91,7 +91,9 @@ namespace Kernwacht.Game.UI
     {
         // Bezugsmaße (1920×1080, CSS-px)
         const float TOP_H = 52;
-        const float BAR_H = 76;
+        const float BAR_H = 90;
+        /// <summary>Turmknöpfe: freigeschaltet breit mit großem Porträt, gesperrt als schmaler Chip.</summary>
+        const float TBTN = 78, TBTN_LOCKED = 40, TICON = 58;
         const float PANEL_W = 340;
 
         static readonly Dictionary<string, string> MODE_LABEL = new Dictionary<string, string> { ["hold"] = "Halten", ["advance"] = "Vorrücken", ["retreat"] = "Rückzug" };
@@ -164,6 +166,9 @@ namespace Kernwacht.Game.UI
             public string costTxt;
             public string costSig;
             public int flags = -1;
+            public LayoutElement le;
+            public Image icon, elem;
+            public bool chip;
         }
         readonly Dictionary<string, TowerBtn> towerBtns = new Dictionary<string, TowerBtn>();
         readonly List<TowerBtn> towerBtnList = new List<TowerBtn>();
@@ -429,13 +434,13 @@ namespace Kernwacht.Game.UI
             var tbLine = HK.Plain(tb.transform, "Edge", new Color(183 / 255f, 123 / 255f, 1f, 0.5f));
             var tbl = tbLine.rectTransform; tbl.anchorMin = new Vector2(0, 1); tbl.anchorMax = new Vector2(1, 1); tbl.pivot = new Vector2(0.5f, 1); tbl.sizeDelta = new Vector2(0, 1);
             var tRow = HK.HRow(tb.transform, 4, TextAnchor.MiddleLeft);
-            tRow.padding = new RectOffset(6, 6, 5, 5);
+            tRow.padding = new RectOffset(6, 6, 6, 6);
             towerBar = tRow.GetComponent<RectTransform>();
             Ui.Fill(towerBar);
             if (s.rules.endless)
             {
                 limitStat = Ui.Button(towerBar, "", () => toggleLimitPop(), Ui.BtnKind.Ghost, 12);
-                Ui.Size(limitStat, 52, 58);
+                Ui.Size(limitStat, 60, TBTN);
                 limitStat.GetComponent<Outline>().effectColor = Theme.LineStrong;
                 var lbl = limitStat.GetComponentInChildren<UText>();
                 lbl.gameObject.SetActive(false);
@@ -506,20 +511,27 @@ namespace Kernwacht.Game.UI
             tb.bg = Ui.Panel(towerBar, "TBtn", Theme.Hex(0x28203c), true, Theme.Round);
             tb.outline = tb.bg.GetComponent<Outline>();
             tb.outline.effectColor = Theme.LineStrong;
-            Ui.Size(tb.bg, 64, 64);
+            tb.le = Ui.Size(tb.bg, TBTN, TBTN);
             tb.btn = tb.bg.gameObject.AddComponent<Button>();
             tb.btn.targetGraphic = tb.bg;
             var nav = tb.btn.navigation; nav.mode = Navigation.Mode.None; tb.btn.navigation = nav;
             var cb = tb.btn.colors; cb.highlightedColor = new Color(1.25f, 1.2f, 1.4f); cb.colorMultiplier = 1.4f; cb.disabledColor = new Color(1, 1, 1, 0.5f); tb.btn.colors = cb;
             tb.cg = tb.bg.gameObject.AddComponent<CanvasGroup>();
-            var ic = HK.Img(tb.bg.transform, Icons.Model(id), 40);
-            Ui.Place(ic.rectTransform, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -4), new Vector2(40, 40));
+            // Elementfarbe als schmaler Streifen oben (Feuer, Frost, Blitz …) – Türme auf einen Blick unterscheidbar
+            tb.elem = HK.Plain(tb.bg.transform, "Element", elemColor(d.damageType));
+            var er = tb.elem.rectTransform; er.anchorMin = new Vector2(0, 1); er.anchorMax = new Vector2(1, 1); er.pivot = new Vector2(0.5f, 1);
+            er.anchoredPosition = new Vector2(0, -2); er.sizeDelta = new Vector2(-12, 4);
+            tb.elem.raycastTarget = false;
+            var ic = HK.Img(tb.bg.transform, Icons.Model(id, 160), TICON);
+            Ui.Place(ic.rectTransform, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -3), new Vector2(TICON, TICON));
+            tb.icon = ic;
             tb.cost = HK.T(tb.bg.transform, U.Fmt(d.cost), 13, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
             tb.cost.horizontalOverflow = HorizontalWrapMode.Overflow;
-            Ui.Place(tb.cost.rectTransform, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 2), new Vector2(64, 17));
+            Ui.Place(tb.cost.rectTransform, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 2), new Vector2(TBTN, 17));
             tb.cost.gameObject.AddComponent<Shadow>().effectColor = new Color(0, 0, 0, 0.8f);
-            tb.key = HK.T(tb.bg.transform, towerKey(id), 11, Theme.Muted, TextAnchor.UpperLeft);
-            Ui.Place(tb.key.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(4, -2), new Vector2(30, 14));
+            tb.key = HK.T(tb.bg.transform, towerKey(id), 12, Theme.Text, TextAnchor.UpperLeft, FontStyle.Bold);
+            Ui.Place(tb.key.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(5, -5), new Vector2(30, 15));
+            tb.key.gameObject.AddComponent<Shadow>().effectColor = new Color(0, 0, 0, 0.9f);
             tb.prespec = HK.T(tb.bg.transform, "★", 11, HK.StarGold, TextAnchor.LowerLeft);
             Ui.Place(tb.prespec.rectTransform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(4, 16), new Vector2(14, 14));
             tb.prespec.gameObject.SetActive(false);
@@ -537,7 +549,7 @@ namespace Kernwacht.Game.UI
             tb.fuseLbl.horizontalOverflow = HorizontalWrapMode.Overflow;
             var fl = Ui.Node("FuseTag", tb.bg.transform).AddComponent<Image>();
             fl.sprite = Theme.Round; fl.type = Image.Type.Sliced; fl.color = FUSE_COL; fl.raycastTarget = false;
-            Ui.Place(fl.rectTransform, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, 14), new Vector2(58, 18));
+            Ui.Place(fl.rectTransform, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, 14), new Vector2(62, 18));
             tb.fuseLbl.transform.SetParent(fl.transform, false);
             Ui.Fill(tb.fuseLbl.rectTransform);
             tb.fuseLbl.raycastTarget = false;
@@ -555,6 +567,30 @@ namespace Kernwacht.Game.UI
             Ui.Tip(tb.bg, () => towerTitle(id));
             towerBtnList.Add(tb);
             return tb;
+        }
+
+        static Color elemColor(string dmg)
+        {
+            if (string.IsNullOrEmpty(dmg)) return new Color(0.62f, 0.58f, 0.7f);
+            int c = Palette.damageColor(dmg);
+            return new Color(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f);
+        }
+
+        /// <summary>Gesperrter Turm: schmaler Chip (kleines Symbol, Freischaltwelle) statt vollem Knopf – spart Platz in der Leiste.</summary>
+        void setChip(TowerBtn tb, bool chip)
+        {
+            if (tb.chip == chip && tb.le != null && tb.le.preferredWidth > 0) return;
+            tb.chip = chip;
+            float w = chip ? TBTN_LOCKED : TBTN;
+            tb.le.preferredWidth = w; tb.le.minWidth = w;
+            ((RectTransform)tb.bg.transform).sizeDelta = new Vector2(w, TBTN);
+            float ic = chip ? 30 : TICON;
+            Ui.Place(tb.icon.rectTransform, new Vector2(0.5f, chip ? 0.5f : 1), new Vector2(0.5f, chip ? 0.5f : 1), chip ? new Vector2(0, 6) : new Vector2(0, -3), new Vector2(ic, ic));
+            tb.icon.color = chip ? new Color(0.62f, 0.62f, 0.68f, 1f) : Color.white;
+            tb.key.gameObject.SetActive(!chip);
+            tb.cost.fontSize = chip ? 11 : 13;
+            tb.cost.rectTransform.sizeDelta = new Vector2(w, 17);
+            tb.elem.rectTransform.sizeDelta = new Vector2(chip ? -8 : -12, chip ? 3 : 4);
         }
 
         string towerTitle(string id)
@@ -1028,10 +1064,11 @@ namespace Kernwacht.Game.UI
                 if (costTxt != tb.costTxt) { tb.costTxt = costTxt; tb.cost.text = costTxt; }
                 if (flags == tb.flags) continue;
                 tb.flags = flags;
+                setChip(tb, locked);
                 bool poor = (flags & 2) != 0, active = (flags & 4) != 0;
                 // Gesperrt/zu teuer: dunkle Abdeckung statt Durchsichtigkeit (sonst blasses Rosa mit weißer Schrift)
                 tb.cg.alpha = 1f;
-                Common.dim(tb.bg, !tb.btn.interactable ? 0.7f : locked ? 0.62f : poor ? 0.35f : 0f);
+                Common.dim(tb.bg, !tb.btn.interactable ? 0.7f : locked ? 0.3f : poor ? 0.35f : 0f);
                 tb.bg.color = locked ? Theme.Hex(0x1e1a26) : Theme.Hex(0x28203c);
                 tb.cost.color = poor ? Theme.Bad : locked ? Theme.Hex(0xffd860) : Theme.Gold;
                 bool fusePartner = tb.fuseWith != null;
