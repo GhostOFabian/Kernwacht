@@ -608,6 +608,12 @@ namespace Kernwacht.Sim
             if (s.gold < r.cost) return CommandResult.Fail("Nicht genug Gold");
             s.gold -= r.cost;
             s.stats.goldSpent += r.cost;
+            // Erbe: Spezialisierungen beider Eltern merken (Reihenfolge wie im Rezept)
+            var ta = t.def == r.a ? t : p;
+            var tb = ta == t ? p : t;
+            double specA = ta.spec, specB = tb.spec;
+            t.fuseA = specA;
+            t.fuseB = specB;
             t.def = r.id;
             t.level = 4;
             t.spec = 0;
@@ -634,7 +640,7 @@ namespace Kernwacht.Sim
             sim.reindex();
             markDirty(sim);
             sim.emit(new GameEvent { k = "fusion", tower = r.id, x = t.cx + 0.5, y = t.cy + 0.5 });
-            sim.emit(new GameEvent { k = "message", text = $"Legendärer Turm erschaffen: {Towers.TOWERS[r.id].name}!", severity = "info" });
+            sim.emit(new GameEvent { k = "message", text = $"Legendärer Turm erschaffen: {Towers.TOWERS[r.id].name}! Erbe: {FusionHeritage.describe(r.id, specA, specB)}", severity = "info" });
             return CommandResult.Ok();
         }
 

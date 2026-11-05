@@ -76,6 +76,8 @@ namespace Kernwacht.Sim
             var st = spreadBase(def);
             for (int i = 0; i < t.level - 1 && i < def.upgrades.Count; i++) applyMods(st, def.upgrades[i].mods);
             if (t.spec > 0) applyMods(st, def.specs[(int)t.spec - 1].mods);
+            // Fusions-Erbe (legendäre Türme): halbe Elternspezialisierungen + Kombinationsbonus
+            FusionHeritage.apply(st, t);
             // 3.6: Veredelung
             if (U.Truthy(t.stars)) applyMods(st, Goldsinks.starMods(t.def, t.stars.Value));
             // Runen (Helden-Endlos 2.7)
@@ -212,6 +214,8 @@ namespace Kernwacht.Sim
             var st = spreadBase(def);
             for (int i = 0; i < t.level - 1 && i < def.upgrades.Count; i++) applyMods(st, def.upgrades[i].mods);
             if (t.spec > 0) applyMods(st, def.specs[(int)t.spec - 1].mods);
+            // Fusions-Erbe (legendäre Türme): halbe Elternspezialisierungen + Kombinationsbonus
+            FusionHeritage.apply(st, t);
             return st;
         }
 
