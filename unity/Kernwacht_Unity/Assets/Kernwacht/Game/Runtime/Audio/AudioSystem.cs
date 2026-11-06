@@ -195,7 +195,7 @@ namespace Kernwacht.Game
             for (int i = 0; i < sfxSources.Length; i++) if (!sfxSources[i].isPlaying) { voice = i; break; }
             if (voice < 0) return;   // entspricht "active > 48"
             last[id] = now;
-            var clip = getSfxClip(id);
+            var clip = getSfxClip(Themes.SciFi && SCI_SFX.Contains(id) ? "sf_" + id : id);
             if (clip == null) return;
             var src = sfxSources[voice];
             sfxVol[voice] = volume;
@@ -228,12 +228,45 @@ namespace Kernwacht.Game
             return e.clips[rnd.Next(e.clips.Count)];
         }
 
+        /** 4.1: Klänge mit eigener Sci-Fi-Fassung ("sf_" + id). */
+        private static readonly HashSet<string> SCI_SFX = new HashSet<string>
+        {
+            "ui", "build", "upgrade", "sell", "shot_ranger", "shot_ember", "shot_ballista", "shot_cannon", "shot_spore", "zap", "beam", "rift",
+            "pulse_frost", "pulse_sonic", "hit", "explosion", "kill", "gold", "waveStart", "waveClear", "shot_meteor", "gravity", "teleport", "towerActive", "freeze",
+        };
+
         /** Die Rezepte aus play() (TS), bei now = 0 in einen Puffer gerendert, Lautstärke v = 1. */
         private static bool recipe(string id, Mix m)
         {
             const double now = 0, v = 1;
             switch (id)
             {
+                // ---- 4.1 Sci-Fi-Fassungen
+                case "sf_ui": m.tone(1480, now, 0.05, "sine", 0.12 * v); m.tone(2960, now, 0.03, "sine", 0.04 * v); break;
+                case "sf_build": m.tone(330, now, 0.12, "square", 0.06 * v, filter: 2000, slide: 660); m.tone(990, now + 0.08, 0.1, "sine", 0.1 * v); m.noiseBurst(now, 0.1, 0.12 * v, "lowpass", 900); break;
+                case "sf_upgrade": { double[] fs = { 659, 880, 1175, 1568 }; for (int i = 0; i < fs.Length; i++) m.tone(fs[i], now + i * 0.05, 0.12, "square", 0.05 * v, filter: 3000); break; }
+                case "sf_sell": m.tone(1568, now, 0.06, "sine", 0.12 * v); m.tone(1046, now + 0.06, 0.1, "sine", 0.12 * v, slide: 784); break;
+                case "sf_shot_ranger": m.tone(1900, now, 0.07, "square", 0.045 * v, slide: 600, filter: 5200); m.tone(950, now, 0.06, "sine", 0.06 * v, slide: 400); break;
+                case "sf_shot_ember": m.tone(240, now, 0.26, "sawtooth", 0.1 * v, filter: 1500, slide: 560); m.noiseBurst(now, 0.22, 0.12 * v, "bandpass", 1400, 300); break;
+                case "sf_shot_ballista": m.tone(2600, now, 0.2, "sawtooth", 0.06 * v, slide: 180, filter: 6500); m.noiseBurst(now, 0.12, 0.14 * v, "highpass", 4200); m.tone(80, now, 0.2, "sine", 0.2 * v, slide: 40); break;
+                case "sf_shot_cannon": m.tone(130, now, 0.28, "square", 0.12 * v, filter: 800, slide: 50); m.noiseBurst(now, 0.22, 0.2 * v, "lowpass", 1600); m.tone(1500, now, 0.1, "sine", 0.05 * v, slide: 300); break;
+                case "sf_shot_spore": m.tone(520, now, 0.12, "sine", 0.1 * v, slide: 950); m.noiseBurst(now, 0.12, 0.07 * v, "bandpass", 3200); break;
+                case "sf_zap": m.noiseBurst(now, 0.1, 0.16 * v, "bandpass", 4800, 1600); m.tone(2400, now, 0.08, "square", 0.05 * v, slide: 600, filter: 6000); break;
+                case "sf_beam": m.tone(1200, now, 0.14, "sawtooth", 0.035 * v, filter: 3200, slide: 1500); break;
+                case "sf_rift": m.tone(200, now, 0.32, "sine", 0.12 * v, slide: 2200, attack: 0.03); m.tone(400, now, 0.3, "square", 0.03 * v, slide: 3000, filter: 3000); break;
+                case "sf_teleport": m.tone(2400, now, 0.25, "sine", 0.08 * v, slide: 200); m.noiseBurst(now, 0.2, 0.05 * v, "highpass", 5000); break;
+                case "sf_pulse_frost": m.tone(2800, now, 0.3, "sine", 0.05 * v, slide: 1400); m.noiseBurst(now, 0.28, 0.07 * v, "highpass", 6000); break;
+                case "sf_freeze": m.tone(3000, now, 0.22, "sine", 0.06 * v, slide: 1800); m.tone(1500, now, 0.2, "square", 0.02 * v, filter: 4000); break;
+                case "sf_pulse_sonic": m.tone(140, now, 0.36, "sine", 0.2 * v, slide: 70); m.tone(280, now, 0.3, "square", 0.04 * v, filter: 900); break;
+                case "sf_hit": m.noiseBurst(now, 0.04, 0.07 * v, "bandpass", 2800); m.tone(1800, now, 0.03, "sine", 0.03 * v); break;
+                case "sf_explosion": m.noiseBurst(now, 0.38, 0.28 * v, "lowpass", 2200, 150); m.tone(60, now, 0.32, "sine", 0.25 * v, slide: 30); m.tone(3000, now, 0.2, "sine", 0.04 * v, slide: 200); break;
+                case "sf_kill": m.tone(900, now, 0.08, "square", 0.04 * v, filter: 3000, slide: 300); break;
+                case "sf_gold": m.tone(1568, now, 0.06, "sine", 0.1 * v); m.tone(2093, now + 0.05, 0.08, "sine", 0.08 * v); m.tone(3136, now + 0.09, 0.05, "sine", 0.03 * v); break;
+                case "sf_waveStart": m.tone(587, now, 0.16, "square", 0.07 * v, filter: 1800); m.tone(880, now + 0.16, 0.24, "square", 0.07 * v, filter: 1800); m.tone(220, now, 0.4, "sawtooth", 0.06 * v, filter: 600); break;
+                case "sf_waveClear": { double[] fs = { 659, 784, 988, 1318 }; for (int i = 0; i < fs.Length; i++) m.tone(fs[i], now + i * 0.07, 0.2, "square", 0.05 * v, filter: 2600); break; }
+                case "sf_shot_meteor": m.tone(3000, now, 0.6, "sine", 0.05 * v, slide: 300, attack: 0.05); m.tone(100, now, 0.6, "sawtooth", 0.12 * v, filter: 900, slide: 40); m.noiseBurst(now, 0.5, 0.1 * v, "bandpass", 2200, 400); break;
+                case "sf_gravity": m.tone(80, now, 0.5, "sine", 0.24 * v, slide: 40, attack: 0.04); m.tone(160, now, 0.45, "sawtooth", 0.04 * v, slide: 60, filter: 500); break;
+                case "sf_towerActive": m.tone(440, now, 0.35, "sawtooth", 0.07 * v, filter: 3000, slide: 1760); m.tone(880, now + 0.1, 0.3, "square", 0.05 * v, filter: 2400); break;
                 case "ui": m.tone(880, now, 0.07, "triangle", 0.15 * v); break;
                 case "select": m.tone(660, now, 0.06, "triangle", 0.12 * v); m.tone(990, now + 0.04, 0.06, "triangle", 0.1 * v); break;
                 case "error": m.tone(180, now, 0.18, "square", 0.12 * v, filter: 900); break;
@@ -373,7 +406,8 @@ namespace Kernwacht.Game
                 if (b % 8 == 0)
                 {
                     // Flächenklang
-                    foreach (int k in new[] { 0, 2, 4 }) musicTone(midi(deg(prog + k, -1)), t, spb * 8, "triangle", 0.05, attack: 0.6, filter: 1200);
+                    bool sfm = Themes.SciFi;
+                    foreach (int k in new[] { 0, 2, 4 }) musicTone(midi(deg(prog + k, -1)), t, spb * 8, sfm ? "sawtooth" : "triangle", sfm ? 0.03 : 0.05, attack: 0.6, filter: sfm ? 800 : 1200);
                     musicTone(midi(deg(prog, -2)), t, spb * 4, "sine", 0.12, attack: 0.05);
                 }
                 if (b % 8 == 4) musicTone(midi(deg(prog, -2)), t, spb * 4, "sine", 0.1, attack: 0.05);
@@ -381,7 +415,7 @@ namespace Kernwacht.Game
                 if (intensity >= 1 && b % 2 == 0 && phrase != 1)
                 {
                     int[] pat = phrase == 3 ? new[] { 4, 2, 0, 1, 2, 4, 5, 4 } : new[] { 0, 2, 4, 2, 1, 3, 4, 5 };
-                    if (!(phrase == 2 && b % 8 >= 6)) musicTone(midi(deg(prog + pat[b % 8], 0)), t, spb * 0.9, "triangle", 0.018, filter: 1100);
+                    if (!(phrase == 2 && b % 8 >= 6)) musicTone(midi(deg(prog + pat[b % 8], 0)), t, spb * 0.9, Themes.SciFi ? "square" : "triangle", Themes.SciFi ? 0.012 : 0.018, filter: Themes.SciFi ? 1600 : 1100);
                 }
                 else if (intensity >= 1 && phrase == 1 && b % 4 == 2)
                 {
@@ -405,6 +439,8 @@ namespace Kernwacht.Game
                     if (b % 4 == 0 || b % 8 == 3) musicTone(48, t, 0.3, "sine", 0.2, slide: 30);
                     if (b % 4 == 2) musicNoise(t, 0.12, 0.045, "bandpass", 900);
                 }
+                // 4.1 Sci-Fi: pulsierender Synth-Bass in Achteln
+                if (Themes.SciFi && intensity >= 1) musicTone(midi(deg(prog, -2)), t, spb * 0.4, "sawtooth", 0.035, filter: 500);
                 // Arpeggio-Glitzer mit Echo (leise, in allen Phasen) – nur über die Echoleitung hörbar
                 if (b % 4 == 1 && (bar + (int)Math.Floor(b / 32.0)) % 2 == 0)
                 {

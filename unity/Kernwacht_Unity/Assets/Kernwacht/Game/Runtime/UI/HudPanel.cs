@@ -218,7 +218,7 @@ namespace Kernwacht.Game.UI
             var s = sim.s;
             var body = panelBody;
             HK.T(body, HudText.MODE_NAMES.TryGetValue(s.mode, out var mode) ? mode : s.mode, HK.H3, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
-            P(body, $"{s.map.name} · Seed {s.seed.text}", HK.FS, Theme.Muted);
+            P(body, $"{Themes.MapText(s.map.name)} · Seed {s.seed.text}", HK.FS, Theme.Muted);
             if (s.he != null)
             {
                 var doc = Doctrines.of(s.he);

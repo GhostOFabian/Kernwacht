@@ -473,6 +473,7 @@ namespace Kernwacht.Game.UI
         /// </summary>
         public static Sprite Model(string modelId, int size = 128)
         {
+            modelId = Themes.Model(modelId);
             string key = $"{modelId}:{size}";
             if (modelCache.TryGetValue(key, out var hit) && hit != null) return hit;
             Sprite s = null;

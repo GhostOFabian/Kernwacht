@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using Kernwacht.Sim;
 using UnityEngine;
@@ -66,7 +67,7 @@ namespace Kernwacht.Game.UI
                 var col = Ui.Column(banner.transform, 4);
                 Ui.Size(col, -1, -1, 1);
                 Common.label(col.transform, win ? (mission != null ? $"Mission „{mission.name}“ geschafft" : "Der Kern hält stand!") : "Der Kern ist gefallen", Common.H2, Theme.Text, FontStyle.Bold);
-                Common.para(col.transform, $"{TextUtil.modeName(s.mode)} · {s.map.name} · {U.Fmt(st.wavesCleared)} Wellen überstanden");
+                Common.para(col.transform, $"{TextUtil.modeName(s.mode)} · {Themes.MapText(s.map.name)} · {U.Fmt(st.wavesCleared)} Wellen überstanden");
                 if (U.Truthy(r.stars))
                 {
                     var stars = Ui.Row(col.transform, 4, TextAnchor.MiddleLeft, false);
@@ -197,7 +198,8 @@ namespace Kernwacht.Game.UI
         {
             public string id;
             public string name;
-            public double end, built, dmg, kills, invested;
+            public double end, built, dmg, kills, invested, first = -1;
+            public double perWave(GameState s) => first < 0 ? -1 : dmg / Math.Max(1, s.stats.wavesCleared - first);
         }
 
         static List<TowerRow> towerRows(GameState s)
@@ -216,6 +218,7 @@ namespace Kernwacht.Game.UI
             foreach (var kv in st.damageByTower) get(kv.Key).dmg = kv.Value;
             foreach (var kv in st.builtByTower) get(kv.Key).built = kv.Value;
             if (st.killsByTower != null) foreach (var kv in st.killsByTower) get(kv.Key).kills = kv.Value;
+            if (st.firstWaveByTower != null) foreach (var kv in st.firstWaveByTower) get(kv.Key).first = kv.Value;
             foreach (var tw in s.towers)
             {
                 var r = get(tw.def);
@@ -235,9 +238,9 @@ namespace Kernwacht.Game.UI
             var sb = new System.Text.StringBuilder();
             sb.Append($"Kernwacht · {TextUtil.modeName(s.mode)} · Welle {U.Fmt(s.stats.wavesCleared)} · Seed {s.seed.text}\n");
             if (s.he != null) sb.Append($"Held: {Champions.CHAMPIONS[s.he.champion.id].name} St. {U.Fmt(s.he.champion.level)} · Schaden {TextUtil.fmt(s.he.champion.damageDealt)} · Doktrin {Doctrines.of(s.he).name}\n");
-            sb.Append("Turm\tAm Ende\tGebaut\tSchaden\tAnteil\tAbschüsse\tInvestiert\tSchaden/100 Gold\n");
+            sb.Append("Turm\tAm Ende\tGebaut\tAb Welle\tSchaden\tAnteil\tSchaden/Welle seit Bau\tAbschüsse\tInvestiert\tSchaden/100 Gold\n");
             foreach (var r in rows)
-                sb.Append($"{r.name}\t{U.Fmt(r.end)}\t{U.Fmt(r.built)}\t{TextUtil.fmt(r.dmg)}\t{U.Fixed(r.dmg / total * 100, 1)} %\t{U.Fmt(r.kills)}\t{TextUtil.fmt(r.invested)}\t{(r.invested > 0 ? TextUtil.fmt(r.dmg / r.invested * 100) : "–")}\n");
+                sb.Append($"{r.name}\t{U.Fmt(r.end)}\t{U.Fmt(r.built)}\t{(r.first >= 0 ? U.Fmt(r.first) : "–")}\t{TextUtil.fmt(r.dmg)}\t{U.Fixed(r.dmg / total * 100, 1)} %\t{(r.perWave(s) >= 0 ? TextUtil.fmt(r.perWave(s)) : "–")}\t{U.Fmt(r.kills)}\t{TextUtil.fmt(r.invested)}\t{(r.invested > 0 ? TextUtil.fmt(r.dmg / r.invested * 100) : "–")}\n");
             return sb.ToString();
         }
 
@@ -251,11 +254,12 @@ namespace Kernwacht.Game.UI
             var ht = Common.h3(head.transform, "Türme im Lauf");
             Ui.Size(ht, -1, -1, 1);
             string text = towerTableText(s);
-            Common.btn(head.transform, "Statistik kopieren", () => Common.copyText(app, text), Ui.BtnKind.Normal, "copy", true);
-            Common.para(c, "Anzahl am Ende des Laufs, insgesamt gebaut (Fusionen zählen als gebaut), Schaden und Anteil am Turmschaden, Abschüsse, investiertes Gold der verbliebenen Türme und Schaden je 100 Gold.", "small muted");
+            Common.btn(head.transform, "Als Bild kopieren", () => app.StartCoroutine(captureStats(app, s)), Ui.BtnKind.Primary, "copy", true);
+            Common.btn(head.transform, "Als Text kopieren", () => Common.copyText(app, text), Ui.BtnKind.Normal, "copy", true);
+            Common.para(c, "Anzahl am Ende des Laufs, insgesamt gebaut (Fusionen zählen als gebaut), Schaden und Anteil am Turmschaden, Abschüsse, investiertes Gold der verbliebenen Türme, Schaden je 100 Gold, Welle des ersten Baus und Schaden je Welle seit dem ersten Bau. „Als Bild kopieren“ legt eine gut lesbare Übersicht in die Zwischenablage.", "small muted");
             if (rows.Count == 0) { Common.para(c, "–", "muted"); return; }
-            float[] w = { 230, 64, 64, -1, 92, 62, 80, 86, 96 };
-            string[] hd = { "Turm", "Ende", "Gebaut", "Schaden", "", "Anteil", "Abschüsse", "Investiert", "je 100 Gold" };
+            float[] w = { 230, 56, 60, -1, 92, 62, 72, 80, 90, 64, 84 };
+            string[] hd = { "Turm", "Ende", "Gebaut", "Schaden", "", "Anteil", "Abschüsse", "Investiert", "je 100 Gold", "ab Welle", "je Welle" };
             var hr = Ui.Row(c, 8, TextAnchor.MiddleLeft, false);
             for (int k = 0; k < hd.Length; k++)
             {
@@ -285,7 +289,132 @@ namespace Kernwacht.Game.UI
                 num(row.transform, U.Fmt(r.kills), w[6], Theme.Muted);
                 num(row.transform, r.invested > 0 ? TextUtil.fmt(r.invested) : "–", w[7], Theme.Muted);
                 num(row.transform, r.invested > 0 && r.dmg > 0 ? TextUtil.fmt(r.dmg / r.invested * 100) : "–", w[8], Theme.Text);
+                num(row.transform, r.first >= 0 ? U.Fmt(r.first) : "–", w[9], Theme.Muted);
+                num(row.transform, r.perWave(s) >= 0 ? TextUtil.fmt(r.perWave(s)) : "–", w[10], Theme.Text);
             }
+        }
+
+        // ------------------------------------------------------------ 4.1: Statistik als Bild
+
+        static Text shotText(Transform p, string text, float x, float y, float w, float h, int size, Color col, TextAnchor align, FontStyle style = FontStyle.Normal)
+        {
+            var t = Ui.Label(p, text, size, col, align, style);
+            t.horizontalOverflow = HorizontalWrapMode.Overflow;
+            t.verticalOverflow = VerticalWrapMode.Overflow;
+            t.raycastTarget = false;
+            Ui.Place(t.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -y), new Vector2(w, h));
+            return t;
+        }
+
+        static void shotBox(Transform p, float x, float y, float w, float h, Color col)
+        {
+            var img = Ui.Panel(p, "Box", col, false, null);
+            img.sprite = null;
+            img.type = Image.Type.Simple;
+            img.raycastTarget = false;
+            Ui.Place(img.rectTransform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(x, -y), new Vector2(w, h));
+        }
+
+        /// <summary>
+        /// Baut eine aufgeräumte, bildschirmfüllende Zusammenfassung (Lauf, Held, Turmtabelle), nimmt sie als Bild auf
+        /// und legt das PNG in die Zwischenablage (sonst Download).
+        /// </summary>
+        static IEnumerator captureStats(GameApp app, GameState s)
+        {
+            var rows = towerRows(s);
+            double total = Math.Max(1, rows.Sum((r) => r.dmg));
+            double maxDmg = Math.Max(1, rows.Count > 0 ? rows.Max((r) => r.dmg) : 0);
+            var effs = rows.Where((r) => r.invested > 0 && r.dmg > 0).Select((r) => r.dmg / r.invested * 100).OrderBy((v) => v).ToList();
+            double effLo = effs.Count > 0 ? effs[effs.Count / 3] : 0, effHi = effs.Count > 0 ? effs[effs.Count * 2 / 3] : 0;
+            var layer = app.tooltipLayer != null ? app.tooltipLayer : app.root;
+            var go = Ui.Node("StatsShot", layer);
+            var rt = Ui.Fill(go.GetComponent<RectTransform>());
+            go.transform.SetAsLastSibling();
+            var bg = go.AddComponent<Image>();
+            bg.color = Theme.Bg;
+            float W = app.root.rect.width, H = app.root.rect.height;
+            float m = 22;
+            // Kopf
+            var st = s.stats;
+            shotText(go.transform, $"Kernwacht · {TextUtil.modeName(s.mode)}{(s.theme == "scifi" ? " · Sci-Fi" : "")} · Welle {U.Fmt(st.wavesCleared)} · {Balance.DIFFICULTY[s.difficulty].name}", m, m, W - 2 * m, 30, 24, Theme.Gold, TextAnchor.UpperLeft, FontStyle.Bold);
+            string line2 = $"Seed {s.seed.text} · Karte {Biomes.BIOMES[s.map.biome].name} ({s.map.variant}) · Kampfzeit {duration(st.duration)} · Gold verdient {TextUtil.fmt(st.goldEarned)} / ausgegeben {TextUtil.fmt(st.goldSpent)} · Leben {U.Fmt(s.lives)}/{U.Fmt(s.maxLives)}";
+            shotText(go.transform, line2, m, m + 32, W - 2 * m, 22, 16, Theme.Text, TextAnchor.UpperLeft);
+            string line3 = s.he != null
+                ? $"Held: {Champions.CHAMPIONS[s.he.champion.id].name} St. {U.Fmt(s.he.champion.level)} · Heldenschaden {TextUtil.fmt(s.he.champion.damageDealt)} · Doktrin {Doctrines.of(s.he).name} · Turmschaden gesamt {TextUtil.fmt(total)}"
+                : $"Turmschaden gesamt {TextUtil.fmt(total)}";
+            shotText(go.transform, line3, m, m + 56, W - 2 * m, 22, 16, Theme.Muted, TextAnchor.UpperLeft);
+            if (s.modifiers.Count > 0)
+            {
+                string mods = string.Join(", ", s.modifiers.Select((id) => Modifiers.MODIFIERS.TryGetValue(id, out var md) ? md.name : id));
+                shotText(go.transform, "Modifikatoren: " + mods, m, m + 80, W - 2 * m, 22, 14, Theme.Muted, TextAnchor.UpperLeft);
+            }
+            float top = m + 108;
+            // Tabelle (bei vielen Türmen zweispaltig)
+            int n = Math.Max(1, rows.Count);
+            float avail = H - top - m - 26;
+            int cols = avail / n < 19 ? 2 : 1;
+            int per = (n + cols - 1) / cols;
+            float rowH = Mathf.Clamp(avail / per, 14, 30);
+            int fs = Mathf.Clamp(Mathf.RoundToInt(rowH * 0.6f), 11, 18);
+            float gap = 24;
+            float tw = (W - 2 * m - gap * (cols - 1)) / cols;
+            // Spalten: Name, Ende, Gebaut, Schaden (+Balken), Anteil, Abschüsse, Investiert, je 100 Gold
+            float[] fr = { 0.22f, 0.05f, 0.06f, 0.06f, 0.17f, 0.07f, 0.1f, 0.07f, 0.09f, 0.11f };
+            string[] hd = { "Turm", "Ende", "Gebaut", "ab W.", "Schaden", "Anteil", "je Welle", "Kills", "Investiert", "je 100 Gold" };
+            for (int c = 0; c < cols; c++)
+            {
+                float x0 = m + c * (tw + gap);
+                float x = x0;
+                for (int k = 0; k < hd.Length; k++)
+                {
+                    float cw = fr[k] * tw;
+                    shotText(go.transform, hd[k], x + 4, top, cw - 8, 22, fs, Theme.Muted, k == 0 ? TextAnchor.MiddleLeft : TextAnchor.MiddleRight, FontStyle.Bold);
+                    x += cw;
+                }
+                shotBox(go.transform, x0, top + 23, tw, 1, Theme.LineStrong);
+                for (int i = 0; i < per; i++)
+                {
+                    int idx = c * per + i;
+                    if (idx >= rows.Count) break;
+                    var r = rows[idx];
+                    float y = top + 26 + i * rowH;
+                    if (i % 2 == 0) shotBox(go.transform, x0, y, tw, rowH, new Color(1, 1, 1, 0.045f));
+                    double eff = r.invested > 0 && r.dmg > 0 ? r.dmg / r.invested * 100 : -1;
+                    Color effC = eff < 0 ? Theme.Muted : eff >= effHi ? Theme.Good : eff <= effLo ? Theme.Bad : Theme.Text;
+                    string[] cells =
+                    {
+                        $"{idx + 1}. {r.name}", U.Fmt(r.end), U.Fmt(r.built), r.first >= 0 ? U.Fmt(r.first) : "–", TextUtil.fmt(r.dmg), $"{U.Fixed(r.dmg / total * 100, 1)} %",
+                        r.perWave(s) >= 0 ? TextUtil.fmt(r.perWave(s)) : "–", U.Fmt(r.kills), r.invested > 0 ? TextUtil.fmt(r.invested) : "–", eff >= 0 ? TextUtil.fmt(eff) : "–",
+                    };
+                    x = x0;
+                    for (int k = 0; k < cells.Length; k++)
+                    {
+                        float cw = fr[k] * tw;
+                        if (k == 4)
+                        {
+                            float bw = (cw - 8) * 0.45f;
+                            shotBox(go.transform, x + 4, y + rowH * 0.35f, bw, rowH * 0.3f, new Color(0, 0, 0, 0.45f));
+                            shotBox(go.transform, x + 4, y + rowH * 0.35f, Mathf.Max(1, bw * (float)(r.dmg / maxDmg)), rowH * 0.3f, Theme.Accent);
+                        }
+                        Color col = k == 9 ? effC : k == 5 && r.dmg / total >= 0.2 ? Theme.Gold : k == 0 ? Theme.Text : r.end > 0 || k != 1 ? Theme.Text : Theme.Muted;
+                        shotText(go.transform, cells[k], x + 4, y, cw - 8, rowH, fs, col, k == 0 ? TextAnchor.MiddleLeft : TextAnchor.MiddleRight);
+                        x += cw;
+                    }
+                }
+            }
+            shotText(go.transform, "Ende = Türme am Ende · Gebaut = insgesamt gebaut (Fusionen zählen) · ab W. = erstmals gebaut in Welle · je Welle = Schaden je Welle seit dem ersten Bau · Investiert = Gold in den verbliebenen Türmen · je 100 Gold: grün = oberes Drittel, rot = unteres Drittel", m, H - m - 18, W - 2 * m, 18, 12, Theme.Muted, TextAnchor.MiddleLeft);
+            yield return new WaitForEndOfFrame();
+            Texture2D tex = null;
+            try { tex = ScreenCapture.CaptureScreenshotAsTexture(); }
+            catch (Exception e) { Debug.LogWarning("[Statistik] Aufnahme fehlgeschlagen: " + e.Message); }
+            UnityEngine.Object.Destroy(go);
+            if (tex == null) { app.toast("Bild konnte nicht aufgenommen werden.", "warn", 4000); yield break; }
+            byte[] png = tex.EncodeToPNG();
+            UnityEngine.Object.Destroy(tex);
+            int res = WebClipboard.CopyPng(png, $"kernwacht-welle-{U.Fmt(st.wavesCleared)}.png");
+            if (res == 1) app.toast("Statistik als Bild in die Zwischenablage gelegt – mit Strg+V einfügen. (Verweigert der Browser das, wird das Bild heruntergeladen.)", "info", 6000);
+            else if (res == 2) app.toast("Statistik als Bild heruntergeladen.", "info", 5000);
+            else app.toast("Bild konnte nicht kopiert werden.", "warn", 4000);
         }
 
         static void num(Transform p, string text, float width, Color col)

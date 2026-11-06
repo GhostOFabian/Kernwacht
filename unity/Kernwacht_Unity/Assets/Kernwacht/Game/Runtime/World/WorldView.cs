@@ -91,6 +91,9 @@ namespace Kernwacht.Game
         static readonly string[] ZONE_WINDUP_ABIL = { "fireZones", "nullPulse", "quake", "riftJump", "riftPortals", "riftPortals", "stomp", "siegeSlam", "devour" };
 
         // Tageszeit-Schlüsselbilder (Lichtfarbe, Intensität, Höhenwinkel)
+        static readonly int[] TOD_COL = { 0xffe2b8, 0xffffff, 0xffb070, 0x9aa8ff };
+        /// <summary>4.1 Sci-Fi: kühles Licht, Neon-Dämmerung.</summary>
+        static readonly int[] TOD_SF = { 0xc8e4ff, 0xf4f8ff, 0xffa0d8, 0x8090ff };
         static readonly float[][] TOD = { new[] { 0xffe2b8, 0.9f, 0.7f }, new[] { 0xffffff, 1.0f, 0.95f }, new[] { 0xffb070, 0.85f, 0.55f }, new[] { 0x9aa8ff, 0.62f, 0.75f } };
 
         const bool SPRITE_ADD = true;
@@ -553,14 +556,15 @@ namespace Kernwacht.Game
                     case "meteor":
                     {
                         float my0 = gy(map, e.x, e.y);
-                        fx.explosion(ex, my0, ey, (float)e.r, 0xff6a20, e.big);
-                        fx.pillar(ex, my0, ey, e.big ? 3.2f : 2.2f, 0xff8030, 0.45f, (float)e.r * 0.55f);
-                        fx.ring(ex, my0 + 0.05f, ey, (float)e.r * 1.7f, 0xfff0c0, 0.35f, 0.1f, 0.3f);
-                        fx.glow(ex, my0 + 0.6f, ey, (float)e.r * 2.4f, 0xff9040, 0.3f, 0.8f);
+                        bool sf = Themes.SciFi;
+                        fx.explosion(ex, my0, ey, (float)e.r, sf ? 0x40a8ff : 0xff6a20, e.big);
+                        fx.pillar(ex, my0, ey, e.big ? 3.2f : 2.2f, sf ? 0x80d8ff : 0xff8030, 0.45f, (float)e.r * 0.55f);
+                        fx.ring(ex, my0 + 0.05f, ey, (float)e.r * 1.7f, sf ? 0xe0f8ff : 0xfff0c0, 0.35f, 0.1f, 0.3f);
+                        fx.glow(ex, my0 + 0.6f, ey, (float)e.r * 2.4f, sf ? 0x60b0ff : 0xff9040, 0.3f, 0.8f);
                         for (int i = 0; i < 10 * fx.intensity; i++)
                         {
                             float ang = Rnd() * Mathf.PI * 2, vel = 2 + Rnd() * 3;
-                            fx.emit(ex, my0 + 0.3f, ey, 0.7f + Rnd() * 0.4f, 0xffd080, vx: Mathf.Cos(ang) * vel, vy: 3 + Rnd() * 4, vz: Mathf.Sin(ang) * vel, c1: 0x401008, s0: 0.14f, s1: 0.04f, shape: SHAPE.spark, stretch: 0.25f);
+                            fx.emit(ex, my0 + 0.3f, ey, 0.7f + Rnd() * 0.4f, sf ? 0xc0f0ff : 0xffd080, vx: Mathf.Cos(ang) * vel, vy: 3 + Rnd() * 4, vz: Mathf.Sin(ang) * vel, c1: sf ? 0x102040 : 0x401008, s0: 0.14f, s1: 0.04f, shape: SHAPE.spark, stretch: 0.25f);
                         }
                     }
                         if (e.big)
@@ -1178,7 +1182,8 @@ namespace Kernwacht.Game
             int i0 = Mathf.FloorToInt(tod) % TOD.Length;
             int i1 = (i0 + 1) % TOD.Length;
             float f = tod - Mathf.Floor(tod);
-            int c0 = (int)TOD[i0][0], c1 = (int)TOD[i1][0];
+            var todC = Themes.SciFi ? TOD_SF : TOD_COL;
+            int c0 = todC[i0], c1 = todC[i1];
             float k0 = TOD[i0][1], e0 = TOD[i0][2], k1 = TOD[i1][1], e1 = TOD[i1][2];
             int col = Col.Mix(Col.Mix((int)pal.light, c0, 0.55), Col.Mix((int)pal.light, c1, 0.55), f);
             float inten = k0 + (k1 - k0) * f;
@@ -1612,7 +1617,12 @@ namespace Kernwacht.Game
                         float dz = z + Mathf.Sin(o) * 0.9f;
                         float dy = by + top + 0.5f + Mathf.Sin(t * 3 + (float)tw.uid) * 0.1f;
                         float yaw = Mathf.Atan2(-Mathf.Cos(o), -Mathf.Sin(o));
-                        drawParts(WorldModels.DRAGON, dx, dy, dz, yaw, 0.55f * scale, main, tw.spec == 2 ? 0x80c8ff : 0xffa040, "opaque", 1, -1, 0, 0, (float)tw.uid);
+                        if (Themes.SciFi)
+                        {
+                            drawParts(WorldModels.DRONE, dx, dy + 0.15f, dz, yaw, (tw.def == "phoenix" ? 0.75f : 0.55f) * scale, main, tw.spec == 2 ? 0x80c8ff : tw.def == "phoenix" ? 0xff4080 : 0xff8030, "opaque", 1, -1, 0, 0, (float)tw.uid);
+                            if (Rnd() < 0.3f * fx.intensity) fx.emit(dx, dy + 0.05f, dz, 0.3f, 0x80d0ff, vy: -1.2f, s0: 0.08f, s1: 0.01f);
+                        }
+                        else drawParts(WorldModels.DRAGON, dx, dy, dz, yaw, 0.55f * scale, main, tw.spec == 2 ? 0x80c8ff : 0xffa040, "opaque", 1, -1, 0, 0, (float)tw.uid);
                         break;
                     }
                     case "gravity":
@@ -1888,14 +1898,26 @@ namespace Kernwacht.Game
                 float zx = (float)z.x, zz = (float)z.y, zr = (float)z.r;
                 float y = (float)Terrain.cellTop(map, Math.Floor(z.x), Math.Floor(z.y)) + 0.04f;
                 if (z.kind == "soldier") continue;
-                if (z.kind == "meteor" && z.armed > 0 && sim.c.towerByUid.TryGetValue(z.src, out var sl) && sl != null && sl.def == "sunlance")
+                bool sunl = z.kind == "meteor" && z.armed > 0 && sim.c.towerByUid.TryGetValue(z.src, out var sl) && sl != null && sl.def == "sunlance";
+                if (z.kind == "meteor" && z.armed > 0 && (sunl || Themes.SciFi))
                 {
-                    // Sonnenlanze: Lichtsäule vom Himmel statt Meteor
-                    float k = Mathf.Clamp01(1 - (float)z.armed / 0.5f);
-                    r.line(zx, y + 12, zz, zx, y, zz, 0.08f + k * 0.35f, 0xffd070, 0.25f + k * 0.5f);
-                    r.line(zx, y + 12, zz, zx, y, zz, 0.03f + k * 0.12f, 0xfffff0, 0.5f + k * 0.5f);
-                    r.ground(SPRITE_ADD, SHAPE.glow, zx, y, zz, zr * (0.6f + k), 0xffc040, 0.4f + k * 0.4f, 0, 0.3f);
-                    r.ground(SPRITE_ADD, SHAPE.ring, zx, y + 0.02f, zz, zr, 0xfff0a0, 0.8f, time * 3, 0.3f, 0.05f);
+                    // Sonnenlanze bzw. Sci-Fi-Orbitalschlag: Strahl vom Himmel statt Meteor
+                    float k = Mathf.Clamp01(1 - (float)z.armed / (sunl ? 0.5f : 1.2f));
+                    int bc = sunl ? (Themes.SciFi ? 0xff5060 : 0xffd070) : 0x60c8ff;
+                    int gc = sunl ? (Themes.SciFi ? 0xff3040 : 0xffc040) : 0x40a0ff;
+                    float kk = sunl ? k : k * k;
+                    r.line(zx, y + 14, zz, zx, y, zz, 0.04f + kk * 0.4f, bc, 0.2f + kk * 0.55f);
+                    r.line(zx, y + 14, zz, zx, y, zz, 0.02f + kk * 0.14f, 0xfffff8, 0.45f + kk * 0.55f);
+                    r.ground(SPRITE_ADD, SHAPE.glow, zx, y, zz, zr * (0.6f + kk), gc, 0.3f + kk * 0.5f, 0, 0.3f);
+                    r.ground(SPRITE_ADD, SHAPE.ring, zx, y + 0.02f, zz, zr, Col.Mix(bc, 0xffffff, 0.4), 0.8f, time * 3, 0.3f, 0.05f);
+                    if (!sunl)
+                    {
+                        // Zielerfassung: schrumpfender Ring und Fadenkreuz
+                        r.ground(SPRITE_ADD, SHAPE.ring, zx, y + 0.03f, zz, Mathf.Max(0.1f, zr * (1.6f - k)), 0xa0e8ff, 0.7f, -time * 2, 0.3f, 0.05f);
+                        r.line(zx - zr, y + 0.05f, zz, zx + zr, y + 0.05f, zz, 0.03f, 0xa0e8ff, 0.6f);
+                        r.line(zx, y + 0.05f, zz - zr, zx, y + 0.05f, zz + zr, 0.03f, 0xa0e8ff, 0.6f);
+                        if (Rnd() < kk * fx.intensity) fx.emit(zx, y + Rnd() * 6, zz, 0.3f, 0xc0f0ff, vy: -3f, s0: 0.15f, s1: 0.02f, shape: SHAPE.spark, stretch: 0.5f);
+                    }
                     continue;
                 }
                 if (z.kind == "mine")
@@ -2782,6 +2804,11 @@ namespace Kernwacht.Game
                 float tf = Mathf.Max(0, frac - tail / total);
                 float tx = px - ux * tail, tz = pz - uz * tail;
                 float ty = bse + 0.75f + (lob ? Mathf.Sin(tf * Mathf.PI) * 1.3f : 0.25f * (1 - tf));
+                if (Themes.SciFi)
+                {
+                    sciProjectile(p.kind, col, px, y, pz, tx, ty, tz, ux, uz, yaw);
+                    continue;
+                }
                 switch (p.kind)
                 {
                     case "ranger":
@@ -2848,6 +2875,84 @@ namespace Kernwacht.Game
                         r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.7f, col, 0.85f);
                         if (Rnd() < 0.6f * fx.intensity) fx.emit(px, y, pz, 0.35f, col, s0: 0.2f, s1: 0.03f);
                         break;
+                }
+            }
+        }
+
+        /// <summary>4.1 Sci-Fi: Energiegeschosse statt Pfeilen, Bolzen und Kanonenkugeln.</summary>
+        void sciProjectile(string kind, int col, float px, float y, float pz, float tx, float ty, float tz, float ux, float uz, float yaw)
+        {
+            switch (kind)
+            {
+                case "ranger":
+                case "thornwood":
+                    r.line(tx, ty, tz, px, y, pz, 0.06f, 0x30e0ff, 0.5f);
+                    r.line(px - ux * 0.3f, y, pz - uz * 0.3f, px, y, pz, 0.025f, 0xe0ffff, 0.95f);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.38f, 0x40e8ff, 0.8f);
+                    break;
+                case "ballista":
+                case "voidlance":
+                    r.line(px - ux * 2.4f, y, pz - uz * 2.4f, px, y, pz, 0.12f, 0x6aa0ff, 0.3f);
+                    r.line(px - ux * 1.6f, y, pz - uz * 1.6f, px, y, pz, 0.035f, 0xffffff, 0.9f);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.55f, 0xa0c8ff, 0.8f);
+                    if (Rnd() < 0.7f * fx.intensity) fx.emit(px, y, pz, 0.25f, 0xa0c8ff, s0: 0.1f, s1: 0.02f, shape: SHAPE.spark, stretch: 0.4f);
+                    break;
+                case "ember":
+                    r.line(tx, ty, tz, px, y, pz, 0.22f, 0xff2a8a, 0.45f);
+                    r.line(tx, ty, tz, px, y, pz, 0.08f, 0xffc0e8, 0.8f);
+                    r.add("opaque", "sphere", px, y, pz, 0.24f, 0.24f, 0.24f, 0xffb0e0, 1, 2.6f);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 1f, 0xff3a9a, 0.9f);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.4f, 0xfff0ff, 0.8f);
+                    if (Rnd() < 0.8f * fx.intensity) fx.emit(px, y, pz, 0.45f, 0xff60b0, s0: 0.16f, s1: 0.02f);
+                    break;
+                case "spore":
+                    r.line(tx, ty, tz, px, y, pz, 0.08f, 0x7aff40, 0.4f);
+                    r.add("opaque", "cyl8", px, y, pz, 0.12f, 0.24f, 0.12f, 0x3a4048, 1, 0.2f, yaw, Time.time * 9);
+                    r.add("opaque", "box", px, y, pz, 0.13f, 0.05f, 0.13f, 0x9aff50, 1, 1.6f, yaw, Time.time * 9);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.55f, 0x7aff40, 0.6f);
+                    if (Rnd() < 0.4f * fx.intensity) fx.emit(px, y, pz, 0.5f, 0xb0ff70, vy: -0.4f, s0: 0.1f, s1: 0.03f);
+                    break;
+                case "cannon":
+                case "glacier":
+                    r.line(tx, ty, tz, px, y, pz, 0.16f, kind == "glacier" ? 0x60c8ff : 0x5a8aff, 0.35f);
+                    r.add("opaque", "sphere", px, y, pz, 0.24f, 0.24f, 0.24f, kind == "glacier" ? 0xd0f4ff : 0xffe0b0, 1, 2f);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.8f, kind == "glacier" ? 0x80e0ff : 0xffa040, 0.75f);
+                    if (Rnd() < 0.6f * fx.intensity) fx.emit(px, y, pz, 0.3f, 0x80a8ff, s0: 0.14f, s1: 0.02f);
+                    break;
+                case "acid":
+                case "acidmortar":
+                case "plaguepot":
+                {
+                    float sz = kind == "acidmortar" ? 0.32f : 0.22f;
+                    int ac = kind == "plaguepot" ? 0x50ff90 : 0xc0ff30;
+                    r.line(tx, ty, tz, px, y, pz, sz * 0.5f, ac, 0.45f);
+                    r.add("opaque", "octa", px, y, pz, sz, sz * 1.2f, sz, Col.Mix(ac, 0xffffff, 0.3), 1, 2f, Time.time * 6);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, sz * 3.2f, ac, 0.75f);
+                    if (Rnd() < 0.7f * fx.intensity) fx.emit(px, y, pz, 0.5f, ac, vy: -1.2f, s0: 0.09f, s1: 0.03f);
+                    break;
+                }
+                case "eyrie":
+                case "falcon":
+                    r.line(px - ux * 2.2f, y, pz - uz * 2.2f, px, y, pz, kind == "falcon" ? 0.1f : 0.07f, 0xff3040, 0.4f);
+                    r.line(px - ux * 1.2f, y, pz - uz * 1.2f, px, y, pz, 0.025f, 0xffe0e0, 0.95f);
+                    r.billboard(SPRITE_ADD, SHAPE.spark, px, y, pz, 0.4f, 0xff6070, 0.85f, 0, 2);
+                    break;
+                case "stormbattery":
+                case "skyguard":
+                case "skywatch":
+                    r.line(tx, ty, tz, px, y, pz, 0.08f, 0x80c8ff, 0.45f);
+                    r.add("opaque", "octa", px, y, pz, 0.16f, 0.16f, 0.16f, 0xe0f0ff, 1, 1.6f, Time.time * 8);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.6f, 0x90d0ff, 0.7f);
+                    break;
+                default:
+                {
+                    int c = Col.Mix(col, 0x40e0ff, 0.25);
+                    r.line(tx, ty, tz, px, y, pz, 0.14f, c, 0.45f);
+                    r.line(tx, ty, tz, px, y, pz, 0.05f, Col.Mix(c, 0xffffff, 0.7), 0.85f);
+                    r.add("opaque", "octa", px, y, pz, 0.18f, 0.22f, 0.18f, Col.Mix(c, 0xffffff, 0.4), 1, 2f, Time.time * 7);
+                    r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.75f, c, 0.85f);
+                    if (Rnd() < 0.6f * fx.intensity) fx.emit(px, y, pz, 0.35f, c, s0: 0.18f, s1: 0.03f);
+                    break;
                 }
             }
         }

@@ -338,7 +338,7 @@ namespace Kernwacht.Game.UI
             var s = sim.s;
             var box = Dialog(560).transform;
             H2(box, "Pause");
-            P(box, $"{(HudText.MODE_NAMES.TryGetValue(s.mode, out var mn) ? mn : s.mode)} · {s.map.name} · Seed {s.seed.text}", HK.FS, Theme.Muted);
+            P(box, $"{(HudText.MODE_NAMES.TryGetValue(s.mode, out var mn) ? mn : s.mode)} · {Themes.MapText(s.map.name)} · Seed {s.seed.text}", HK.FS, Theme.Muted);
             Tiny(box, $"KERNWACHT Version {Application.version}");
             if (s.modifiers.Count > 0) Small(box, $"Aktive Modifikatoren: {string.Join(", ", s.modifiers.Select((m) => Modifiers.MODIFIERS[m].name))}");
             HK.B(box, "Fortsetzen", () => a.togglePause(), Ui.BtnKind.Primary);

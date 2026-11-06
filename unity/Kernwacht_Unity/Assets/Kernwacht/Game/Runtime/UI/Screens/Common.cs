@@ -116,21 +116,8 @@ namespace Kernwacht.Game.UI
         /// <summary>Text in die Zwischenablage (mit Rückmeldung).</summary>
         public static void copyText(GameApp app, string text)
         {
-            try
-            {
-                GUIUtility.systemCopyBuffer = text;
-#if UNITY_WEBGL && !UNITY_EDITOR
-                // PORT: Im WebGL-Build erreicht systemCopyBuffer die Zwischenablage des Browsers nicht (ohne .jslib) –
-                // wie im Webspiel bei fehlender Zwischenablage: Text gut lesbar anzeigen, damit er abgeschrieben werden kann.
-                app.toast($"Kopieren nicht möglich – {text}", "warn", 8000);
-#else
-                app.toast($"Kopiert: {(text.Length > 40 ? text.Substring(0, 40) + "…" : text)}", "info", 1800);
-#endif
-            }
-            catch
-            {
-                app.toast($"Kopieren nicht möglich – {text}", "warn", 8000);
-            }
+            if (WebClipboard.CopyText(text)) app.toast($"Kopiert: {(text.Length > 40 ? text.Substring(0, 40) + "…" : text)}", "info", 1800);
+            else app.toast("Kopieren nicht möglich – der Browser hat den Zugriff auf die Zwischenablage verweigert.", "warn", 5000);
         }
 
         /// <summary>

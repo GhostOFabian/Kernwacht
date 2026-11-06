@@ -503,6 +503,8 @@ namespace Kernwacht.Game
             positionToasts();
             if (screen != "game")
             {
+                // 4.1: Menüs zeigen das Fantasy-Thema; die Ergebnisse behalten das Thema des Laufs.
+                if (Themes.SciFi && screen != "results") { Themes.Apply(Themes.FANTASY); bgSim = null; }
                 ensureBackground();
                 audio.intensity = 0;
             }
@@ -796,6 +798,7 @@ namespace Kernwacht.Game
             {
                 save.progress.heroMeta.lastChampion = setup.heroEndless.champion;
                 if (setup.heroEndless.doctrine != null) save.progress.heroMeta.lastDoctrine = setup.heroEndless.doctrine;
+                save.progress.heroMeta.lastTheme = setup.theme == Themes.SCIFI ? Themes.SCIFI : Themes.FANTASY;
                 save.progress.heroMeta.startKit = new List<string>(setup.heroEndless.startKit);
             }
             commitPendingHeroRun();
@@ -831,6 +834,7 @@ namespace Kernwacht.Game
                 session.dispose();
                 session = null;
             }
+            Themes.Apply(sim.s.theme);
             go("game");
             session = new GameSession(this, sim);
             var b = Biomes.BIOMES[sim.s.map.biome];

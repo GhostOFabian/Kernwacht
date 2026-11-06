@@ -330,7 +330,7 @@ namespace Kernwacht.Sim
                 attack = "projectile",
                 defaultPriority = "first",
                 networkable = true,
-                @base = new Dictionary<string, double> { ["damage"] = 30, ["range"] = 3.8, ["cooldown"] = 2.4, ["projectileSpeed"] = 6.5, ["splash"] = 1.3 },
+                @base = new Dictionary<string, double> { ["damage"] = 40, ["range"] = 3.8, ["cooldown"] = 2.2, ["projectileSpeed"] = 6.5, ["splash"] = 1.3 },
                 upgrades = new List<UpgradeDefinition>
                 {
                     new UpgradeDefinition { id = "cannon1", name = "Schwarzpulver", description = "+10 Schaden", cost = 80, mods = new List<StatMod> { new StatMod { stat = "damage", add = 10 } } },
@@ -480,7 +480,7 @@ namespace Kernwacht.Sim
                 attack = "dragon",
                 defaultPriority = "first",
                 networkable = true,
-                @base = new Dictionary<string, double> { ["damage"] = 22, ["range"] = 3.4, ["cooldown"] = 1.5, ["splash"] = 1, ["burnDps"] = 6, ["burnDur"] = 3, ["hitsAir"] = 1, ["airDmgMul"] = 2.5, ["preferAir"] = 1 },
+                @base = new Dictionary<string, double> { ["damage"] = 34, ["range"] = 3.4, ["cooldown"] = 1.5, ["splash"] = 1, ["burnDps"] = 10, ["burnDur"] = 3, ["hitsAir"] = 1, ["airDmgMul"] = 2.5, ["preferAir"] = 1 },
                 upgrades = new List<UpgradeDefinition>
                 {
                     new UpgradeDefinition { id = "dragon1", name = "Wachstum", description = "+10 Schaden", cost = 110, mods = new List<StatMod> { new StatMod { stat = "damage", add = 10 } } },
@@ -504,13 +504,13 @@ namespace Kernwacht.Sim
                 icon = "💎",
                 hotkey = "#",
                 color = 0x60f0e0,
-                description = "Ein Kristallstrahl, der mit der Zeit stärker wird und alle Gegner in seiner Linie durchdringt. Mehrere Laser dicht beieinander stören sich (−20 % je Nachbarlaser in 3 Feldern), direkt am Riss −35 %.",
+                description = "Ein Kristallstrahl, der mit der Zeit stärker wird und alle Gegner in seiner Linie durchdringt. Mehrere Laser dicht beieinander stören sich (−12 % je Nachbarlaser in 3 Feldern), direkt am Riss −35 %.",
                 damageType = "arcane",
                 cost = 200,
                 attack = "laser",
                 defaultPriority = "first",
                 networkable = true,
-                @base = new Dictionary<string, double> { ["damage"] = 2.8, ["range"] = 3.8, ["cooldown"] = 0.1, ["laserRamp"] = 3, ["hitsAir"] = 1 },
+                @base = new Dictionary<string, double> { ["damage"] = 3.4, ["range"] = 3.8, ["cooldown"] = 0.1, ["laserRamp"] = 3, ["hitsAir"] = 1 },
                 upgrades = new List<UpgradeDefinition>
                 {
                     new UpgradeDefinition { id = "laser1", name = "Reiner Kristall", description = "+1,2 Schaden je Puls", cost = 110, mods = new List<StatMod> { new StatMod { stat = "damage", add = 1.2 } } },
