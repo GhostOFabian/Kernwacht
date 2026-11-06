@@ -651,6 +651,8 @@ namespace Kernwacht.Sim
         public double version;
         public WorldSeed seed;
         public string mode;         // GameMode
+        /// <summary>4.1: Optik-Thema ('fantasy' | 'scifi'); null = fantasy. Rein kosmetisch.</summary>
+        public string theme;
         public string difficulty;   // Difficulty
         public string missionId;    // string | null
         public MissionRules rules;
@@ -920,6 +922,8 @@ namespace Kernwacht.Sim
         public string lastChampion;   // ChampionId
         /// <summary>Zuletzt gewählte Doktrin (Doctrines.DOCTRINES).</summary>
         public string lastDoctrine;
+        /// <summary>4.1: zuletzt gewähltes Thema ('fantasy' | 'scifi').</summary>
+        public string lastTheme;
         public double runs;
         /// <summary>Passiver Baum: Knoten-ID → Rang.</summary>
         public Dictionary<string, double> passive = new Dictionary<string, double>();

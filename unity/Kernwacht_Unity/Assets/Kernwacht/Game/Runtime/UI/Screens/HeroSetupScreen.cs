@@ -50,6 +50,7 @@ namespace Kernwacht.Game.UI
             double slots = HeroEndless.carrySlots(perks);
             var done = app.save.progress.campaignCompleted;
             string champion = meta.lastChampion != null && Champions.CHAMPIONS.ContainsKey(meta.lastChampion) && Champions.championUnlocked(meta.lastChampion, perks, meta.bestWave, done) ? meta.lastChampion : "lyra";
+            string theme = meta.lastTheme == "scifi" ? "scifi" : "fantasy";
             string doctrine = meta.lastDoctrine != null && Doctrines.DOCTRINES.ContainsKey(meta.lastDoctrine) ? meta.lastDoctrine : Doctrines.DEFAULT;
             List<string> kit = meta.startKit.Where((i) => meta.unlockedItems.Contains(i)).Take((int)slots).ToList();
             var setup = new RunSetup
@@ -221,6 +222,15 @@ namespace Kernwacht.Game.UI
                 Common.para(summary, $"Ablauf: {U.Fmt(HeroEndless.HERO_ENDLESS.prepTime)} s Vorbereitung, danach starten die Wellen automatisch (Pause hält alles an). Der Held läuft per Klick/Rechtsklick über die Karte – auch auf der Gegnerbahn und durch Türme hindurch. Gegner lassen Erfahrung, Ressourcen, Tränke und Fragmente fallen. Der Laden steht nahe dem Kern.", "tiny muted");
 
                 var options = Common.card(c2, "Options");
+                // 4.1: Thema des Laufs (gleiche Werte, andere Welt)
+                Text themeHint = null;
+                Common.seg(Common.field(options, "Thema"), new List<(string, string)> { ("fantasy", "Fantasy"), ("scifi", "Sci-Fi") }, theme, (x) =>
+                {
+                    theme = x;
+                    if (themeHint != null) themeHint.text = themeText(x);
+                    Common.sfx(app, "select");
+                }, "Thema");
+                themeHint = Common.para(options, themeText(theme), "tiny muted");
                 var mapOpts = new List<(string, string)> { ("random", "Zufallswelt (Seed)") };
                 if (heroMap != null) mapOpts.Add(("editor", $"Aus dem Editor: {heroMap.name}"));
                 for (int i = 0; i < savedMaps.Count; i++) mapOpts.Add(($"saved:{i}", $"Gespeichert: {savedMaps[i].name}"));
@@ -233,7 +243,7 @@ namespace Kernwacht.Game.UI
                 Common.seg(Common.field(options, "Kartenvariante"), new List<(string, string)> { ("classic", "Classic"), ("mazing", "Mazing") }, setup.variant, (x) => { setup.variant = x; }, "Kartenvariante");
                 Common.seg(Common.field(options, "Kartengröße"), new List<(string, string)> { ("normal", "Normal"), ("large", "Groß"), ("huge", "Riesig") }, setup.size ?? "large", (x) => { setup.size = x; }, "Kartengröße");
                 var biomeOpts = new List<(string, string)> { ("random", "Zufällig (aus Seed)") };
-                foreach (var b in Biomes.BIOME_ORDER) biomeOpts.Add((b, Biomes.BIOMES[b].name));
+                foreach (var b in Biomes.BIOME_ORDER) biomeOpts.Add((b, Themes.SciBiomeName(b) != null ? $"{Biomes.BIOMES[b].name} / {Themes.SciBiomeName(b)}" : Biomes.BIOMES[b].name));
                 Common.select(Common.field(options, "Biom"), biomeOpts, setup.biome, (v) => { setup.biome = v; }, "Biom");
                 Common.seg(Common.field(options, "Schwierigkeit"), new[] { "easy", "normal", "hard" }.Select((d) => (d, Balance.DIFFICULTY[d].name)).ToList(), setup.difficulty, (x) => { setup.difficulty = x; }, "Schwierigkeit");
                 // Doktrin: Spielweise des Laufs (Vorteil mit Preis)
@@ -268,7 +278,7 @@ namespace Kernwacht.Game.UI
                     {
                         mode = setup.mode, seedText = setup.seedText, variant = setup.variant, biome = setup.biome, difficulty = setup.difficulty,
                         missionId = setup.missionId, customMap = setup.customMap, size = setup.size, heroes = setup.heroes,
-                        heroEndless = app.heroEndlessSetup(champion, kit, doctrine),
+                        heroEndless = app.heroEndlessSetup(champion, kit, doctrine), theme = theme,
                     });
                 }, Ui.BtnKind.Primary);
                 start.gameObject.name = "start-hero";
@@ -278,6 +288,10 @@ namespace Kernwacht.Game.UI
             renderKit();
             return el;
         }
+
+        static string themeText(string t) => t == "scifi"
+            ? "Sci-Fi: Orbitalstationen, Alien-Dschungel und Mondbasen. Railguns, Plasmawerfer und Drohnen verteidigen den Reaktorkern – gleiche Werte, gleiche Regeln, neue Welt."
+            : "Fantasy: Wälder, Vulkane und Himmelsinseln. Die klassische Kernwacht.";
 
         /// <summary>Alias (Auftragsbeschreibung).</summary>
         public static RectTransform heroSetupScreen(GameApp app, MapDefinition heroMap = null) => renderHeroSetup(app, heroMap);

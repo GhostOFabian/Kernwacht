@@ -58,7 +58,11 @@ namespace Kernwacht.Game
             ["abyss"] = new SeaInfo(-9f, true, 0x0e0a1a, 0),
         };
 
-        public static SeaInfo sea(string kind) => kind != null && SEA.TryGetValue(kind, out var s) ? s : SEA["water"];
+        public static SeaInfo sea(string kind)
+        {
+            var s = kind != null && SEA.TryGetValue(kind, out var f) ? f : SEA["water"];
+            return Themes.SciFi ? new SeaInfo(s.y, s.floating, Themes.SeaColor(kind, s.color), s.mat) : s;
+        }
 
         /// <summary>
         /// Zufallswert für das Aussehen einer Karte. Früher nur aus Name + Biom – dadurch sahen alle Karten
@@ -286,7 +290,7 @@ namespace Kernwacht.Game
                     float a = Terrain.rnd(salt, k) * Mathf.PI * 2;
                     float d = Mathf.Max(w, h) * 0.45f + Terrain.rnd(salt, k + 99) * 22;
                     float s = 2.2f + Terrain.rnd(salt, k + 7) * 3.2f;
-                    Add("sphere", w / 2f + Mathf.Cos(a) * d, seaI.y + 0.4f + Terrain.rnd(salt, k + 3), h / 2f + Mathf.Sin(a) * d, s * 1.6f, s * 0.7f, s * 1.3f, Col.Mix(0xdfe8f8, 0xb8c4e0, Terrain.rnd(salt, k + 5)), 0, glowMat: true);
+                    Add("sphere", w / 2f + Mathf.Cos(a) * d, seaI.y + 0.4f + Terrain.rnd(salt, k + 3), h / 2f + Mathf.Sin(a) * d, s * 1.6f, s * 0.7f, s * 1.3f, Themes.SciFi ? Col.Mix(0xf0c890, 0xc8885a, Terrain.rnd(salt, k + 5)) : Col.Mix(0xdfe8f8, 0xb8c4e0, Terrain.rnd(salt, k + 5)), 0, glowMat: true);
                 }
             }
             else if (biome.sea == "abyss")
@@ -344,7 +348,8 @@ namespace Kernwacht.Game
             else Add("rbox", w / 2f, -0.9f, h / 2f, w + 0.5f, 0.9f, h + 0.5f, Col.Shade(cliff, 0.8));
 
             // --- Zellen
-            bool lush = m.biome == "forest" || m.biome == "swamp" || m.biome == "sky";
+            bool sci = Themes.SciFi;
+            bool lush = m.biome == "forest" || m.biome == "swamp" || (!sci && m.biome == "sky");
             int stoneBase = Col.Mix(cliff, 0xb0a898, 0.45);
             for (int y = 0; y < h; y++)
             {
@@ -359,6 +364,11 @@ namespace Kernwacht.Game
                     {
                         int col = Col.Shade((int)pal.path, 0.96 + n * 0.08);
                         Column(x, y, top, col, col, 0);
+                        if (sci)
+                        {
+                            SciPath(x, y, i, top, cx, cz, accent, detail);
+                            continue;
+                        }
                         // Fahrspuren: zwei dunkle Streifen in Laufrichtung
                         int rut = Col.Shade((int)pal.path, 0.82);
                         for (int s = 0; s < 4; s++)
@@ -610,8 +620,105 @@ namespace Kernwacht.Game
             }
         }
 
+        /// <summary>4.1 Sci-Fi: Wegfeld als Metallplatte mit Leuchtspur in Laufrichtung und Randschienen mit Lichtpfosten.</summary>
+        void SciPath(int x, int y, int i, float top, float cx, float cz, int accent, int detail)
+        {
+            int path = (int)pal.path;
+            Add("box", cx, top + 0.003f, cz, 0.9f, 0.006f, 0.9f, Col.Shade(path, 1.07f + Terrain.rnd(salt, i * 3) * 0.05f));
+            int lineC = Col.Mix(accent, 0xffffff, 0.15);
+            for (int s = 0; s < 4; s++)
+            {
+                int dx = s == 0 ? 1 : s == 1 ? -1 : 0, dy = s == 2 ? 1 : s == 3 ? -1 : 0;
+                if (!IsPath(x + dx, y + dy)) continue;
+                Add("box", cx + dx * 0.25f, top + 0.009f, cz + dy * 0.25f, dx != 0 ? 0.5f : 0.05f, 0.006f, dy != 0 ? 0.5f : 0.05f, lineC, 1f);
+            }
+            Add("cyl8", cx, top + 0.008f, cz, 0.12f, 0.008f, 0.12f, lineC, 1f);
+            int w = (int)map.width, h = (int)map.height;
+            int rail = Col.Shade(path, 0.62f);
+            for (int s = 0; s < 4; s++)
+            {
+                int dx = s == 0 ? 1 : s == 1 ? -1 : 0, dy = s == 2 ? 1 : s == 3 ? -1 : 0;
+                if (IsPath(x + dx, y + dy) || x + dx < 0 || y + dy < 0 || x + dx >= w || y + dy >= h) continue;
+                float ex = cx + dx * 0.46f, ez = cz + dy * 0.46f;
+                Add("box", ex, top + 0.045f, ez, dx != 0 ? 0.07f : 1f, 0.09f, dy != 0 ? 0.07f : 1f, rail);
+                Add("box", ex, top + 0.093f, ez, dx != 0 ? 0.04f : 0.96f, 0.012f, dy != 0 ? 0.04f : 0.96f, accent, 0.8f);
+                float r = Terrain.rnd(salt, i * 11 + s);
+                if (detail >= 1 && r > 0.82f)
+                {
+                    Add("cyl8", ex, top, ez, 0.07f, 0.34f, 0.07f, Col.Shade(rail, 1.2f));
+                    Add("sphereLo", ex, top + 0.37f, ez, 0.09f, 0.06f, 0.09f, accent, 1f);
+                    if (r > 0.93f) glows.Add(new GlowPoint(ex, top + 0.38f, ez, 0.28f, accent, i));
+                }
+            }
+        }
+
+        /// <summary>4.1 Sci-Fi: Bodendetails je Biom (Alienpflanzen, Bodenplatten, Lüftungsgitter, Eissplitter …).</summary>
+        void AddSciGroundDetail(string bio, float x, float y, float z, float n, int groundC, int accent)
+        {
+            switch (bio)
+            {
+                case "forest":
+                {
+                    // Biolumineszente Knollenhalme
+                    int stem = Col.Shade(Col.Mix(groundC, 0x2a8a8a, 0.5), 0.9 + n * 0.3);
+                    Add("cone4", x, y - 0.02f, z, 0.07f, 0.26f + n * 0.16f, 0.07f, stem, 0.1f, n * 6, 0.12f);
+                    Add("cone4", x + 0.06f, y - 0.02f, z + 0.04f, 0.05f, 0.18f + n * 0.1f, 0.05f, Col.Shade(stem, 1.15), 0.1f, n * 3, -0.2f);
+                    if (n > 0.55f) Add("sphereLo", x, y + 0.27f + n * 0.14f, z, 0.07f, 0.07f, 0.07f, n > 0.8f ? 0xff60d0 : accent, 0.9f);
+                    if (n > 0.93f) glows.Add(new GlowPoint(x, y + 0.3f, z, 0.2f, accent, n * 10));
+                    break;
+                }
+                case "swamp":
+                {
+                    // Giftblasen und dürre Stängel
+                    if (n > 0.5f) Add("sphereLo", x, y + 0.02f, z, 0.08f + n * 0.08f, 0.05f + n * 0.04f, 0.08f + n * 0.08f, accent, 0.7f);
+                    else Add("cone4", x, y, z, 0.04f, 0.3f + n * 0.25f, 0.04f, Col.Shade(0x5a6a3a, 0.9 + n * 0.3), 0, n * 6, 0.1f);
+                    if (n > 0.9f) glows.Add(new GlowPoint(x, y + 0.08f, z, 0.2f, accent, n * 10));
+                    break;
+                }
+                case "frozen":
+                    if (n > 0.7f) Add("octa", x, y + 0.05f, z, 0.06f, 0.14f, 0.06f, 0xd8f4ff, 0.3f, n * 6, 0.25f);
+                    else Add("sphereLo", x, y, z, 0.2f + n * 0.15f, 0.06f, 0.16f + n * 0.1f, 0xe8f2ff, 0.05f, n * 5);
+                    break;
+                case "volcano":
+                    if (n > 0.55f)
+                    {
+                        Add("box", x, y + 0.002f, z, 0.4f, 0.01f, 0.05f, 0xff6020, 1, n * 6);
+                        if (n > 0.85f) glows.Add(new GlowPoint(x, y + 0.05f, z, 0.3f, 0xff6020, n * 10));
+                    }
+                    else Add("box", x, y + 0.004f, z, 0.26f, 0.008f, 0.26f, Col.Shade(groundC, 1.15), 0, (int)(n * 4) * 1.5708f);
+                    break;
+                case "crystal":
+                    if (n > 0.5f) Add("octa", x, y + 0.06f, z, 0.07f, 0.2f, 0.07f, accent, 0.6f, n * 6, 0.2f);
+                    else Add("gem", x, y + 0.02f, z, 0.12f, 0.06f, 0.1f, 0x5a4a70, 0, n * 6);
+                    break;
+                case "sky":
+                    // Decksplatten, Lüftungsgitter, Positionslichter
+                    if (n > 0.7f)
+                    {
+                        Add("box", x, y + 0.02f, z, 0.22f, 0.04f, 0.16f, Col.Shade(groundC, 0.75), 0, (int)(n * 4) * 1.5708f);
+                        Add("box", x, y + 0.042f, z, 0.18f, 0.006f, 0.02f, 0x1a2028, 0, (int)(n * 4) * 1.5708f);
+                    }
+                    else if (n > 0.6f) Add("cyl8", x, y + 0.01f, z, 0.06f, 0.02f, 0.06f, accent, 1f);
+                    else Add("box", x, y + 0.003f, z, 0.3f, 0.006f, 0.3f, Col.Shade(groundC, 1.1), 0, (int)(n * 4) * 1.5708f);
+                    break;
+                case "cavern":
+                    if (n > 0.6f)
+                    {
+                        Add("box", x, y + 0.004f, z, 0.36f, 0.008f, 0.04f, accent, 1f, (int)(n * 4) * 1.5708f);
+                        if (n > 0.85f) glows.Add(new GlowPoint(x, y + 0.05f, z, 0.22f, accent, n * 9));
+                    }
+                    else Add("gem", x, y + 0.02f, z, 0.1f, 0.06f, 0.08f, 0x4a4a5a, 0, n * 6);
+                    break;
+            }
+        }
+
         void AddGroundDetail(string bio, float x, float y, float z, float n, int groundC, int accent)
         {
+            if (Themes.SciFi)
+            {
+                AddSciGroundDetail(bio, x, y, z, n, groundC, accent);
+                return;
+            }
             switch (bio)
             {
                 case "forest":

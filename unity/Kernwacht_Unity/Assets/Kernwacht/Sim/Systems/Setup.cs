@@ -19,6 +19,8 @@ namespace Kernwacht.Sim
         public List<string> heroes; // HeroId[] oder null
         /// <summary>Nur im Modus 'heroEndless': Held, Startausrüstung und Fortschritts-Schnappschuss.</summary>
         public HeroEndlessSetup heroEndless;
+        /// <summary>4.1: Optik-Thema des Laufs ('fantasy' | 'scifi'), rein kosmetisch.</summary>
+        public string theme;
     }
 
     /// <summary>TS: Rückgabetyp von resolveSetup <c>{ seed; variant; biome; size }</c>.</summary>
@@ -225,6 +227,7 @@ namespace Kernwacht.Sim
                 version = STATE_VERSION,
                 seed = seed,
                 mode = setup.mode,
+                theme = setup.theme == "scifi" ? "scifi" : null,
                 difficulty = setup.difficulty,
                 missionId = setup.missionId ?? null,
                 rules = rules,

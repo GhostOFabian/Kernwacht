@@ -181,7 +181,8 @@ namespace Kernwacht.Models.EditorTools
 
                 var info = Ensure<ModelInfo>(go);
                 info.id = it.id; info.title = it.title; info.category = ParseCategory(it.category);
-                info.footprint = it.id == "goldmine" || it.id == "treasury" || it.id == "deepdrill" ? 2 : 1;
+                string fpId = it.id.StartsWith("sf_") ? it.id.Substring(3) : it.id;
+                info.footprint = fpId == "goldmine" || fpId == "treasury" || fpId == "deepdrill" ? 2 : 1;
 
                 switch (info.category)
                 {

@@ -28,6 +28,8 @@ namespace Kernwacht.Game
     public class ModelInst
     {
         public string id;
+        /// <summary>4.1: Pool-/Prefab-Kennung (im Sci-Fi-Thema "sf_"+id).</summary>
+        public string key;
         public GameObject go;
         public Transform tr;
         public TowerView tower;
@@ -192,20 +194,21 @@ namespace Kernwacht.Game
         public static bool Has(string id)
         {
             var c = Catalog;
-            return c != null && id != null && c.Prefab(id) != null;
+            return c != null && id != null && c.Prefab(Themes.Model(id)) != null;
         }
 
         /// <summary>Instanz holen (Prefab oder Ersatzform in der Farbe fallbackColor).</summary>
         public ModelInst Acquire(string id, int fallbackColor = 0x9a9080, PrimitiveType fallbackShape = PrimitiveType.Cube, bool animate = true, Vector3? at = null)
         {
             ModelInst inst = null;
-            if (pool.TryGetValue(id ?? "", out var st))
+            string key = Themes.Model(id) ?? "";
+            if (pool.TryGetValue(key, out var st))
                 while (st.Count > 0 && inst == null)
                 {
                     inst = st.Pop();
                     if (inst.go == null) inst = null;
                 }
-            if (inst == null) inst = Create(id, fallbackColor, fallbackShape);
+            if (inst == null) inst = Create(id, key, fallbackColor, fallbackShape);
             // Vor dem Aktivieren an die Zielstelle setzen (UnitView merkt sich in OnEnable die Startposition)
             if (at.HasValue) inst.tr.position = at.Value;
             inst.tr.SetParent(root, true);
@@ -220,14 +223,15 @@ namespace Kernwacht.Game
             inst.ResetLook();
             if (inst.tower != null) inst.tower.ClearTarget();
             inst.tr.SetParent(parked, false);
-            if (!pool.TryGetValue(inst.id ?? "", out var st)) pool[inst.id ?? ""] = st = new Stack<ModelInst>();
+            string pk = inst.key ?? inst.id ?? "";
+            if (!pool.TryGetValue(pk, out var st)) pool[pk] = st = new Stack<ModelInst>();
             st.Push(inst);
         }
 
-        ModelInst Create(string id, int fallbackColor, PrimitiveType shape)
+        ModelInst Create(string id, string pkey, int fallbackColor, PrimitiveType shape)
         {
             var cat = Catalog;
-            GameObject prefab = cat != null && id != null ? cat.Prefab(id) : null;
+            GameObject prefab = cat != null && id != null ? cat.Prefab(pkey) : null;
             GameObject go;
             bool fb = prefab == null;
             if (!fb)
@@ -255,6 +259,7 @@ namespace Kernwacht.Game
             var inst = new ModelInst
             {
                 id = id,
+                key = pkey,
                 go = go,
                 tr = go.transform,
                 tower = go.GetComponent<TowerView>(),
@@ -295,7 +300,7 @@ namespace Kernwacht.Game
                 }
             }
             // Maße einmal je Kennung messen (Prefab in Ruhelage, Maßstab 1)
-            string key = id ?? "";
+            string key = pkey ?? id ?? "";
             if (!measured.TryGetValue(key, out var hm))
             {
                 go.transform.position = Vector3.zero;
@@ -425,9 +430,34 @@ namespace Kernwacht.Game
         /// <summary>Zusatzteile je Ausbaustufe (kumulativ): Banner, Goldringe, leuchtende Krone.</summary>
         public static Part[] levelParts(int level, float top)
         {
-            long key = level * 100000L + Mathf.RoundToInt(top * 1000);
+            bool sf = Themes.SciFi;
+            long key = level * 100000L + Mathf.RoundToInt(top * 1000) + (sf ? 1000000000L : 0);
             if (levelCache.TryGetValue(key, out var c)) return c;
             var o = new List<Part>();
+            if (sf)
+            {
+                // Sci-Fi: Antennen mit Positionslichtern, ab Stufe 4 vier Energiepfeiler
+                if (level >= 2)
+                {
+                    o.Add(new Part("cyl8", 0.42f, 0.18f, 0.42f, 0.04f, 0.8f, 0.04f, 0x5a6470));
+                    o.Add(new Part("sphereLo", 0.42f, 0.98f, 0.42f, 0.07f, 0.07f, 0.07f, 0xff4050, e: 2f, glow: 0xff4050));
+                }
+                if (level >= 3)
+                {
+                    o.Add(new Part("cyl8", -0.42f, 0.18f, -0.42f, 0.04f, 0.8f, 0.04f, 0x5a6470));
+                    o.Add(new Part("sphereLo", -0.42f, 0.98f, -0.42f, 0.07f, 0.07f, 0.07f, 0x40e0ff, e: 2f, glow: 0x40e0ff));
+                }
+                if (level >= 4)
+                    for (int k = 0; k < 4; k++)
+                    {
+                        float a = k / 4f * Mathf.PI * 2 + Mathf.PI / 4;
+                        o.Add(new Part("box", Mathf.Cos(a) * 0.48f, 0.2f, Mathf.Sin(a) * 0.48f, 0.08f, 0.3f, 0.08f, 0x3a4048, yaw: a));
+                        o.Add(new Part("box", Mathf.Cos(a) * 0.48f, 0.36f, Mathf.Sin(a) * 0.48f, 0.05f, 0.06f, 0.05f, 0x60e0ff, e: 1.5f, yaw: a));
+                    }
+                var sa = o.ToArray();
+                levelCache[key] = sa;
+                return sa;
+            }
             if (level >= 2)
             {
                 o.Add(new Part("cyl8", 0.42f, 0.18f, 0.42f, 0.05f, 0.75f, 0.05f, WOOD_D));
@@ -490,6 +520,25 @@ namespace Kernwacht.Game
             new Part("leaf", 0, 0.1f, 0.15f, 1.1f, 1, 1.1f, -1, wing: 1),
             new Part("leaf", 0, 0.1f, -0.15f, 1.1f, 1, -1.1f, -1, wing: -1),
             new Part("cone8", -0.4f, 0, 0, 0.2f, 0.7f, 0.2f, -1, pitch: Mathf.PI / 2),
+        };
+
+        /// <summary>4.1 Sci-Fi: Kampfdrohne mit vier Rotoren statt des Drachen.</summary>
+        public static readonly Part[] DRONE =
+        {
+            new Part("sphere", 0, 0, 0, 0.62f, 0.26f, 0.5f, 0xd8dee6),
+            new Part("sphereLo", 0.24f, -0.02f, 0, 0.2f, 0.13f, 0.2f, -2, e: 2.5f, glow: 0x60e0ff),
+            new Part("box", 0, 0.04f, 0, 1.05f, 0.05f, 0.07f, 0x3a4048, yaw: Mathf.PI / 4),
+            new Part("box", 0, 0.04f, 0, 1.05f, 0.05f, 0.07f, 0x3a4048, yaw: -Mathf.PI / 4),
+            new Part("cyl8", 0.37f, 0.06f, 0.37f, 0.12f, 0.08f, 0.12f, 0x2a3038),
+            new Part("cyl8", -0.37f, 0.06f, 0.37f, 0.12f, 0.08f, 0.12f, 0x2a3038),
+            new Part("cyl8", 0.37f, 0.06f, -0.37f, 0.12f, 0.08f, 0.12f, 0x2a3038),
+            new Part("cyl8", -0.37f, 0.06f, -0.37f, 0.12f, 0.08f, 0.12f, 0x2a3038),
+            new Part("box", 0.37f, 0.11f, 0.37f, 0.44f, 0.012f, 0.05f, 0xa0b0c0, spin: 40),
+            new Part("box", -0.37f, 0.11f, 0.37f, 0.44f, 0.012f, 0.05f, 0xa0b0c0, spin: -40),
+            new Part("box", 0.37f, 0.11f, -0.37f, 0.44f, 0.012f, 0.05f, 0xa0b0c0, spin: -40),
+            new Part("box", -0.37f, 0.11f, -0.37f, 0.44f, 0.012f, 0.05f, 0xa0b0c0, spin: 40),
+            new Part("cyl8", 0.1f, -0.16f, 0, 0.08f, 0.14f, 0.08f, 0x2a3038, pitch: Mathf.PI / 2),
+            new Part("sphereLo", -0.28f, 0, 0, 0.1f, 0.08f, 0.16f, -1, e: 1.5f),
         };
     }
 }
