@@ -47,6 +47,9 @@ namespace Kernwacht.Sim
                 var sh = ElementSystem.getStatus(e, "shred");
                 if (sh != null && sh.flag > 0 && resist > Elements.STATUS_RULES.shredFloor) resist = U.Max(Elements.STATUS_RULES.shredFloor, resist - (sh.flag / 1000) * sh.stacks);
             }
+            // 4.0 Zersetzung (Ätzkessel): senkt alle Resistenzen je Stapel, höchstens bis zur Untergrenze
+            var co = ElementSystem.getStatus(e, "corrode");
+            if (co != null && resist > Elements.STATUS_RULES.shredFloor) resist = U.Max(Elements.STATUS_RULES.shredFloor, resist - co.power * co.stacks);
             resist = U.Max(-1, U.Min(0.9, resist));
             double dmg = amount * (1 - resist);
             if (type == "physical" && ElementSystem.hasStatus(e, "brittle")) dmg *= 1 + Elements.STATUS_RULES.brittleBonus;
@@ -139,12 +142,22 @@ namespace Kernwacht.Sim
             // Kolossjäger: Zusatzschaden nach max. LP – gedeckelt auf das 3-Fache des eigenen Treffers,
             // damit er mit dem Turm wächst und nicht allein mit den immer zäheren Gegnern
             if (st["maxHpPct"] > 0) dmg += U.Min(e.maxHp * st["maxHpPct"] * (U.Truthy(e.boss) ? 0.25 : 1), dmg * MAX_HP_PCT_CAP);
+            // 4.0 Hinrichtung: Bosse unter 30 % Leben erleiden Zusatzschaden
+            if (st["executePct"] > 0 && U.Truthy(e.boss) && e.hp < e.maxHp * 0.3) dmg *= 1 + st["executePct"] * 4;
             if (dmg > 0)
             {
                 dmg = ElementSystem.react(sim, e, p.type, dmg, p.tower);
                 dealDamage(sim, e, dmg, p.type, p.tower, st["armorPierce"]);
             }
             if (!e.alive) return;
+            // 4.0 Hinrichtung (Adlerhorst): Nicht-Bosse unter executePct Leben sterben sofort
+            if (st["executePct"] > 0 && !U.Truthy(e.boss) && e.challenge != true && e.hp <= e.maxHp * st["executePct"])
+            {
+                sim.emit(new GameEvent { k = "execute", x = e.x, y = e.y });
+                if (U.Truthy(p.tower) && sim.c.towerByUid.TryGetValue(p.tower, out var et) && et != null) et.damageDealt += U.Max(0, e.hp);
+                killEnemy(sim, e, p.tower);
+                return;
+            }
             applyOnHitEffects(sim, e, p);
         }
 
@@ -194,9 +207,21 @@ namespace Kernwacht.Sim
             if (st["brittleDur"] > 0) ElementSystem.addStatus(e, "brittle", st["brittleDur"], Elements.STATUS_RULES.brittleBonus, p.tower);
             if (st["knockback"] > 0 && !boss && e.knockCd <= sim.s.time)
             {
-                e.knockCd = sim.s.time + 2;
-                EnemySystem.riftTeleport(sim, e, st["knockback"]);
+                // 4.0: Flieger fliegen weiter (Windwacht); Sperrzeit wächst mit der Weite, damit Rückstoß nicht dauerhaft festhält
+                double cells = U.Round(st["knockback"] + (e.flying ? st["airKnock"] : 0));
+                e.knockCd = sim.s.time + 1.5 + cells;
+                EnemySystem.riftTeleport(sim, e, cells);
             }
+            // 4.0 Zersetzung, Entgraben, Niederdrücken, Bann
+            if (st["corrodePct"] > 0 && st["corrodeDur"] > 0) ElementSystem.addStatus(e, "corrode", st["corrodeDur"], st["corrodePct"], p.tower, U.Max(1, U.Round(st["corrodeMax"])));
+            if (st["hitsBurrowed"] > 0 && e.burrowed)
+            {
+                e.burrowed = false;
+                e.surfaced = true;
+                sim.emit(new GameEvent { k = "burrow", x = e.x, y = e.y, up = true });
+            }
+            if (st["groundDur"] > 0 && e.flying) ElementSystem.addStatus(e, "grounded", st["groundDur"], 1, p.tower);
+            if (st["sealDur"] > 0) ElementSystem.addStatus(e, "sealed", st["sealDur"], 1, p.tower);
         }
 
         /// <summary>Tod eines Gegners. Belohnungen werden pro Gegner garantiert nur einmal vergeben.</summary>
@@ -224,7 +249,7 @@ namespace Kernwacht.Sim
             for (int i = 0; i < towers.Count; i++)
             {
                 var tw = towers[i];
-                if (tw.def != "goldmine") continue;
+                if (!TowersNew.BOUNTY.Contains(tw.def)) continue;
                 var st = sim.stats(tw);
                 if (st["killBounty"] <= 0) continue;
                 double dx = tw.cx + 0.5 - e.x;
@@ -298,7 +323,7 @@ namespace Kernwacht.Sim
                     {
                         var tw = towers2[i];
                         if (Towers.TOWERS[tw.def].attack == "none") continue;
-                        if (Sq(tw.cx + 0.5 - e.x) + Sq(tw.cy + 0.5 - e.y) <= 1.6 * 1.6) tw.stunned = U.Max(tw.stunned, 2);
+                        if (Sq(tw.cx + 0.5 - e.x) + Sq(tw.cy + 0.5 - e.y) <= 1.6 * 1.6) TowerSystem.disableTower(sim, tw, 2, null);
                     }
                     sim.emit(new GameEvent { k = "burst", x = e.x, y = e.y, r = 1.6 });
                 }
@@ -333,6 +358,30 @@ namespace Kernwacht.Sim
                         ElementSystem.addStatus(o, "burn", U.Max(1, burn.t * 0.5 + 1), burn.power, burn.src, 1, 1);
                         n++;
                     }
+                }
+            }
+            // 4.0 Pestkessel: Gift und Zersetzung springen beim Tod über (Kopien springen nicht weiter)
+            var cz = ElementSystem.getStatus(e, "corrode");
+            if (cz != null && cz.flag == 0)
+            {
+                sim.c.towerByUid.TryGetValue(cz.src, out var ps);
+                double spread = ps != null ? U.Round(sim.stats(ps)["contagion"]) : 0;
+                if (spread > 0)
+                {
+                    var pz = ElementSystem.getStatus(e, "poison");
+                    var pst = sim.stats(ps);
+                    int n = 0;
+                    var enemies = s.enemies;
+                    for (int i = 0; i < enemies.Count && n < spread; i++)
+                    {
+                        var o = enemies[i];
+                        if (!o.alive || o == e || Sq(o.x - e.x) + Sq(o.y - e.y) > 2.25) continue;
+                        var oc = ElementSystem.addStatus(o, "corrode", U.Max(2, cz.t), cz.power, cz.src, U.Max(1, U.Round(pst["corrodeMax"])), 1);
+                        oc.stacks = U.Max(oc.stacks, U.Max(1, cz.stacks - 1));
+                        if (pz != null) ElementSystem.addStatus(o, "poison", U.Max(2, pz.t), pz.power, pz.src, U.Max(1, U.Round(pst["poisonMaxStacks"])));
+                        n++;
+                    }
+                    if (n > 0) sim.emit(new GameEvent { k = "burst", x = e.x, y = e.y, r = 1.5 });
                 }
             }
             var def = Enemies.ENEMIES[e.def];

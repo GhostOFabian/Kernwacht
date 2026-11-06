@@ -41,18 +41,27 @@ namespace Kernwacht.Sim
                         sim.c.towerByUid.TryGetValue(z.src, out var t);
                         double maxStacks = t != null ? U.Round(sim.stats(t)["poisonMaxStacks"]) : 5;
                         double dur = t != null ? sim.stats(t)["poisonDur"] : 4;
+                        var cst = t != null ? sim.stats(t) : null;
+                        bool corrode = cst != null && cst["corrodePct"] > 0;
                         var enemies = s.enemies;
                         for (int i = 0; i < enemies.Count; i++)
                         {
                             var e = enemies[i];
                             if (!e.alive || e.flying) continue;
-                            if (Sq(e.x - z.x) + Sq(e.y - z.y) <= z.r * z.r) ElementSystem.addStatus(e, "poison", dur, z.power, z.src, maxStacks);
+                            if (Sq(e.x - z.x) + Sq(e.y - z.y) > z.r * z.r) continue;
+                            ElementSystem.addStatus(e, "poison", dur, z.power, z.src, maxStacks);
+                            // 4.0 Säurepfütze: zersetzt zusätzlich
+                            if (corrode) ElementSystem.addStatus(e, "corrode", U.Max(2, cst["corrodeDur"]), cst["corrodePct"], z.src, U.Max(1, U.Round(cst["corrodeMax"])));
                         }
                     }
                 }
                 else if (z.kind == "mine")
                 {
                     TowerSystem.updateMine(sim, z);
+                }
+                else if (z.kind == "soldier")
+                {
+                    TowerSystem.updateSoldier(sim, z, dt);
                 }
                 else if (z.kind == "burnTrap")
                 {
@@ -120,8 +129,8 @@ namespace Kernwacht.Sim
                     {
                         if (Sq(t.cx + 0.5 - z.x) + Sq(t.cy + 0.5 - z.y) <= z.r * z.r)
                         {
-                            t.stunned = U.Max(t.stunned, dur);
-                            hit++;
+                            sim.c.enemyByUid.TryGetValue(z.src, out var by);
+                            if (TowerSystem.disableTower(sim, t, dur, by)) hit++;
                         }
                     }
                     z.t = dur;
@@ -194,8 +203,8 @@ namespace Kernwacht.Sim
                     {
                         if (Sq(t.cx + 0.5 - z.x) + Sq(t.cy + 0.5 - z.y) <= z.r * z.r)
                         {
-                            t.stunned = U.Max(t.stunned, z.power);
-                            hit++;
+                            sim.c.enemyByUid.TryGetValue(z.src, out var by);
+                            if (TowerSystem.disableTower(sim, t, z.power, by)) hit++;
                         }
                     }
                     sim.emit(new GameEvent { k = "burst", x = z.x, y = z.y, r = z.r });

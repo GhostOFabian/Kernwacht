@@ -591,14 +591,32 @@ namespace Kernwacht.Game.UI
         }
 
         /// <summary>Gesperrter Turm: schmaler Chip (kleines Symbol, Freischaltwelle) statt vollem Knopf – spart Platz in der Leiste.</summary>
-        void setChip(TowerBtn tb, bool chip)
+        /// <summary>Breite der freigeschalteten Knöpfe – schrumpft, wenn die Leiste sonst überläuft (4.0: 28 Türme).</summary>
+        float fullW = TBTN;
+
+        void fitTowerBar()
         {
-            if (tb.chip == chip && tb.le != null && tb.le.preferredWidth > 0) return;
+            if (towerBar == null || towerBtnList.Count == 0) return;
+            float avail = towerBar.rect.width - 12 - (limitStat != null ? 64 : 0);
+            if (avail <= 100) return;
+            int nFull = 0, nChip = 0;
+            foreach (var b in towerBtnList) { if (b.chip) nChip++; else nFull++; }
+            if (nFull == 0) return;
+            float w = Mathf.Clamp((avail - nChip * (TBTN_LOCKED + 4)) / nFull - 4, 52, TBTN);
+            w = Mathf.Floor(w);
+            if (Mathf.Abs(w - fullW) < 1) return;
+            fullW = w;
+            foreach (var b in towerBtnList) setChip(b, b.chip, true);
+        }
+
+        void setChip(TowerBtn tb, bool chip, bool force = false)
+        {
+            if (!force && tb.chip == chip && tb.le != null && tb.le.preferredWidth > 0) return;
             tb.chip = chip;
-            float w = chip ? TBTN_LOCKED : TBTN;
+            float w = chip ? TBTN_LOCKED : fullW;
             tb.le.preferredWidth = w; tb.le.minWidth = w;
             ((RectTransform)tb.bg.transform).sizeDelta = new Vector2(w, TBTN);
-            float ic = chip ? 30 : TICON;
+            float ic = chip ? 30 : Mathf.Min(TICON, fullW - 16);
             Ui.Place(tb.icon.rectTransform, new Vector2(0.5f, chip ? 0.5f : 1), new Vector2(0.5f, chip ? 0.5f : 1), chip ? new Vector2(0, 6) : new Vector2(0, -3), new Vector2(ic, ic));
             tb.icon.color = chip ? new Color(0.62f, 0.62f, 0.68f, 1f) : Color.white;
             tb.key.gameObject.SetActive(!chip);
@@ -1053,6 +1071,7 @@ namespace Kernwacht.Game.UI
         {
             var s = sim.s;
             updateFusePartners();
+            fitTowerBar();
             float pulse = 0.65f + 0.35f * Mathf.Sin(Time.unscaledTime * 5f);
             for (int i = 0; i < towerBtnList.Count; i++)
             {

@@ -77,6 +77,14 @@ namespace Kernwacht.Sim
             ["sporemine"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "poisonDps", add = 2 }, new StatMod { stat = "mineMax", add = 0.5 } }, text = "+2 Gift/s, +1 Mine je 2 Sterne" },
             ["skywatch"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "airDmgMul", add = 0.1 }, new StatMod { stat = "multishot", add = 0.2 } }, text = "+10 % Schaden gegen Flieger, +1 Ziel je 5 Sterne" },
             ["phoenix"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "burnDps", add = 3 }, new StatMod { stat = "airDmgMul", add = 0.08 } }, text = "+3 Brand/s, +8 % gegen Flieger" },
+            ["seal"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "silenceDur", add = 0.05 }, new StatMod { stat = "range", add = 0.05 } }, text = "+0,05 s Stille, +0,05 Reichweite" },
+            ["acid"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "corrodePct", add = 0.002 }, new StatMod { stat = "splash", add = 0.03 } }, text = "+0,2 % Zersetzung je Stapel, +0,03 Spritzradius" },
+            ["quake"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "range", add = 0.04 }, new StatMod { stat = "stunDur", add = 0.01 } }, text = "+0,04 Reichweite, +0,01 s Taumeln" },
+            ["gale"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "range", add = 0.05 }, new StatMod { stat = "chillPct", add = 0.005 } }, text = "+0,05 Reichweite, +0,5 % Verlangsamung" },
+            ["eyrie"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "critChance", add = 0.01 }, new StatMod { stat = "range", add = 0.08 } }, text = "+1 % Krit, +0,08 Reichweite" },
+            ["barracks"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "soldierHold", add = 0.3 } }, text = "+0,3 s Halten je Soldat" },
+            ["bank"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "interestCap", add = 1.5 } }, text = "+1,5 Gold Zinsgrenze" },
+            ["ward"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "range", add = 0.05 }, new StatMod { stat = "wardCd", add = -0.15 } }, text = "+0,05 Reichweite, 0,15 s schnelleres Nachladen" },
             ["glacier"] = new StarKeyDefinition { mods = new List<StatMod> { new StatMod { stat = "chillMax", add = 0.015 }, new StatMod { stat = "splash", add = 0.04 } }, text = "+1,5 % Verlangsamung, +0,04 Radius" },
         };
 

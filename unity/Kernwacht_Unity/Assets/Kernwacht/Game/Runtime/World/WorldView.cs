@@ -476,8 +476,12 @@ namespace Kernwacht.Game
                         {
                             float y0 = i == 0 ? gy(map, pts[0], pts[1]) + 1.25f : gy(map, pts[i], pts[i + 1]) + 0.45f;
                             float y1 = gy(map, pts[i + 2], pts[i + 3]) + 0.45f;
-                            fx.bolt((float)pts[i], y0, (float)pts[i + 1], (float)pts[i + 2], y1, (float)pts[i + 3], 0xfff090, 0.05f, 0.2f, 1);
-                            fx.glow((float)pts[i + 2], y1, (float)pts[i + 3], 0.45f, 0xfff090, 0.15f);
+                            int cc = e.tower == "seal" ? 0xc090ff : e.tower == "cyclone" ? 0xb8e8ff : 0xfff090;
+                            if (e.tower == "seal") fx.beam((float)pts[i], y0, (float)pts[i + 1], (float)pts[i + 2], y1, (float)pts[i + 3], cc, 0.08f, 0.2f);
+                            else fx.bolt((float)pts[i], y0, (float)pts[i + 1], (float)pts[i + 2], y1, (float)pts[i + 3], cc, 0.05f, 0.2f, 1);
+                            fx.glow((float)pts[i + 2], y1, (float)pts[i + 3], 0.45f, cc, 0.15f);
+                            if (e.tower == "seal") fx.emit((float)pts[i + 2], y1 + 0.3f, (float)pts[i + 3], 0.6f, cc, shape: SHAPE.ring, flat: true, s0: 0.5f, s1: 0.1f, seed: 0.1f);
+                            if (e.tower == "cyclone" && Rnd() < fx.intensity) fx.smoke((float)pts[i + 2], y1, (float)pts[i + 3], 0.4f, 0xd8e8f0, 0.35f, 0.5f);
                         }
                         break;
                     }
@@ -486,10 +490,31 @@ namespace Kernwacht.Game
                         break;
                     case "pulse":
                     {
-                        int col = e.tower == "frost" ? 0x9ae0ff : 0x60e8d4;
+                        int col = e.tower == "frost" ? 0x9ae0ff : e.tower == "quake" || e.tower == "deepdrill" ? 0xc09060 : e.tower == "gale" ? 0xe8f4ff : e.tower == "banecircle" ? 0xb070ff : e.tower == "silencehall" ? 0x80e0f0 : 0x60e8d4;
                         float y = gy(map, e.x, e.y);
                         float rr = (float)e.r;
                         fx.ring(ex, y, ey, rr, col, 0.5f, 0.1f);
+                        if (e.tower == "quake" || e.tower == "deepdrill")
+                        {
+                            fx.debrisBurst(ex, y, ey, 0x6a5a40, 6);
+                            for (int i = 0; i < 8 * fx.intensity; i++)
+                            {
+                                float a = Rnd() * Mathf.PI * 2;
+                                fx.smoke(ex + Mathf.Cos(a) * rr * 0.7f, y + 0.1f, ey + Mathf.Sin(a) * rr * 0.7f, 0.45f, 0x7a6a50, 0.4f, 0.8f);
+                            }
+                            Shake(ui, 0.05f);
+                            break;
+                        }
+                        if (e.tower == "gale")
+                        {
+                            for (int i = 0; i < 14 * fx.intensity; i++)
+                            {
+                                float a = Rnd() * Mathf.PI * 2;
+                                float d = rr * (0.3f + Rnd() * 0.5f);
+                                fx.emit(ex + Mathf.Cos(a) * d, y + 0.4f + Rnd() * 0.5f, ey + Mathf.Sin(a) * d, 0.5f, 0xffffff, vx: Mathf.Cos(a) * 3, vz: Mathf.Sin(a) * 3, drag: 1.5f, s0: 0.1f, s1: 0.3f, shape: SHAPE.spark, stretch: 0.5f);
+                            }
+                            break;
+                        }
                         if (e.tower == "frost")
                         {
                             for (int i = 0; i < 10 * fx.intensity; i++)
@@ -688,6 +713,33 @@ namespace Kernwacht.Game
                         fx.ring(ex, y, ey, rr, 0x60ff90, 0.6f, 0.1f);
                         for (int i = 0; i < 8 * fx.intensity; i++)
                             fx.emit(ex + (Rnd() - 0.5f) * rr, y + 0.3f, ey + (Rnd() - 0.5f) * rr, 0.8f, 0xa0ffb0, shape: SHAPE.star, vy: 1.2f, s0: 0.14f, s1: 0.06f);
+                        break;
+                    }
+                    case "ward":
+                    {
+                        float y = gy(map, e.x, e.y) + 0.6f;
+                        fx.glow(ex, y, ey, 1.4f, 0x80e0ff, 0.35f);
+                        fx.emit(ex, y, ey, 0.6f, 0xa0f0ff, shape: SHAPE.ring, s0: 0.4f, s1: 1.4f, seed: 0.1f);
+                        EmitFloater("Abgewehrt", e.x, 1.4, e.y, "#8fe8ff", false);
+                        break;
+                    }
+                    case "execute":
+                    {
+                        float y = gy(map, e.x, e.y) + 0.5f;
+                        fx.glow(ex, y, ey, 1.1f, 0xff4030, 0.3f);
+                        fx.sparks(ex, y, ey, 0xffd0a0, 10, 1.6f);
+                        EmitFloater("Hingerichtet", e.x, 1.1, e.y, "#ff8060", false);
+                        break;
+                    }
+                    case "soldier":
+                    {
+                        float y = gy(map, e.x, e.y);
+                        if (e.up) fx.glow(ex, y + 0.4f, ey, 0.9f, 0xffd080, 0.3f);
+                        else
+                        {
+                            fx.smoke(ex, y + 0.2f, ey, 0.6f, 0x8a8070, 0.5f, 0.9f);
+                            fx.sparks(ex, y + 0.4f, ey, 0xd0c0a0, 6, 1);
+                        }
                         break;
                     }
                     case "burrow":
@@ -1621,7 +1673,7 @@ namespace Kernwacht.Game
                     r.overlayBox(x, by + top + 0.35f, z, 0.36f, 0.08f, 0xff4040, 1, Mathf.PI / 4);
                     r.overlayBox(x, by + top + 0.35f, z, 0.36f, 0.08f, 0xff4040, 1, -Mathf.PI / 4);
                 }
-                if (ui.showRanges && def.attack != "economy" && def.attack != "none" && tw.uid != ui.selectedTower)
+                if (ui.showRanges && ((def.attack != "economy" && def.attack != "none") || TowersNew.WARDS.Contains(tw.def)) && tw.uid != ui.selectedTower)
                 {
                     sim.c.towerStats.TryGetValue(tw.uid, out var st);
                     float range = (float)StatOf(st, "range");
@@ -1768,14 +1820,84 @@ namespace Kernwacht.Game
             return 1.5f;
         }
 
+        // 4.0 Wachkaserne: Soldaten als Modelle auf der Lane
+        readonly Dictionary<double, ModelInst> soldierVis = new Dictionary<double, ModelInst>();
+        readonly List<double> soldierGone = new List<double>();
+        readonly HashSet<double> soldierSeen = new HashSet<double>();
+
+        void drawSoldiers(GameSimulation sim)
+        {
+            var map = sim.s.map;
+            soldierSeen.Clear();
+            foreach (var z in sim.s.zones)
+            {
+                if (z.kind != "soldier" || z.t <= 0) continue;
+                soldierSeen.Add(z.uid);
+                sim.c.towerByUid.TryGetValue(z.link, out var tw);
+                bool knight = tw != null && tw.def == "order";
+                string mid = knight ? "knight" : "soldier";
+                float zx = (float)z.x, zz = (float)z.y;
+                float y = (float)Terrain.cellTop(map, Math.Floor(z.x), Math.Floor(z.y));
+                if (!soldierVis.TryGetValue(z.uid, out var inst) || inst == null)
+                {
+                    inst = pool.Acquire(mid, knight ? 0xd06048 : 0xb05040, PrimitiveType.Capsule, true, IsoCamera.W(zx, y, zz));
+                    soldierVis[z.uid] = inst;
+                }
+                inst.Place(zx, y, zz, (knight ? 0.95f : 0.8f) * UNIT);
+                // zur nächsten Gegnerin/zum nächsten Gegner drehen, sonst vom Turm weg
+                float ang = tw != null ? Mathf.Atan2(zz - (float)tw.cy - 0.5f, zx - (float)tw.cx - 0.5f) : 0;
+                double bd = 1.2;
+                foreach (var e in sim.s.enemies)
+                {
+                    if (!e.alive || e.flying) continue;
+                    double d = (e.x - z.x) * (e.x - z.x) + (e.y - z.y) * (e.y - z.y);
+                    if (d < bd) { bd = d; ang = Mathf.Atan2((float)(e.y - z.y), (float)(e.x - z.x)); }
+                }
+                inst.SetHeading(ang);
+                bool fighting = bd < 1.2;
+                if (fighting && inst.tower != null && z.tick > 0 && Mathf.Repeat(time * 2.5f + (float)z.uid, 1) < 0.05f) inst.tower.Fire();
+                // Haltekraft als kleiner Balken
+                if (tw != null && sim.c.towerStats.TryGetValue(tw.uid, out var st) && st != null && st.TryGetValue("soldierHold", out var hold) && hold > 0)
+                {
+                    float f = Mathf.Clamp01((float)(z.power / hold));
+                    if (f < 0.999f)
+                    {
+                        float by = y + 0.95f * UNIT;
+                        r.overlayBox(zx, by, zz, 0.5f, 0.09f, 0x101010, 0.8f);
+                        r.overlayBox(zx - (0.46f - 0.46f * f) / 2, by, zz, Mathf.Max(0.001f, 0.46f * f), 0.05f, f > 0.35f ? 0xffd060 : 0xff6040, 1);
+                    }
+                }
+                r.ground(false, SHAPE.disc, zx, y + 0.03f, zz, 0.3f, 0x000000, 0.3f, 0, 0.6f);
+            }
+            soldierGone.Clear();
+            foreach (var kv in soldierVis) if (!soldierSeen.Contains(kv.Key)) soldierGone.Add(kv.Key);
+            foreach (var id in soldierGone)
+            {
+                if (soldierVis[id] != null) pool.Release(soldierVis[id]);
+                soldierVis.Remove(id);
+            }
+        }
+
         void drawZones(GameSimulation sim)
         {
             float t = time;
             var map = sim.s.map;
+            drawSoldiers(sim);
             foreach (var z in sim.s.zones)
             {
                 float zx = (float)z.x, zz = (float)z.y, zr = (float)z.r;
                 float y = (float)Terrain.cellTop(map, Math.Floor(z.x), Math.Floor(z.y)) + 0.04f;
+                if (z.kind == "soldier") continue;
+                if (z.kind == "meteor" && z.armed > 0 && sim.c.towerByUid.TryGetValue(z.src, out var sl) && sl != null && sl.def == "sunlance")
+                {
+                    // Sonnenlanze: Lichtsäule vom Himmel statt Meteor
+                    float k = Mathf.Clamp01(1 - (float)z.armed / 0.5f);
+                    r.line(zx, y + 12, zz, zx, y, zz, 0.08f + k * 0.35f, 0xffd070, 0.25f + k * 0.5f);
+                    r.line(zx, y + 12, zz, zx, y, zz, 0.03f + k * 0.12f, 0xfffff0, 0.5f + k * 0.5f);
+                    r.ground(SPRITE_ADD, SHAPE.glow, zx, y, zz, zr * (0.6f + k), 0xffc040, 0.4f + k * 0.4f, 0, 0.3f);
+                    r.ground(SPRITE_ADD, SHAPE.ring, zx, y + 0.02f, zz, zr, 0xfff0a0, 0.8f, time * 3, 0.3f, 0.05f);
+                    continue;
+                }
                 if (z.kind == "mine")
                 {
                     sim.c.towerByUid.TryGetValue(z.link, out var tw);
@@ -2649,7 +2771,7 @@ namespace Kernwacht.Game
                 float total = Mathf.Max(0.5f, (float)p.traveled + remaining);
                 float frac = (float)p.traveled / Mathf.Max(0.001f, (float)p.traveled + remaining);
                 float bse = Terrain.topAt(map, p.x, p.y);
-                bool lob = p.kind == "ember" || p.kind == "spore" || p.kind == "cannon";
+                bool lob = p.kind == "ember" || p.kind == "spore" || p.kind == "cannon" || p.kind == "acid" || p.kind == "acidmortar" || p.kind == "plaguepot";
                 float y = bse + 0.75f + (lob ? Mathf.Sin(frac * Mathf.PI) * 1.3f : 0.25f * (1 - frac));
                 float yaw = Mathf.Atan2(-(float)(p.ty - p.y), (float)(p.tx - p.x));
                 int col = Palette.damageColor(p.payload != null ? p.payload.type : null);
@@ -2692,6 +2814,32 @@ namespace Kernwacht.Game
                         r.add("opaque", "sphere", px, y, pz, 0.26f, 0.26f, 0.26f, 0x2a2a2e, 1, 0);
                         r.billboard(SPRITE_ADD, SHAPE.spark, px - ux * 0.15f, y, pz - uz * 0.15f, 0.22f, 0xffb050, 0.6f);
                         if (Rnd() < 0.6f * fx.intensity) fx.smoke(px, y, pz, 0.28f, 0x8a8480, 0.3f, 0.7f);
+                        break;
+                    case "acid":
+                    case "acidmortar":
+                    case "plaguepot":
+                    {
+                        bool big = p.kind == "acidmortar";
+                        float sz = big ? 0.34f : 0.24f;
+                        int ac = p.kind == "plaguepot" ? 0x8ad030 : 0xb8f040;
+                        r.line(tx, ty, tz, px, y, pz, sz * 0.5f, ac, 0.4f);
+                        r.add("opaque", "sphere", px, y, pz, sz, sz * 0.85f, sz, Col.Mix(ac, 0xffffff, 0.2), 1, 1.6f, Time.time * 6);
+                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, sz * 3, ac, 0.7f);
+                        if (Rnd() < 0.8f * fx.intensity) fx.emit(px, y, pz, 0.5f, ac, vy: -1.2f, s0: 0.09f, s1: 0.03f);
+                        break;
+                    }
+                    case "eyrie":
+                    case "falcon":
+                        r.line(px - ux * 1.6f, y, pz - uz * 1.6f, px, y, pz, p.kind == "falcon" ? 0.09f : 0.06f, 0xffe8b0, 0.35f);
+                        r.line(px - ux * 0.9f, y, pz - uz * 0.9f, px, y, pz, 0.025f, 0xffffff, 0.8f);
+                        r.add("opaque", "rbox", px, y, pz, 0.55f, 0.05f, 0.05f, 0xd8c090, 1, 0.6f, yaw);
+                        r.billboard(SPRITE_ADD, SHAPE.spark, px, y, pz, 0.35f, 0xfff0c0, 0.7f, 0, 2);
+                        break;
+                    case "stormbattery":
+                        r.line(tx, ty, tz, px, y, pz, 0.1f, 0xc0e0ff, 0.4f);
+                        r.add("opaque", "sphere", px, y, pz, 0.2f, 0.2f, 0.2f, 0x506070, 1, 0.4f);
+                        r.billboard(SPRITE_ADD, SHAPE.glow, px, y, pz, 0.6f, 0xa0d0ff, 0.6f);
+                        if (Rnd() < 0.5f * fx.intensity) fx.emit(px, y, pz, 0.4f, 0xe0f0ff, vy: -1.5f, s0: 0.12f, s1: 0.02f, shape: SHAPE.spark, stretch: 0.3f);
                         break;
                     default:
                         r.line(tx, ty, tz, px, y, pz, 0.14f, col, 0.45f);

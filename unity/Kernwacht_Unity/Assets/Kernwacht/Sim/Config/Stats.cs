@@ -92,6 +92,36 @@ namespace Kernwacht.Sim
             { "auraSpeed", 0 },
             { "meteorDelay", 1.1 },
             { "meteorCount", 1 },
+            // 4.0 neue Türme
+            /** Ätzkessel: Zersetzung senkt alle Resistenzen um corrodePct je Stapel (bis corrodeMax Stapel). */
+            { "corrodePct", 0 },
+            { "corrodeMax", 4 },
+            { "corrodeDur", 0 },
+            /** Trifft eingegrabene Gegner und holt sie an die Oberfläche (Bebenhammer). */
+            { "hitsBurrowed", 0 },
+            /** Hinrichtung: Nicht-Bosse unter diesem Lebensanteil sterben sofort (Adlerhorst). */
+            { "executePct", 0 },
+            /** Sturmbatterie: getroffene Flieger gelten so lange als Bodenziel. */
+            { "groundDur", 0 },
+            /** Pestkessel: beim Tod springen Gift und Zersetzung auf so viele Nachbarn über. */
+            { "contagion", 0 },
+            /** Handelskontor: Zinssatz und Zinsgrenze je Welle. */
+            { "interest", 0 },
+            { "interestCap", 0 },
+            /** Schildwerk: Nachladezeit des Schutzes je Turm, Rückwurf auf den Verursacher. */
+            { "wardCd", 0 },
+            { "wardReflect", 0 },
+            /** Wachkaserne: Soldaten, Haltekraft (s), Rückkehr (s), Gegner je Soldat. */
+            { "soldiers", 0 },
+            { "soldierHold", 0 },
+            { "soldierRespawn", 10 },
+            { "soldierBlock", 1 },
+            /** Bannkreis: Heilsperre (s). */
+            { "sealDur", 0 },
+            /** Siegelstein: Gegner mit Fähigkeit in Vorbereitung zuerst. */
+            { "castPriority", 0 },
+            /** Windwacht: zusätzliche Rückstoßfelder für Flieger. */
+            { "airKnock", 0 },
         };
 
         /// <summary>Object.keys(ZERO_STATS) in Deklarationsreihenfolge.</summary>
@@ -137,6 +167,20 @@ namespace Kernwacht.Sim
             { "auraDmg", "Aura-Schaden" },
             { "auraSpeed", "Aura-Tempo" },
             { "meteorCount", "Meteore je Angriff" },
+            { "corrodePct", "Zersetzung je Stapel" },
+            { "corrodeMax", "Max. Zersetzungsstapel" },
+            { "executePct", "Hinrichtung unter" },
+            { "groundDur", "Zu Boden gedrückt" },
+            { "contagion", "Ansteckung (Nachbarn)" },
+            { "interest", "Zinssatz" },
+            { "interestCap", "Zinsgrenze" },
+            { "wardCd", "Schutz lädt nach" },
+            { "soldiers", "Soldaten" },
+            { "soldierHold", "Halten (s)" },
+            { "soldierRespawn", "Rückkehr (s)" },
+            { "soldierBlock", "Gegner je Soldat" },
+            { "sealDur", "Heilsperre" },
+            { "airKnock", "Rückstoß Flieger +" },
         };
 
         /// <summary>Frische, veränderbare Kopie von ZERO_STATS (TS: <c>{ ...ZERO_STATS }</c>). Zusatzhilfe, kein TS-Export.</summary>

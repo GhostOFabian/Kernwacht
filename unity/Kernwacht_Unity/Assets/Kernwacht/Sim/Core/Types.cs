@@ -392,6 +392,8 @@ namespace Kernwacht.Sim
         public double retarget;
         public double aim;
         public double stunned;        // durch Bossfähigkeiten deaktiviert
+        /// <summary>4.0 Schildwerk: Nachladezeit des Schutzes dieses Turms.</summary>
+        public double wardCd;
         public double disrupted;      // Netzwerk gestört
         public double rampTarget;
         public double rampStacks;

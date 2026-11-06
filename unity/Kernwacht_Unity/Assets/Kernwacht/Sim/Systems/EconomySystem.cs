@@ -530,7 +530,7 @@ namespace Kernwacht.Sim
             double total = 0;
             foreach (var t in sim.s.towers)
             {
-                if (t.def != "goldmine" || t.builtWave >= sim.s.wave) continue;
+                if (!TowersNew.MINES.Contains(t.def) || t.builtWave >= sim.s.wave) continue;
                 double inc = U.Round(sim.stats(t)["income"]);
                 // Goldvorkommen: zusätzlicher Abbau neben dem normalen Ertrag
                 if (onVein(sim, t)) inc += veinBonus(sim.s.wave);
@@ -539,6 +539,44 @@ namespace Kernwacht.Sim
                 t.goldEarned += inc;
                 total += inc;
                 sim.emit(new GameEvent { k = "gold", amount = inc, x = t.cx + 0.5, y = t.cy + 0.5 });
+            }
+            total += collectInterest(sim);
+            return total;
+        }
+
+        /// <summary>Zinsgrenze eines Kontors in der aktuellen Welle (wächst um 0,6 Gold je Welle).</summary>
+        public static double interestCap(GameSimulation sim, Dictionary<string, double> st)
+        {
+            return st["interestCap"] + 0.6 * sim.s.wave;
+        }
+
+        /// <summary>
+        /// 4.0 Handelskontor: Zinsen auf ungenutztes Gold. Mehrere Kontore teilen sich den Goldvorrat –
+        /// jedes verzinst einen eigenen Teil (höchster Zinssatz zuerst), damit sich Kontore nicht vervielfachen.
+        /// </summary>
+        public static double collectInterest(GameSimulation sim)
+        {
+            var banks = new List<TowerInstance>();
+            foreach (var t in sim.s.towers)
+                if (t.builtWave < sim.s.wave && sim.stats(t)["interest"] > 0) banks.Add(t);
+            if (banks.Count == 0) return 0;
+            U.StableSort(banks, (a, b) => U.Or(sim.stats(b)["interest"] - sim.stats(a)["interest"], a.uid - b.uid));
+            double pool = U.Max(0, sim.s.gold);
+            double total = 0;
+            foreach (var t in banks)
+            {
+                if (pool <= 0) break;
+                var st = sim.stats(t);
+                double cap = interestCap(sim, st);
+                double slice = U.Min(pool, cap / st["interest"]);
+                pool -= slice;
+                double inc = U.Round(slice * st["interest"]);
+                if (sim.c.champBuff.TryGetValue(t.uid, out var cb) && cb != null && cb.dmg > 0) inc = U.Round(inc * (1 + cb.dmg));
+                if (inc <= 0) continue;
+                t.goldEarned += inc;
+                total += inc;
+                var c = Towers.towerCenter(t);
+                sim.emit(new GameEvent { k = "gold", amount = inc, x = c.x, y = c.y });
             }
             return total;
         }
@@ -624,8 +662,9 @@ namespace Kernwacht.Sim
             t.activeCd = 0;
             t.activeT = 0;
             t.builtInPhase = false;
-            // Der legendäre Turm entsteht immer auf dem Feld, das näher an der Lane liegt
-            bool keepPartnerCell = laneDistance(sim, p.cx, p.cy) < laneDistance(sim, t.cx, t.cy);
+            // Der legendäre Turm entsteht immer auf dem Feld, das näher an der Lane liegt –
+            // 2×2-Fusionen (Goldgräber) bleiben auf der Fläche des Goldgräbers
+            bool keepPartnerCell = Towers.towerSize(r.id) > 1 ? Towers.towerSize(p.def) > 1 : laneDistance(sim, p.cx, p.cy) < laneDistance(sim, t.cx, t.cy);
             double px = p.cx;
             double py = p.cy;
             s.towers = s.towers.Where((x) => x.uid != p.uid).ToList();

@@ -54,6 +54,9 @@ namespace Kernwacht.Sim
             ["voidMark"] = new StatusEffectDefinition { id = "voidMark", name = "Leerenmal", description = "Erleidet zusätzlichen Schaden.", icon = "✧", color = 0xa060ff, maxStacks = 1 },
             ["pull"] = new StatusEffectDefinition { id = "pull", name = "Gravitation", description = "Wird zurückgezogen und verlangsamt.", icon = "◉", color = 0x8a6aff, maxStacks = 1 },
             ["shred"] = new StatusEffectDefinition { id = "shred", name = "Rüstungsbruch", description = "Blutet (physischer Schaden je Stapel) und verliert physische Resistenz je Stapel. Stoppt Regeneration.", icon = "🩸", color = 0xd04040, maxStacks = 8 },
+            ["corrode"] = new StatusEffectDefinition { id = "corrode", name = "Zersetzt", description = "Alle Resistenzen gesenkt (je Stapel).", icon = "⚗", color = 0xa8e040, maxStacks = 6 },
+            ["grounded"] = new StatusEffectDefinition { id = "grounded", name = "Zu Boden gedrückt", description = "Fliegt tief – auch Bodentürme treffen.", icon = "⬇", color = 0x90b8d8, maxStacks = 1 },
+            ["sealed"] = new StatusEffectDefinition { id = "sealed", name = "Gebannt", description = "Kann nicht geheilt werden und regeneriert nicht.", icon = "⭕", color = 0xb070ff, maxStacks = 1 },
             ["weather"] = new StatusEffectDefinition { id = "weather", name = "Wetter", description = "Vom Geländeereignis betroffen.", icon = "☁", color = 0xa0a0c0, maxStacks = 1 },
         };
 

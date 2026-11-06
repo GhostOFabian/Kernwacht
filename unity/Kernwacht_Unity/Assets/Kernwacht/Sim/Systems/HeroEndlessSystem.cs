@@ -354,7 +354,7 @@ namespace Kernwacht.Sim
                 // Kristalladern: Goldgräber auf einer Ader fördern zusätzlich Kristall
                 foreach (TowerInstance t in s.towers)
                 {
-                    if (t.def != "goldmine" || !EconomySystem.onDeposit(sim, t) || t.builtWave >= he.rewardedWave) continue;
+                    if (!TowersNew.MINES.Contains(t.def) || !EconomySystem.onDeposit(sim, t) || t.builtWave >= he.rewardedWave) continue;
                     double n = 1 + Math.Floor(he.rewardedWave / 8) + (t.level >= 3 ? 1 : 0);
                     LootSystem.addResource(he, "crystal", n);
                     sim.emit(new GameEvent { k = "pickup", kind = "resource", x = Towers.towerCenter(t).x, y = Towers.towerCenter(t).y, label = $"+{U.Fmt(n)} ◆ Kristallader", color = 0x7ae0ff });

@@ -299,7 +299,7 @@ namespace Kernwacht.Game.UI
                 double i = cell.y * m.width + cell.x;
                 double sz = Towers.towerSize(id);
                 if (sz > 1) lines.Add($"▦ Belegt {U.Fmt(sz)}×{U.Fmt(sz)} Felder (ab dem gewählten Feld nach rechts/unten)");
-                if (cells.Any((k) => m.veins.Contains(k))) lines.Add(id == "goldmine" ? $"● Goldvorkommen: +50 % Ertrag und zusätzlich +{U.Fmt(EconomySystem.veinBonus(sim.s.wave + 1))} Gold je Welle" : "● Goldvorkommen – ideal für einen Goldgräber (zusätzlicher Goldabbau)");
+                if (cells.Any((k) => m.veins.Contains(k))) lines.Add(TowersNew.MINES.Contains(id) ? $"● Goldvorkommen: +50 % Ertrag und zusätzlich +{U.Fmt(EconomySystem.veinBonus(sim.s.wave + 1))} Gold je Welle" : "● Goldvorkommen – ideal für einen Goldgräber (zusätzlicher Goldabbau)");
                 if (cells.Any((k) => m.deposits != null && m.deposits.Contains(k))) lines.Add(id == "goldmine" ? $"◆ Kristallader: Goldgräber fördert zusätzlich {U.Fmt(1 + Math.Floor((sim.s.wave + 1) / 8))}+ Kristall je Welle" : "◆ Kristallader – ein Goldgräber fördert hier zusätzlich Kristall");
                 if (m.ley.Contains(i)) lines.Add("✦ Leylinie: +15 % Schaden für Türme auf diesem Feld");
             }
@@ -718,9 +718,15 @@ namespace Kernwacht.Game.UI
             {
                 Small(body, "Nicht vernetzt – ein Leitpylon in Reichweite verbindet diesen Turm.", Theme.Muted);
             }
-            if (t.def == "goldmine")
+            if (st != null && HudText.V(st, "interest") > 0)
+                Small(body, $"Zinsen: {HK.pct(HudText.V(st, "interest"))} des ungenutzten Golds, höchstens {HK.fmt(Math.Round(EconomySystem.interestCap(sim, st)))} Gold je Welle. Mehrere Kontore verzinsen je einen eigenen Teil.", Theme.Gold);
+            if (TowersNew.WARDS.Contains(t.def) && st != null)
+                Small(body, $"Schützt Türme in {HK.fmtNum(HudText.V(st, "range"))} Feldern vor der nächsten Betäubung · lädt je Turm in {HK.fmt(HudText.V(st, "wardCd"))} s nach{(HudText.V(st, "wardReflect") > 0 ? " · wirft Fähigkeiten zurück" : "")}.");
+            if (d.attack == "barracks" && st != null)
+                Small(body, $"Soldaten: {U.Fmt(TowerSystem.soldiersOf(sim, t.uid))}/{U.Fmt(Math.Round(HudText.V(st, "soldiers")))} · Halten {HK.fmtNum(HudText.V(st, "soldierHold"))} s · Rückkehr {HK.fmt(HudText.V(st, "soldierRespawn"))} s");
+            if (TowersNew.MINES.Contains(t.def) || t.def == "bank")
                 Small(body, $"Bisher gefördert: {HK.fmt(t.goldEarned)} Gold. Investiert: {HK.fmt(t.invested)} Gold.{(t.builtWave >= s.wave && s.phase == "build" ? " Zahlt ab Ende der nächsten Welle." : "")}");
-            else if (d.attack != "none")
+            else if (d.attack != "none" && d.attack != "economy")
                 Small(body, $"Schaden gesamt: {HK.fmt(t.damageDealt)} · Abschüsse: {U.Fmt(t.kills)}", Theme.Muted);
             // Zielwahl
             if (st != null && HudText.V(st, "damage") > 0 && d.attack != "pulse" && d.attack != "aura")

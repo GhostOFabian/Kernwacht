@@ -245,14 +245,13 @@ namespace Kernwacht.Sim
                         {
                             if (Sq(t.cx + 0.5 - e.x) + Sq(t.cy + 0.5 - e.y) <= 1.5 * 1.5)
                             {
-                                t.stunned = U.Max(t.stunned, 1);
-                                hit++;
+                                if (TowerSystem.disableTower(sim, t, 1, e)) hit++;
                             }
                         }
                         if (U.Truthy(hit)) sim.emit(new GameEvent { k = "burst", x = e.x, y = e.y, r = 1.5 });
                     }
                 }
-                if (regen > 0 && !ElementSystem.hasStatus(e, "poison") && !ElementSystem.hasStatus(e, "burn") && !ElementSystem.hasStatus(e, "shred"))
+                if (regen > 0 && !ElementSystem.hasStatus(e, "poison") && !ElementSystem.hasStatus(e, "burn") && !ElementSystem.hasStatus(e, "shred") && !ElementSystem.hasStatus(e, "sealed"))
                 {
                     e.hp = U.Min(e.maxHp, e.hp + e.maxHp * regen * dt);
                 }
@@ -405,7 +404,7 @@ namespace Kernwacht.Sim
             {
                 foreach (var t in sim.s.towers)
                 {
-                    if (Sq(t.cx + 0.5 - tx) + Sq(t.cy + 0.5 - ty) <= r * r) t.stunned = U.Max(t.stunned, 3);
+                    if (Sq(t.cx + 0.5 - tx) + Sq(t.cy + 0.5 - ty) <= r * r) TowerSystem.disableTower(sim, t, 3, e);
                 }
             }
             else if (id == "siegeSlam")
@@ -413,15 +412,14 @@ namespace Kernwacht.Sim
                 var t = U.Get(sim.c.towerByUid, r);
                 if (t != null && Sq(t.cx + 0.5 - e.x) + Sq(t.cy + 0.5 - e.y) <= 2.4 * 2.4)
                 {
-                    t.stunned = U.Max(t.stunned, 4);
-                    sim.emit(new GameEvent { k = "burst", x = t.cx + 0.5, y = t.cy + 0.5, r = 0.8 });
+                    if (TowerSystem.disableTower(sim, t, 4, e)) sim.emit(new GameEvent { k = "burst", x = t.cx + 0.5, y = t.cy + 0.5, r = 0.8 });
                 }
             }
             else if (id == "heal")
             {
                 foreach (var o in sim.s.enemies)
                 {
-                    if (!o.alive || Sq(o.x - e.x) + Sq(o.y - e.y) > r * r) continue;
+                    if (!o.alive || Sq(o.x - e.x) + Sq(o.y - e.y) > r * r || ElementSystem.hasStatus(o, "sealed")) continue;
                     o.hp = U.Min(o.maxHp, o.hp + o.maxHp * (U.Truthy(o.boss) ? 0.03 : 0.12));
                 }
                 sim.emit(new GameEvent { k = "heal", x = e.x, y = e.y, r = r });

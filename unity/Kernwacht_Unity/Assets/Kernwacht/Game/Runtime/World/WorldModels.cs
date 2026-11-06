@@ -341,6 +341,8 @@ namespace Kernwacht.Game
             ["meteor"] = 1.6f, ["tesla"] = 1.3f, ["gravity"] = 1.0f, ["dragon"] = 1.0f, ["laser"] = 1.2f, ["totem"] = 1.6f,
             ["plasma"] = 1.6f, ["glacier"] = 1.5f, ["voidlance"] = 1.4f, ["starfall"] = 2.1f,
             ["thornwood"] = 1.5f, ["thunderspire"] = 2.2f, ["riftgate"] = 1.5f, ["phoenix"] = 1.4f, ["cathedral"] = 1.6f, ["stormeye"] = 1.7f, ["minelayer"] = 1.1f, ["sporemine"] = 1.2f, ["skyguard"] = 1.0f, ["skywatch"] = 1.5f,
+            ["seal"] = 1.5f, ["acid"] = 1.0f, ["quake"] = 1.3f, ["gale"] = 1.5f, ["eyrie"] = 1.8f, ["barracks"] = 1.1f, ["bank"] = 1.0f, ["ward"] = 1.0f,
+            ["silencehall"] = 1.8f, ["banecircle"] = 1.3f, ["acidmortar"] = 1.2f, ["plaguepot"] = 1.2f, ["quakemaw"] = 1.4f, ["cyclone"] = 1.8f, ["stormbattery"] = 1.5f, ["falcon"] = 2.0f, ["sunlance"] = 2.1f, ["order"] = 1.5f, ["treasury"] = 0.95f, ["deepdrill"] = 1.2f, ["shieldnet"] = 1.6f,
         };
 
         public static float towerTop(string def) => def != null && TOWER_TOP.TryGetValue(def, out var v) ? v : 1f;

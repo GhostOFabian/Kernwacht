@@ -71,7 +71,7 @@ namespace Kernwacht.Sim
                 if (U.Truthy(def.partner))
                 {
                     var p = s.enemies.FirstOrDefault((o) => o.alive && o.boss == def.partner);
-                    if (p != null && Sq(p.x - e.x) + Sq(p.y - e.y) <= 9) e.hp = U.Min(e.maxHp, e.hp + e.maxHp * 0.02 * dt);
+                    if (p != null && Sq(p.x - e.x) + Sq(p.y - e.y) <= 9 && !ElementSystem.hasStatus(e, "sealed")) e.hp = U.Min(e.maxHp, e.hp + e.maxHp * 0.02 * dt);
                 }
                 // Phasenwechsel über HP-Schwellen (Schild-Auslöser separat)
                 int ni = (int)(e.phase + 1);
@@ -179,7 +179,7 @@ namespace Kernwacht.Sim
                     break;
                 case "fireZones":
                 {
-                    var towers = sim.s.towers.Where((t) => t.def != "goldmine").ToList();
+                    var towers = sim.s.towers.Where((t) => !TowersNew.MINES.Contains(t.def)).ToList();
                     if (towers.Count == 0)
                     {
                         a.cd = 3;

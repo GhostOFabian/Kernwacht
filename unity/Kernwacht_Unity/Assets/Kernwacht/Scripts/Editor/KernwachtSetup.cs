@@ -181,7 +181,7 @@ namespace Kernwacht.Models.EditorTools
 
                 var info = Ensure<ModelInfo>(go);
                 info.id = it.id; info.title = it.title; info.category = ParseCategory(it.category);
-                info.footprint = it.id == "goldmine" ? 2 : 1;
+                info.footprint = it.id == "goldmine" || it.id == "treasury" || it.id == "deepdrill" ? 2 : 1;
 
                 switch (info.category)
                 {
@@ -291,7 +291,7 @@ namespace Kernwacht.Models.EditorTools
                 {
                     if (e.prefab == null) continue;
                     var inst = (GameObject)PrefabUtility.InstantiatePrefab(e.prefab, row.transform);
-                    float step = c == ModelCategory.Boss ? 3.5f : (e.id == "goldmine" ? 2.5f : 1.6f);
+                    float step = c == ModelCategory.Boss ? 3.5f : (e.id == "goldmine" || e.id == "treasury" || e.id == "deepdrill" ? 2.5f : 1.6f);
                     inst.transform.position = new Vector3(x + step * 0.5f, 0, z);
                     inst.transform.rotation = Quaternion.Euler(0, 180, 0);
                     inst.AddComponent<DemoCycler>();
