@@ -325,15 +325,17 @@ namespace Kernwacht.Game
             new QualityTier(4, 2048, true),
             new QualityTier(2, 1024, true),
             new QualityTier(0, 1024, true),
-            new QualityTier(0, 0, true),
-            new QualityTier(0, 0, false),
+            // Schatten nie zur Laufzeit abschalten: Unter WebGL fehlen dann die passenden Shadervarianten,
+            // das Gelände und alle Modelle verschwinden (Fehler „texture format and sampler type“). Kleinste Stufe: 512.
+            new QualityTier(0, 512, true),
+            new QualityTier(0, 512, false),
         };
 
         public void applyQuality()
         {
             var q = save.settings.quality;
             bool cine = save.settings.cinematicFx != false;
-            QualityTier b = q == "low" ? new QualityTier(0, 0, false)
+            QualityTier b = q == "low" ? new QualityTier(0, 512, false)
                 : q == "medium" ? new QualityTier(2, 1024, true)
                     : q == "high" ? new QualityTier(4, 2048, true)
                         : AUTO_TIERS[Math.Min(autoTier, AUTO_TIERS.Length - 1)];
@@ -362,7 +364,7 @@ namespace Kernwacht.Game
                 setProp(rp, "msaaSampleCount", Math.Max(1, t.msaa));
                 if (t.shadowSize > 0) setProp(rp, "mainLightShadowmapResolution", t.shadowSize);
                 setProp(rp, "supportsMainLightShadows", t.shadowSize > 0);
-                setProp(rp, "shadowDistance", t.shadowSize >= 2048 ? 80f : 55f);
+                setProp(rp, "shadowDistance", t.shadowSize >= 2048 ? 80f : t.shadowSize >= 1024 ? 55f : 40f);
             }
         }
 
