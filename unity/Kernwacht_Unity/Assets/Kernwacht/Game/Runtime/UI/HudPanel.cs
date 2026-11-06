@@ -275,7 +275,7 @@ namespace Kernwacht.Game.UI
             var prev = HK.HRow(body, 6, TextAnchor.MiddleCenter);
             HK.Img(prev.transform, Icons.Model(id), 110);
             Tiny(body, "Endausbau: Spezialisierung A (drehend) und B").alignment = TextAnchor.MiddleCenter;
-            P(body, d.description);
+            effectBox(body, d, st, true);
             statTable(body, HudText.statLines(st, d));
             if (d.active != null)
             {
@@ -562,6 +562,99 @@ namespace Kernwacht.Game.UI
             Tiny(body, $"Je Stern: {Goldsinks.starText(t.def)}");
         }
 
+        // ------------------------------------------------------------ 4.1: Wirkung auf einen Blick
+
+        static string Hx(int c) => "#" + c.ToString("x6");
+        static string F1(double v) => HK.fmtNum(v, 1);
+        static string Pc(double v) => $"{U.Fmt(Math.Round(v * 100))} %";
+
+        /// <summary>Was der Turm konkret bewirkt – aus seinen aktuellen Werten abgeleitet (eine Zeile je Effekt).</summary>
+        public static List<(string text, int col)> effectLines(TowerDefinition d, Dictionary<string, double> st)
+        {
+            var o = new List<(string, int)>();
+            double V(string k) => HudText.V(st, k);
+            const int DMG = 0xffd27a, CTRL = 0x8fd8ff, DOT = 0xb4f06a, DEBUF = 0xd09aff, UTIL = 0xa8b4c8, GOLD = 0xffd84a;
+            switch (d.attack)
+            {
+                case "economy":
+                    if (V("income") > 0) o.Add(($"Bringt {U.Fmt(V("income"))} Gold nach jeder Welle", GOLD));
+                    if (V("interest") > 0) o.Add(($"Zinsen: {Pc(V("interest"))} deines ungenutzten Golds", GOLD));
+                    if (V("killBounty") > 0) o.Add(($"Kopfgeld: +{U.Fmt(V("killBounty"))} Gold je Abschuss in {F1(V("bountyRange"))} Feldern", GOLD));
+                    if (V("damage") > 0) o.Add(($"Schlägt zusätzlich auf Bodengegner in {F1(V("range"))} Feldern", DMG));
+                    break;
+                case "aura":
+                    if (V("auraDmg") > 0) o.Add(($"Türme im Umkreis: +{Pc(V("auraDmg"))} Schaden", DMG));
+                    if (V("auraSpeed") > 0) o.Add(($"Türme im Umkreis: +{Pc(V("auraSpeed"))} Angriffstempo", DMG));
+                    o.Add(("Deckt getarnte Gegner auf", UTIL));
+                    break;
+                case "none":
+                    break;
+                case "pylon":
+                    o.Add(($"Vernetzt bis zu {U.Fmt(V("maxLinks"))} Türme in {F1(V("linkRange"))} Feldern: +{Pc(V("networkBonus"))} Schaden und Tempo", DMG));
+                    o.Add(("Bestimmte Turm-Kombinationen im Netz lösen Resonanzen aus", UTIL));
+                    if (V("zapDamage") > 0) o.Add(($"Zappt selbst nahe Gegner ({U.Fmt(V("zapDamage"))} Schaden)", DMG));
+                    break;
+                default:
+                {
+                    bool area = V("splash") > 0;
+                    if (d.attack == "pulse" || d.attack == "gravity") o.Add(("Trifft alle Gegner in Reichweite gleichzeitig", DMG));
+                    else if (d.attack == "tesla") o.Add(("Zappt den nächsten Gegner in Reichweite", DMG));
+                    else if (d.attack == "laser") o.Add(($"Dauerstrahl durch alle Gegner in einer Linie, lädt sich bis ×{F1(V("laserRamp"))} auf", DMG));
+                    else if (d.attack == "meteor") o.Add(($"Einschlag von oben nach {F1(V("meteorDelay"))} s, Fläche {F1(V("splash"))} Felder", DMG));
+                    else if (d.attack == "mines") o.Add(($"Legt Minen auf die Lane (bis {U.Fmt(V("mineMax"))}), nur Bodengegner lösen aus", DMG));
+                    else if (d.attack == "barracks") o.Add(($"{U.Fmt(V("soldiers"))} Soldaten halten Bodengegner je {F1(V("soldierHold"))} s auf", CTRL));
+                    else if (area) o.Add(($"Flächenschaden im Radius {F1(V("splash"))} Felder", DMG));
+                    else if (V("chains") <= 0 && V("pierce") <= 0) o.Add(("Einzelziel", DMG));
+                    if (V("chains") > 0) o.Add(($"Springt auf {U.Fmt(V("chains"))} weitere Gegner über", DMG));
+                    if (V("pierce") > 0) o.Add(($"Durchschlägt bis zu {U.Fmt(V("pierce"))} Gegner in einer Linie", DMG));
+                    if (V("multishot") > 1) o.Add(($"{U.Fmt(V("multishot"))} Ziele gleichzeitig", DMG));
+                    if (V("critChance") > 0) o.Add(($"{Pc(V("critChance"))} kritische Treffer (×{F1(Math.Max(2, V("critMult")))})", DMG));
+                    if (V("armorPierce") > 0) o.Add(($"Ignoriert {Pc(Math.Min(1, V("armorPierce")))} Panzerung", DMG));
+                    if (V("executePct") > 0) o.Add(($"Tötet Nicht-Bosse unter {Pc(V("executePct"))} Leben sofort", DMG));
+                    if (V("chillPct") > 0) o.Add(($"Verlangsamt um {Pc(V("chillPct"))} je Treffer (bis {Pc(Math.Max(V("chillPct"), V("chillMax")))})", CTRL));
+                    if (V("freezeChance") > 0) o.Add(($"{Pc(V("freezeChance"))} Chance einzufrieren", CTRL));
+                    if (V("stunDur") > 0) o.Add(($"Betäubt {F1(V("stunDur"))} s", CTRL));
+                    if (V("knockback") > 0) o.Add(($"Stößt Gegner {U.Fmt(V("knockback"))} Feld zurück{(V("airKnock") > 0 ? $", Flieger {U.Fmt(V("knockback") + V("airKnock"))}" : "")}", CTRL));
+                    if (V("pullCells") > 0) o.Add(($"Zieht Gegner {U.Fmt(V("pullCells"))} Feld zurück und bündelt sie", CTRL));
+                    if (V("riftBack") > 0) o.Add(($"Versetzt markierte Gegner {U.Fmt(V("riftBack"))} Felder zurück", CTRL));
+                    if (V("groundDur") > 0) o.Add(($"Holt Flieger {F1(V("groundDur"))} s auf den Boden – dann treffen alle Türme", CTRL));
+                    if (V("burnDps") > 0) o.Add(($"Brand: {U.Fmt(V("burnDps"))} Schaden/s für {F1(V("burnDur"))} s", DOT));
+                    if (V("poisonDps") > 0) o.Add(($"Gift: {U.Fmt(V("poisonDps"))} Schaden/s je Stapel (bis {U.Fmt(Math.Max(1, V("poisonMaxStacks")))}), stoppt Regeneration", DOT));
+                    if (V("bleedDps") > 0) o.Add(($"Blutung: {U.Fmt(V("bleedDps"))} Schaden/s je Stapel", DOT));
+                    if (V("arcDps") > 0) o.Add(($"Lichtbogen zu Nachbar-Spulen: {U.Fmt(V("arcDps"))} Schaden/s", DOT));
+                    if (V("markPct") > 0) o.Add(($"Markiert: Ziele nehmen {Pc(V("markPct"))} mehr Schaden von allen", DEBUF));
+                    if (V("corrodePct") > 0) o.Add(($"Zersetzt: −{Pc(V("corrodePct"))} Resistenz je Stapel (bis {U.Fmt(Math.Max(1, V("corrodeMax")))})", DEBUF));
+                    if (V("shredPct") > 0) o.Add(($"Zerfetzt Rüstung: −{Pc(V("shredPct"))} kinetische Resistenz je Stapel", DEBUF));
+                    if (V("brittleDur") > 0) o.Add(($"Macht spröde: +30 % kinetischer Schaden für {F1(V("brittleDur"))} s", DEBUF));
+                    if (V("interrupt") > 0) o.Add(("Unterbricht Fähigkeiten, erschüttert Bosse", DEBUF));
+                    if (V("silenceDur") > 0) o.Add(($"Lässt Gegner {F1(V("silenceDur"))} s verstummen", DEBUF));
+                    if (V("sealDur") > 0) o.Add(($"Verhindert Heilung {F1(V("sealDur"))} s", DEBUF));
+                    break;
+                }
+            }
+            if (d.attack != "economy" && d.attack != "aura" && d.attack != "none" && d.attack != "pylon")
+            {
+                bool air = V("hitsAir") > 0, ground = V("hitsGround") > 0;
+                string who = air && ground ? "Trifft Boden- und Luftziele" : air ? "Nur Luftziele" : "Nur Bodenziele";
+                if (V("airDmgMul") > 1) who += $" · ×{F1(V("airDmgMul"))} gegen Flieger";
+                if (V("hitsBurrowed") > 0) who += " · trifft Eingegrabene";
+                o.Add((who, UTIL));
+            }
+            if (V("wardCd") > 0) o.Add(($"Schützt Türme vor der nächsten Betäubung (lädt in {U.Fmt(V("wardCd"))} s nach)", CTRL));
+            return o;
+        }
+
+        /// <summary>Kasten „Wirkung“: Kurzbeschreibung und eine farbige Zeile je Effekt.</summary>
+        static void effectBox(Transform body, TowerDefinition d, Dictionary<string, double> st, bool withDesc)
+        {
+            var box = HK.Box(body, new Color(1, 1, 1, 0.05f), new Color(1, 1, 1, 0.16f), 9, 6, 2);
+            HK.T(box.transform, "Wirkung", HK.TINY, Theme.Muted, TextAnchor.MiddleLeft, FontStyle.Bold);
+            if (withDesc && !string.IsNullOrEmpty(d.description)) HK.T(box.transform, d.description, HK.SMALL, Theme.Text);
+            if (st == null) return;
+            foreach (var (text, col) in effectLines(d, st))
+                HK.T(box.transform, $"<color={Hx(col)}>●</color> {text}", HK.SMALL, Theme.Text);
+        }
+
         void renderTower(TowerInstance t)
         {
             var s = sim.s;
@@ -574,6 +667,8 @@ namespace Kernwacht.Game.UI
             string sub = (d.upgrades.Count > 0 ? $"Stufe {U.Fmt(t.level)}/4{(specName != null ? $" · {specName}" : "")}" : d.role) + (U.Truthy(t.stars) ? $" <color=#ffd36b><b>★{U.Fmt(t.stars.Value)}</b></color>" : "");
             Ph(body, Icons.Model(t.def), title, sub, closeAction);
             quickActions(body, t);
+            effectBox(body, d, st, true);
+            sellAndPriority(body, t, d, st);
             if (v.groupDef == t.def)
             {
                 var group = s.towers.Where((o) => o.def == t.def).ToList();
@@ -728,20 +823,6 @@ namespace Kernwacht.Game.UI
                 Small(body, $"Bisher gefördert: {HK.fmt(t.goldEarned)} Gold. Investiert: {HK.fmt(t.invested)} Gold.{(t.builtWave >= s.wave && s.phase == "build" ? " Zahlt ab Ende der nächsten Welle." : "")}");
             else if (d.attack != "none" && d.attack != "economy")
                 Small(body, $"Schaden gesamt: {HK.fmt(t.damageDealt)} · Abschüsse: {U.Fmt(t.kills)}", Theme.Muted);
-            // Zielwahl
-            if (st != null && HudText.V(st, "damage") > 0 && d.attack != "pulse" && d.attack != "aura")
-            {
-                Small(body, "Zielwahl (T):", Theme.Muted);
-                var seg = HK.Flow(body, 4);
-                foreach (var p in HudText.PRIORITY_ORDER)
-                {
-                    if (p == "random" && d.attack != "rift") continue;
-                    string pp = p;
-                    var b = HK.Sm(seg.transform, HudText.PRIORITY_NAMES[p], () => a.setPriority(tuid, pp), t.priority == p ? Ui.BtnKind.On : Ui.BtnKind.Normal);
-                    b.GetComponent<HudFit>().fixedWidth = 151;
-                    Ui.Size(b, 151);
-                }
-            }
             // Upgrades
             double? next = EconomySystem.nextUpgradeCost(t);
             if (next.HasValue)
@@ -789,7 +870,14 @@ namespace Kernwacht.Game.UI
                 var mb = HK.B(body, "⇄ Versetzen", () => a.startMove(tuid));
                 HK.Tip(mb, "Kostenlos auf ein anderes freies Feld versetzen – danach 3 s außer Gefecht");
             }
-            // Verkauf
+            details(body, d);
+        }
+
+        /// <summary>4.1: Verkaufen und Zielwahl direkt unter der Wirkung (statt ganz unten im Panel).</summary>
+        void sellAndPriority(Transform body, TowerInstance t, TowerDefinition d, Dictionary<string, double> st)
+        {
+            var s = sim.s;
+            double tuid = t.uid;
             double refund = EconomySystem.refundValue(sim, t);
             bool full = refund >= t.invested;
             bool armed = sellArmed == t.uid;
@@ -809,7 +897,17 @@ namespace Kernwacht.Game.UI
             }, armed ? Ui.BtnKind.Danger : Ui.BtnKind.Normal);
             HK.Enable(sellBtn, !noSell);
             if (noSell) HK.Tip(sellBtn, "In der Mini-Pause kann nicht verkauft werden");
-            details(body, d);
+            if (st != null && HudText.V(st, "damage") > 0 && d.attack != "pulse" && d.attack != "aura" && d.attack != "economy" && d.attack != "barracks" && d.attack != "mines")
+            {
+                var seg = HK.HRow(body, 4, TextAnchor.MiddleLeft, true);
+                HK.T(seg.transform, "Ziel (T):", HK.SMALL, Theme.Muted);
+                foreach (var p in HudText.PRIORITY_ORDER)
+                {
+                    string pp = p;
+                    var b = HK.Sm(seg.transform, HudText.PRIORITY_NAMES[p], () => a.setPriority(tuid, pp), t.priority == p ? Ui.BtnKind.On : Ui.BtnKind.Normal);
+                    Ui.Size(b, -1, -1, 1);
+                }
+            }
         }
 
         void heroHeader(Transform body, string id, bool close)

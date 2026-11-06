@@ -34,6 +34,9 @@ namespace Kernwacht.Game
         public static readonly Dictionary<string, StatusGlyph> STATUS_GLYPH = new Dictionary<string, StatusGlyph>
         {
             ["burn"] = new StatusGlyph("cone6", 0xff7030, 1.4),
+            ["corrode"] = new StatusGlyph("gem", 0xd0f040, 1),
+            ["sealed"] = new StatusGlyph("ring", 0x60e8d4, 1),
+            ["grounded"] = new StatusGlyph("cone4", 0x90b8d8, -1),
             ["chill"] = new StatusGlyph("octa", 0x90d8ff, 1),
             ["freeze"] = new StatusGlyph("box", 0xe8fbff, 1),
             ["wet"] = new StatusGlyph("sphereLo", 0x4080ff, 1.2),
