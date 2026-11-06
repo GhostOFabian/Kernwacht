@@ -571,7 +571,8 @@ namespace Kernwacht.Sim
                 if (target != null) t.aim = Math.Atan2(target.y - (t.cy + 0.5), target.x - (t.cx + 0.5));
                 if (def.attack == "laser" && (target == null || target.uid != t.rampTarget))
                 {
-                    t.charge = 0;
+                    // 4.1: Zielwechsel halbiert den Aufbau, statt ihn ganz zu verlieren
+                    t.charge = t.charge * 0.5;
                     t.rampTarget = target != null ? target.uid : 0;
                 }
                 if (t.cooldown > 0) continue;
@@ -1004,7 +1005,7 @@ namespace Kernwacht.Sim
             return new LaserPenaltyResult { mul = mul, neighbors = neighbors, nearRift = nearRift };
         }
 
-        public static readonly LaserRules LASER = new LaserRules { interferenceRange = 3, interferencePer = 0.2, interferenceMax = 0.6, riftRange = 3, riftMul = 0.65 };
+        public static readonly LaserRules LASER = new LaserRules { interferenceRange = 3, interferencePer = 0.12, interferenceMax = 0.36, riftRange = 3, riftMul = 0.65 };
 
         // ------------------------------------------------------------ Minenwerfer (2.8)
 

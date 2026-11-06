@@ -58,7 +58,7 @@ namespace Kernwacht.Game
             ["tesla"] = new[] { "Tesla-Generator", "Zappt nahe Gegner und spannt einen dauerhaften Lichtbogen zu anderen Tesla-Generatoren in Reichweite. Wer den Bogen kreuzt, wird gegrillt." },
             ["gravity"] = new[] { "Gravitonmaschine", "Erzeugt Gravitonwellen, die vorauslaufende Gegner zurückziehen und verlangsamen – die Gegner ballen sich zusammen." },
             ["dragon"] = new[] { "Drohnenhangar", "Eine Kampfdrohne kreist über dem Hangar und feuert Plasma auf Boden- und Luftziele. Greift Flieger zuerst an und verursacht an ihnen 2,5-fachen Schaden." },
-            ["laser"] = new[] { "Laserbatterie", "Ein Laserstrahl, der sich mit der Zeit auflädt und alle Gegner in seiner Linie durchdringt. Mehrere Laser dicht beieinander stören sich (−20 % je Nachbarlaser in 3 Feldern), direkt am Portal −35 %." },
+            ["laser"] = new[] { "Laserbatterie", "Ein Laserstrahl, der sich mit der Zeit auflädt und alle Gegner in seiner Linie durchdringt. Mehrere Laser dicht beieinander stören sich (−12 % je Nachbarlaser in 3 Feldern), direkt am Portal −35 %." },
             ["totem"] = new[] { "Feldverstärker", "Verstärkt alle Türme in seinem Feld und deckt getarnte Gegner auf. Greift nicht selbst an." },
             ["minelayer"] = new[] { "Minenleger", "Verlegt im Umkreis Haftminen mitten auf die Lane. Sie bleiben liegen (auch über das Wellenende hinaus) und explodieren, sobald ein Bodengegner darauf tritt – Flieger lösen sie nicht aus." },
             ["skyguard"] = new[] { "Flak-Phalanx", "Reine Flugabwehr: Zwillingsgeschütze feuern schnelle Netzgranaten auf Flieger – verlangsamt sie und trifft hart. Bodengegner ignoriert sie vollständig." },

@@ -82,7 +82,7 @@ namespace Kernwacht.Sim
                 id = "quake", active = "overdrive", name = "Bebenhammer", role = "Physisch · Erdstoß", icon = "🔨", hotkey = "", color = 0xa08060,
                 description = "Ein Dampfhammer schlägt auf den Boden: Die Welle trifft alle Bodengegner in Reichweite, lässt sie kurz taumeln – und trifft auch eingegrabene Tunnelgräber, die dabei an die Oberfläche geschleudert werden.",
                 damageType = "physical", cost = 125, attack = "pulse", defaultPriority = "first", networkable = true,
-                @base = B("damage", 22, "range", 2.2, "cooldown", 2.2, "stunDur", 0.2, "armorPierce", 0.15, "hitsBurrowed", 1),
+                @base = B("damage", 34, "range", 2.2, "cooldown", 2.2, "stunDur", 0.2, "armorPierce", 0.15, "hitsBurrowed", 1),
                 upgrades = new List<UpgradeDefinition>
                 {
                     Up("quake1", "Schwerer Kolben", "+10 Schaden", 70, Add("damage", 10)),
@@ -234,7 +234,7 @@ namespace Kernwacht.Sim
             d["plaguepot"] = L("plaguepot", "Pestkessel", "Legendär · Seuche", "☣️", 0x8ad030,
                 "Fusion aus Ätzkessel und Sporenwerfer: Seuchenschleim vergiftet stark und zersetzt. Stirbt ein Gegner, springen Gift und Zersetzung auf bis zu 3 Nachbarn über.",
                 "poison", "projectile", "first", "overdrive",
-                B("damage", 30, "range", 3.8, "cooldown", 1.0, "projectileSpeed", 7, "splash", 1.1, "poisonDps", 14, "poisonDur", 6, "poisonMaxStacks", 8, "corrodePct", 0.05, "corrodeMax", 5, "corrodeDur", 6, "contagion", 3),
+                B("damage", 45, "range", 3.8, "cooldown", 1.0, "projectileSpeed", 7, "splash", 1.1, "poisonDps", 22, "poisonDur", 6, "poisonMaxStacks", 8, "corrodePct", 0.05, "corrodeMax", 5, "corrodeDur", 6, "contagion", 3),
                 "Verheerend gegen dichte Wellen und Brutmütter. Feuer auf Gift löst Giftbrand aus.", "Flieger, giftresistente Gegner.");
 
             d["quakemaw"] = L("quakemaw", "Bebenschlund", "Legendär · Erdbeben", "🌋", 0xc08050,
@@ -246,7 +246,7 @@ namespace Kernwacht.Sim
             d["cyclone"] = L("cyclone", "Zyklonturm", "Legendär · Sturm & Wind", "🌪️", 0xa8d8ff,
                 "Fusion aus Windwacht und Sturmrufer: Gewitterböen springen zwischen Gegnern und werfen jeden getroffenen ein Feld zurück (Flieger drei).",
                 "lightning", "chain", "first", "overload",
-                B("damage", 55, "range", 3.6, "cooldown", 1.3, "chains", 4, "chainFalloff", 0.85, "chainRange", 2.3, "knockback", 1, "airKnock", 2, "hitsAir", 1),
+                B("damage", 95, "range", 3.6, "cooldown", 1.3, "chains", 4, "chainFalloff", 0.85, "chainRange", 2.3, "knockback", 1, "airKnock", 2, "hitsAir", 1),
                 "Nasse Ziele erleiden Überladung.", "Blitzresistente Saboteure. Bosse werden nicht zurückgestoßen.");
 
             d["stormbattery"] = L("stormbattery", "Sturmbatterie", "Legendär · Luftabwehr", "🛩️", 0x90b8d8,
@@ -256,9 +256,9 @@ namespace Kernwacht.Sim
                 "Macht Kanonen, Sporen und Minen gegen Flieger nutzbar.", "Trifft keine Bodengegner.");
 
             d["falcon"] = L("falcon", "Falkenauge", "Legendär · Präzision", "🎯", 0xd8b070,
-                "Fusion aus Adlerhorst und Belagerungsarmbrust: Ein durchschlagender Bolzen trifft alles in einer Linie und richtet Nicht-Bosse unter 18 % Leben hin.",
+                "Fusion aus Adlerhorst und Belagerungsarmbrust: Ein durchschlagender Bolzen trifft alles in einer Linie und richtet Nicht-Bosse unter 14 % Leben hin.",
                 "physical", "projectile", "strong", "overdrive",
-                B("damage", 260, "range", 8, "cooldown", 2.8, "projectileSpeed", 30, "pierce", 4, "executePct", 0.18, "armorPierce", 0.8, "critChance", 0.15, "critMult", 2.5, "hitsAir", 1),
+                B("damage", 210, "range", 8, "cooldown", 2.8, "projectileSpeed", 30, "pierce", 4, "executePct", 0.14, "armorPierce", 0.8, "critChance", 0.15, "critMult", 2.5, "hitsAir", 1),
                 "Jagt Eliten und Bosse quer über die Karte.", "Langsam gegen Schwärme.");
 
             d["sunlance"] = L("sunlance", "Sonnenlanze", "Legendär · Himmelsstrahl", "☀️", 0xffd070,
@@ -270,7 +270,7 @@ namespace Kernwacht.Sim
             d["order"] = L("order", "Ordensburg", "Legendär · Ritterorden", "🏰", 0xd06048,
                 "Fusion aus Wachkaserne und Totemschrein: 3 Ordensritter halten je 2 Gegner bis zu 14 s auf, kehren nach 7 s zurück und machen Getroffene spröde.",
                 "physical", "barracks", "first", "overdrive",
-                B("damage", 24, "range", 3, "cooldown", 0.8, "soldiers", 3, "soldierHold", 14, "soldierRespawn", 7, "soldierBlock", 2, "brittleDur", 1.5),
+                B("damage", 55, "range", 3, "cooldown", 0.8, "soldiers", 3, "soldierHold", 14, "soldierRespawn", 7, "soldierBlock", 2, "brittleDur", 1.5),
                 "Ein Bollwerk auf der Lane für Kanonen und Frost.", "Flieger und Tunnelgräber laufen vorbei.");
 
             d["treasury"] = L("treasury", "Schatzkammer", "Legendär · Wirtschaft", "💰", 0xffd060,
