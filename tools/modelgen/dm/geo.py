@@ -180,9 +180,11 @@ def box(sx, sy, sz) -> Mesh:
     return rbox(sx, sy, sz, r=0.0)
 
 
-def lathe(profile, seg=24, cap_bottom=True, cap_top=True, sharp=(), a0=0.0, a1=TAU, smooth_all=False) -> Mesh:
+def lathe(profile, seg=24, cap_bottom=True, cap_top=True, sharp=(), a0=0.0, a1=None, smooth_all=False) -> Mesh:
     """Rotationskörper um die Y-Achse. profile: Liste (Radius, Höhe) von unten nach oben.
     sharp: Indizes von Profilpunkten mit harter Kante. Ohne smooth_all sind alle Knicke > 35° hart."""
+    if a1 is None:
+        a1 = a0 + TAU  # voller Umlauf ab a0 (vorher fehlte bei a0 > 0 ein Keil)
     pr = np.array(profile, dtype=np.float64)
     n = len(pr)
     seg_n = []

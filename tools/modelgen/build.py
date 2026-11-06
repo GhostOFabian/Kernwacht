@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from dm import towers
 from dm.gltf import write_glb
 REGS = {}
-for mod in ('towers', 'enemies', 'bosses', 'heroes', 'world', 'heroes2', 'enemies2', 'bosses2', 'towers2'):
+for mod in ('towers', 'enemies', 'bosses', 'heroes', 'world', 'heroes2', 'enemies2', 'bosses2', 'towers2', 'scifi'):
     try:
         M = __import__('dm.' + mod, fromlist=['REG'])
         REGS.update({k: (mod, f) for k, f in M.REG.items()})

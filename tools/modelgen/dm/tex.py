@@ -398,6 +398,81 @@ def _glow_plain(seed=22, tint=0xffffff):
     return dict(base=c * 0.6, height=n * 0.1, rough=np.full_like(n, 0.3), metal=np.zeros_like(n), emis=c, nstr=0.5)
 
 
+# ---------------------------------------------------------------- Sci-Fi (Thema „Sternenwacht“)
+
+def _hull(seed=60, tint=0xd8dce4, seam=0x3a3e48, metal=0.35, rough=0.45, stripes=False):
+    """Rumpfplatten: unregelmäßige Plattenfelder mit Fugen, Nieten und leichter Gebrauchsspur."""
+    rng = np.random.default_rng(seed)
+    x, y = _grid()
+    h = np.zeros_like(x)
+    seams = np.zeros_like(x)
+    # zwei Teilungsebenen: große Platten, dann zufällige Unterteilung
+    for k, g in ((0, 4), (1, 8)):
+        gx, gy = x * g, y * g
+        fx, fy = gx - np.floor(gx), gy - np.floor(gy)
+        gid = (np.floor(gx) + np.floor(gy) * g).astype(int)
+        keep = rng.random(g * g) < (1.0 if k == 0 else 0.35)
+        ex = np.minimum(fx, 1 - fx)
+        ey = np.minimum(fy, 1 - fy)
+        e = np.minimum(ex, ey)
+        line = smooth(0.03, 0.012, e) * keep[gid]
+        seams = np.maximum(seams, line)
+        # Nieten in den Ecken großer Platten
+        if k == 0:
+            rv = np.hypot(np.minimum(fx, 1 - fx) - 0.06, np.minimum(fy, 1 - fy) - 0.06)
+            h += smooth(0.025, 0.012, rv) * 0.35
+        h += rng.random(g * g)[gid] * 0.04
+    n = fbm(8, 4, seed)
+    wear = smooth(0.62, 0.8, fbm(5, 5, seed + 3))
+    h = h + n * 0.05 - seams * 0.5
+    c = col(tint) * (0.9 + 0.12 * n[..., None]) * (1 - 0.18 * wear[..., None])
+    if stripes:
+        st = np.floor((x + y) * 18) % 2
+        band = ((y > 0.86) | (y < 0.06))[..., None]
+        c = np.where(band, mix(col(0x1a1a1a), col(0xf0b020), st), c)
+    c = mix(c, col(seam), seams * 0.85)
+    return dict(base=c, height=h, rough=np.clip(rough + 0.25 * wear - 0.1 * seams, 0.1, 1), metal=np.full_like(h, metal), nstr=4.0)
+
+
+def _circuit(seed=66, tint=0x1a1e26, glow=0x40e0ff):
+    """Dunkle Platine mit leuchtenden Leiterbahnen."""
+    base = _hull(seed, tint, 0x0a0c10, 0.5, 0.35)
+    rng = np.random.default_rng(seed)
+    x, y = _grid()
+    g = 16
+    gx, gy = x * g, y * g
+    fx, fy = gx - np.floor(gx), gy - np.floor(gy)
+    gid = (np.floor(gx) + np.floor(gy) * g).astype(int)
+    hor = rng.random(g * g) < 0.45
+    ver = rng.random(g * g) < 0.45
+    pad = rng.random(g * g) < 0.12
+    tr = np.maximum(smooth(0.07, 0.03, np.abs(fy - 0.5)) * hor[gid], smooth(0.07, 0.03, np.abs(fx - 0.5)) * ver[gid])
+    tr = np.maximum(tr, smooth(0.2, 0.12, np.hypot(fx - 0.5, fy - 0.5)) * pad[gid])
+    base['base'] = mix(base['base'], col(glow) * 0.35, tr)
+    base['emis'] = col(glow)[None, None, :] * (tr * 0.85)[..., None]
+    base['height'] = base['height'] + tr * 0.1
+    return base
+
+
+def _alien_skin(seed=70, tint=0x3a5a4a, spot=0x9aff70):
+    """Feuchte Alienhaut mit leuchtenden Flecken."""
+    x, y = _grid()
+    f1, f2, cid = worley(10, seed)
+    n = fbm(6, 5, seed + 1)
+    w = np.clip(f1, 0, 1)
+    cells = smooth(0.22, 0.05, f1) * (cid > 0.55)
+    h = n * 0.6 + (1 - w) * 0.4
+    c = col(tint) * (0.7 + 0.5 * n[..., None])
+    c = mix(c, col(spot) * 0.5, cells * 0.8)
+    return dict(base=c, height=h, rough=np.clip(0.25 + 0.2 * n, 0.1, 1), metal=np.zeros_like(h), emis=col(spot)[None, None, :] * (cells * 0.6)[..., None], nstr=4.0)
+
+
+def _glass(seed=74, tint=0x6ad0ff):
+    n = fbm(4, 3, seed)
+    c = col(tint)[None, None, :] * (0.35 + 0.15 * n[..., None])
+    return dict(base=c, height=n * 0.05, rough=np.full_like(n, 0.08), metal=np.full_like(n, 0.2), emis=col(tint)[None, None, :] * 0.25, nstr=0.5)
+
+
 # Materialbibliothek: Name → (Rezept, Parameter, UV-Wiederholungen je Meter, Faktoren)
 LIB = {
     'stone_blocks': (_stone_blocks, dict(seed=1), 1.6),
@@ -451,6 +526,25 @@ LIB = {
     'glow_poison': (_glow_plain, dict(seed=57, tint=0x90ff50), 1.0),
     'glow_storm': (_glow_plain, dict(seed=58, tint=0x9ad0ff), 1.0),
     'glow_blood': (_glow_plain, dict(seed=59, tint=0xff2a2a), 1.0),
+    # Sci-Fi
+    'hull_white': (_hull, dict(seed=60), 1.4),
+    'hull_dark': (_hull, dict(seed=61, tint=0x30343e, seam=0x101218, metal=0.55, rough=0.4), 1.4),
+    'hull_blue': (_hull, dict(seed=62, tint=0x2a4a7a, seam=0x0e1a2e, metal=0.45), 1.4),
+    'hull_orange': (_hull, dict(seed=63, tint=0xd8742a, seam=0x40200a, metal=0.3), 1.4),
+    'hull_hazard': (_hull, dict(seed=64, tint=0x5a5e68, seam=0x202228, metal=0.5, stripes=True), 1.4),
+    'gunmetal': (_iron, dict(seed=65, tint=0x3a3e48), 2.4),
+    'circuit': (_circuit, dict(seed=66), 1.2),
+    'circuit_red': (_circuit, dict(seed=67, glow=0xff4a3a), 1.2),
+    'circuit_green': (_circuit, dict(seed=68, glow=0x70ff60), 1.2),
+    'circuit_violet': (_circuit, dict(seed=69, glow=0xc070ff), 1.2),
+    'alien_skin': (_alien_skin, dict(seed=70), 2.5),
+    'alien_violet': (_alien_skin, dict(seed=71, tint=0x4a2a5a, spot=0xff70e0), 2.5),
+    'alien_shell': (_chitin, dict(seed=72, tint=0x1a2a30, edge=0x40d0c0), 2.2),
+    'glass': (_glass, dict(seed=74), 1.0),
+    'glass_green': (_glass, dict(seed=75, tint=0x70ff90), 1.0),
+    'glow_cyan': (_glow_plain, dict(seed=76, tint=0x40f0ff), 1.0),
+    'glow_magenta': (_glow_plain, dict(seed=77, tint=0xff40c0), 1.0),
+    'glow_orange': (_glow_plain, dict(seed=78, tint=0xffa030), 1.0),
 }
 
 
