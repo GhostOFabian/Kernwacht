@@ -189,8 +189,9 @@ namespace Kernwacht.Sim
             shieldMax = 0.3,
             summonEvery = 12,
             summonCount = 3,
-            enrageAfter = 60,
-            enrageSpeed = 1.4,
+            // 4.0: Raserei später und milder (Welle 150 war mit Rissprüngen und Tempo-Zuschlägen kaum zu halten)
+            enrageAfter = 90,
+            enrageSpeed = 1.25,
             /** Durchbruch kostet mindestens so viel bzw. diesen Anteil der maximalen Kernenergie. */
             leakMin = 10,
             leakPct = 0.25,
@@ -224,7 +225,7 @@ namespace Kernwacht.Sim
         };
 
         /** 3.7: Türme, die nicht zum Turmlimit zählen – Barrikaden, Unterstützungstürme, die andere Türme verstärken, und (3.8) Goldgräber. */
-        public static readonly List<string> LIMIT_FREE = new List<string> { "barricade", "lanebarricade", "pylon", "totem", "goldmine" };
+        public static readonly List<string> LIMIT_FREE = new List<string> { "barricade", "lanebarricade", "pylon", "totem", "goldmine", "bank", "treasury", "deepdrill" };
 
         public static bool countsTowardLimit(string def)
         {

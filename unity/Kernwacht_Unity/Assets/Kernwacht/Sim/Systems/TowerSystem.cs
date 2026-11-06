@@ -227,14 +227,25 @@ namespace Kernwacht.Sim
 
         public static bool canHit(Dictionary<string, double> st, EnemyInstance e)
         {
-            if (!e.alive || e.stealthed || e.burrowed) return false;
-            return e.flying ? st["hitsAir"] > 0 : st["hitsGround"] > 0;
+            if (!e.alive || e.stealthed) return false;
+            // 4.0 Bebenhammer: trifft auch eingegrabene Gegner
+            if (e.burrowed && !(st["hitsBurrowed"] > 0)) return false;
+            // 4.0 Sturmbatterie: zu Boden gedrückte Flieger gelten als Bodenziel
+            bool air = e.flying && !ElementSystem.hasStatus(e, "grounded");
+            return air ? st["hitsAir"] > 0 : st["hitsGround"] > 0;
+        }
+
+        /// <summary>Mittelpunkt-Versatz der Turmfläche (2×2-Türme: 1 Feld).</summary>
+        public static double centerOff(TowerInstance t)
+        {
+            return t.def == "deepdrill" ? 1 : 0.5;
         }
 
         private static bool inRange(TowerInstance t, Dictionary<string, double> st, EnemyInstance e)
         {
-            double dx = e.x - (t.cx + 0.5);
-            double dy = e.y - (t.cy + 0.5);
+            double off = centerOff(t);
+            double dx = e.x - (t.cx + off);
+            double dy = e.y - (t.cy + off);
             double r = st["range"] + 0.15;
             return dx * dx + dy * dy <= r * r;
         }
@@ -316,6 +327,19 @@ namespace Kernwacht.Sim
         {
             if (t.priority == "random") { var r = pickTargets(sim, t, st, 1); return r.Count > 0 ? r[0] : null; }
             bool preferAir = st["preferAir"] > 0;
+            // 4.0 Siegelstein: zuerst Gegner, die gerade eine Fähigkeit vorbereiten
+            if (st["castPriority"] > 0)
+            {
+                EnemyInstance caster = null;
+                double cs = 0;
+                foreach (var e in sim.s.enemies)
+                {
+                    if (!canHit(st, e) || !inRange(t, st, e) || !isCasting(e)) continue;
+                    double sc = priorityScore(t.priority, t, e);
+                    if (caster == null || sc < cs || (sc == cs && e.uid < caster.uid)) { caster = e; cs = sc; }
+                }
+                if (caster != null) return caster;
+            }
             EnemyInstance best = null, bestAir = null;
             double bs = 0, bsAir = 0;
             foreach (var e in sim.s.enemies)
@@ -326,6 +350,56 @@ namespace Kernwacht.Sim
                 if (preferAir && e.flying && (bestAir == null || sc < bsAir || (sc == bsAir && e.uid < bestAir.uid))) { bestAir = e; bsAir = sc; }
             }
             return bestAir ?? best;
+        }
+
+        /// <summary>Bereitet der Gegner gerade eine Fähigkeit vor?</summary>
+        public static bool isCasting(EnemyInstance e)
+        {
+            if (e.abilities == null) return false;
+            foreach (var a in e.abilities) if (a.windup > 0) return true;
+            return false;
+        }
+
+        // ------------------------------------------------------------ 4.0 Schildwerk
+
+        /// <summary>
+        /// Deaktiviert einen Turm (Betäubung durch Gegner, Bosse, Explosionen). Ein Schildwerk in Reichweite
+        /// wehrt das ab, sofern der Schutz dieses Turms geladen ist. Liefert true, wenn der Turm betäubt wurde.
+        /// </summary>
+        public static bool disableTower(GameSimulation sim, TowerInstance t, double dur, EnemyInstance by = null)
+        {
+            if (t == null || dur <= 0) return false;
+            if (t.wardCd <= 0)
+            {
+                var w = wardFor(sim, t);
+                if (w != null)
+                {
+                    var wst = sim.stats(w);
+                    t.wardCd = U.Max(2, wst["wardCd"]);
+                    var c = Towers.towerCenter(t);
+                    sim.emit(new GameEvent { k = "ward", x = c.x, y = c.y, uid = w.uid });
+                    if (wst["wardReflect"] > 0 && by != null && by.alive)
+                    {
+                        if (U.Truthy(by.boss)) EnemySystem.interruptEnemy(sim, by, 60);
+                        else ElementSystem.addStatus(by, "stun", 1.5, 1, w.uid);
+                    }
+                    return false;
+                }
+            }
+            t.stunned = U.Max(t.stunned, dur);
+            return true;
+        }
+
+        static TowerInstance wardFor(GameSimulation sim, TowerInstance t)
+        {
+            var c = Towers.towerCenter(t);
+            foreach (var w in sim.s.towers)
+            {
+                if (w == t || !TowersNew.WARDS.Contains(w.def) || w.stunned > 0) continue;
+                double r = sim.stats(w)["range"];
+                if (Sq(w.cx + 0.5 - c.x) + Sq(w.cy + 0.5 - c.y) <= r * r) return w;
+            }
+            return null;
         }
 
         public static HitPayload towerPayload(TowerInstance t, Dictionary<string, double> st)
@@ -438,6 +512,7 @@ namespace Kernwacht.Sim
                 var t = towers[ti];
                 t.fireAnim = U.Max(0, t.fireAnim - dt);
                 if (t.activeCd > 0) t.activeCd = U.Max(0, t.activeCd - dt);
+                if (t.wardCd > 0) t.wardCd = U.Max(0, t.wardCd - dt);
                 if (t.activeT > 0)
                 {
                     t.activeT -= dt;
@@ -476,6 +551,13 @@ namespace Kernwacht.Sim
                 var st = sim.stats(t);
                 if (st["damage"] <= 0 && def.attack == "pylon") continue;
                 t.cooldown = U.Max(0, t.cooldown - dt);
+                if (def.attack == "barracks")
+                {
+                    // Soldaten kehren einzeln zurück (t.charge = Rückkehr-Countdown)
+                    if (t.charge > 0) t.charge = U.Max(0, t.charge - dt);
+                    if (t.charge <= 0) t.charge = spawnSoldier(sim, t, st) && soldiersOf(sim, t.uid) < U.Round(st["soldiers"]) ? 1 : 2;
+                    continue;
+                }
                 t.retarget -= dt;
                 EnemyInstance target = null;
                 if (U.Truthy(t.target)) sim.c.enemyByUid.TryGetValue(t.target, out target);
@@ -506,8 +588,8 @@ namespace Kernwacht.Sim
         private static bool fire(GameSimulation sim, TowerInstance t, Dictionary<string, double> st, EnemyInstance target)
         {
             var def = Towers.TOWERS[t.def];
-            double ox = t.cx + 0.5;
-            double oy = t.cy + 0.5;
+            double ox = t.cx + centerOff(t);
+            double oy = t.cy + centerOff(t);
             // PORT: Schleifen über sim.s.enemies als Index-Schleifen über die erfasste Liste (JS for…of sieht
             // während der Schleife gespawnte Gegner, z. B. aus Todesabspaltungen, mit).
             switch (def.attack)
@@ -576,7 +658,7 @@ namespace Kernwacht.Sim
                         }
                         cur = next;
                     }
-                    sim.emit(new GameEvent { k = "chain", pts = pts });
+                    sim.emit(new GameEvent { k = "chain", pts = pts, tower = t.def });
                     sim.emit(new GameEvent { k = "shot", tower = t.def, x = ox, y = oy, tx = target.x, ty = target.y, uid = t.uid });
                     return true;
                 }
@@ -1054,6 +1136,100 @@ namespace Kernwacht.Sim
                 sim.emit(new GameEvent { k = "hit", type = "physical", x = z.x, y = z.y, amount = z.power, splash = 1 });
             }
             sim.emit(new GameEvent { k = "burst", x = z.x, y = z.y, r = t != null && st != null ? U.Max(0.6, st["splash"]) : 1 });
+        }
+
+        // ------------------------------------------------------------ 4.0 Wachkaserne
+
+        /// <summary>Lebende Soldaten eines Turms.</summary>
+        public static double soldiersOf(GameSimulation sim, double uid)
+        {
+            double n = 0;
+            foreach (var z in sim.s.zones) if (z.kind == "soldier" && z.link == uid && z.t > 0) n++;
+            return n;
+        }
+
+        /// <summary>Stellt einen Soldaten auf das nächste freie Lane-Feld in Reichweite (deterministisch).</summary>
+        private static bool spawnSoldier(GameSimulation sim, TowerInstance t, Dictionary<string, double> st)
+        {
+            var s = sim.s;
+            if (soldiersOf(sim, t.uid) >= U.Round(st["soldiers"])) return false;
+            var map = s.map;
+            double ox = t.cx + 0.5, oy = t.cy + 0.5;
+            double r = st["range"];
+            double x0 = U.Max(0, Math.Floor(ox - r)), x1 = U.Min(map.width - 1, Math.Floor(ox + r));
+            double y0 = U.Max(0, Math.Floor(oy - r)), y1 = U.Min(map.height - 1, Math.Floor(oy + r));
+            double bx = 0, by = 0, bd = double.PositiveInfinity;
+            for (double y = y0; y <= y1; y++)
+            {
+                for (double x = x0; x <= x1; x++)
+                {
+                    double i = y * map.width + x;
+                    double c = map.cells[(int)i];
+                    bool lane = c == Cell.Path || (map.variant == "mazing" && (c == Cell.Open || c == Cell.NoBuild) && !sim.c.towerByCell.ContainsKey(i));
+                    if (!lane) continue;
+                    if (map.variant == "mazing" && sim.c.field[(int)i] >= 1e8) continue;
+                    double cx = x + 0.5, cy = y + 0.5;
+                    double d = Sq(cx - ox) + Sq(cy - oy);
+                    if (d > r * r) continue;
+                    bool taken = false;
+                    foreach (var z in s.zones) if (z.kind == "soldier" && z.t > 0 && Sq(z.x - cx) + Sq(z.y - cy) < 0.81) { taken = true; break; }
+                    if (taken) continue;
+                    if (d < bd) { bd = d; bx = cx; by = cy; }
+                }
+            }
+            if (double.IsPositiveInfinity(bd)) return false;
+            s.zones.Add(new Zone { uid = sim.uid(), kind = "soldier", x = bx, y = by, r = 0.55, t = 1e9, armed = 0, power = st["soldierHold"], tick = 0, link = t.uid, src = t.uid });
+            sim.emit(new GameEvent { k = "soldier", x = bx, y = by, uid = t.uid, up = true });
+            return true;
+        }
+
+        /// <summary>Soldat: hält Bodengegner auf (Wurzel), kämpft und verbraucht dabei seine Haltekraft.</summary>
+        public static void updateSoldier(GameSimulation sim, Zone z, double dt)
+        {
+            var s = sim.s;
+            sim.c.towerByUid.TryGetValue(z.link, out var t);
+            if (t == null) { z.t = 0; return; }
+            if (t.stunned > 0) return;
+            var st = sim.stats(t);
+            double cap = U.Max(1, U.Round(st["soldierBlock"]));
+            double r2 = z.r * z.r;
+            double drain = 0;
+            int n = 0;
+            EnemyInstance foe = null;
+            double fd = double.PositiveInfinity;
+            var enemies = s.enemies;
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                var e = enemies[i];
+                if (!e.alive || e.flying || e.burrowed || e.stealthed) continue;
+                double d = Sq(e.x - z.x) + Sq(e.y - z.y);
+                if (d > r2) continue;
+                if (d < fd) { fd = d; foe = e; }
+                if (U.Truthy(e.boss))
+                {
+                    // Bosse werden nicht aufgehalten, nur gebremst – und zehren stark
+                    var ch = ElementSystem.addStatus(e, "chill", 0.4, 0.4, t.uid, 1);
+                    ch.flag = U.Max(ch.flag, 40);
+                    drain += 3;
+                    continue;
+                }
+                if (n >= cap) continue;
+                n++;
+                ElementSystem.addStatus(e, "root", 0.2, 1, t.uid);
+                drain += e.elite || U.Truthy(e.miniBoss) ? 2 : 1;
+            }
+            z.tick -= dt;
+            if (foe != null && z.tick <= 0)
+            {
+                z.tick = st["cooldown"];
+                DamageSystem.applyHit(sim, foe, payload(t, st));
+            }
+            if (drain <= 0) return;
+            z.power -= drain * dt;
+            if (z.power > 0) return;
+            z.t = 0;
+            t.charge = U.Max(t.charge, st["soldierRespawn"]);
+            sim.emit(new GameEvent { k = "soldier", x = z.x, y = z.y, uid = t.uid, up = false });
         }
     }
 }

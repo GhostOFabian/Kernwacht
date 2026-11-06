@@ -52,17 +52,17 @@ namespace Kernwacht.Sim
         {
             // Unterstützer: Lyra führt alle Türme an, dafür schwächer
             ["lyra"] = P("alle Türme", new[] { "*" }, null, 0.08, 0.06),
-            ["brann"] = P("Geschütz- und Kanonentürme", null, new[] { "ranger", "cannon", "ballista", "thornwood" }, 0.18, 0.08),
-            ["vela"] = P("Schützentürme", null, new[] { "ranger", "ballista", "skyguard", "skywatch" }, 0.12, 0.12, 0.3),
-            ["kaela"] = P("Frost-, Minen- und Kanonentürme", new[] { "frost" }, new[] { "minelayer", "cannon", "sporemine" }, 0.14, 0.08),
+            ["brann"] = P("Geschütz- und Kanonentürme", null, new[] { "ranger", "cannon", "ballista", "thornwood", "eyrie", "falcon", "acidmortar" }, 0.18, 0.08),
+            ["vela"] = P("Schützentürme", null, new[] { "ranger", "ballista", "skyguard", "skywatch", "eyrie", "falcon", "stormbattery", "gale" }, 0.12, 0.12, 0.3),
+            ["kaela"] = P("Frost-, Minen- und Kanonentürme", new[] { "frost" }, new[] { "minelayer", "cannon", "sporemine", "quake", "quakemaw" }, 0.14, 0.08),
             ["varo"] = P("Feuertürme", new[] { "fire" }, null, 0.18, 0.08),
-            ["nyx"] = P("Riss- und Gravitationstürme", null, new[] { "riftbinder", "gravity", "riftgate", "voidlance", "rune" }, 0.16, 0.1),
+            ["nyx"] = P("Riss- und Gravitationstürme", null, new[] { "riftbinder", "gravity", "riftgate", "voidlance", "rune", "seal", "banecircle", "quakemaw" }, 0.16, 0.1),
             ["liora"] = P("Klang- und Totemtürme", new[] { "sonic" }, new[] { "totem" }, 0.1, 0.16),
-            ["thorgrim"] = P("schwere Türme", null, new[] { "cannon", "ballista", "minelayer", "skyguard", "thornwood" }, 0.16, 0.06, 0, 0.05),
+            ["thorgrim"] = P("schwere Türme", null, new[] { "cannon", "ballista", "minelayer", "skyguard", "thornwood", "quake", "barracks", "order", "deepdrill" }, 0.16, 0.06, 0, 0.05),
             ["sena"] = P("Blitztürme", new[] { "lightning" }, null, 0.16, 0.1),
-            ["oran"] = P("Leitnetz und Strahlen", null, new[] { "pylon", "tesla", "laser", "rune", "thunderspire" }, 0.14, 0.1, 0.2),
-            ["mira"] = P("Gift- und Goldtürme", new[] { "poison" }, new[] { "goldmine" }, 0.16, 0.1),
-            ["ommar"] = P("Frost- und Klangtürme", new[] { "frost", "sonic" }, null, 0.12, 0.1, 0, 0.05),
+            ["oran"] = P("Leitnetz und Strahlen", null, new[] { "pylon", "tesla", "laser", "rune", "thunderspire", "sunlance", "cyclone" }, 0.14, 0.1, 0.2),
+            ["mira"] = P("Gift- und Goldtürme", new[] { "poison" }, new[] { "goldmine", "bank", "treasury", "deepdrill" }, 0.16, 0.1),
+            ["ommar"] = P("Frost-, Klang- und Siegeltürme", new[] { "frost", "sonic" }, new[] { "seal", "gale" }, 0.12, 0.1, 0, 0.05),
         };
 
         public static CommandProfile profileOf(string champId)

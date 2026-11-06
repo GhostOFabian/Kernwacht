@@ -62,7 +62,7 @@ namespace Kernwacht.Sim
                 for (int i = 0; i < enemies.Count; i++)
                 {
                     var e = enemies[i];
-                    if (!e.alive || (e.flying && st["hitsAir"] <= 0)) continue;
+                    if (!e.alive || (e.flying && !ElementSystem.hasStatus(e, "grounded") && st["hitsAir"] <= 0)) continue;
                     double d2 = Sq(e.x - p.x) + Sq(e.y - p.y);
                     if (d2 > r2) continue;
                     DamageSystem.applyHit(sim, e, pl, e == target ? 1 : 0.75);
@@ -117,7 +117,7 @@ namespace Kernwacht.Sim
                 for (int i = 0; i < enemies.Count; i++)
                 {
                     var e = enemies[i];
-                    if (!e.alive || e.flying || p.hitList.Contains(e.uid)) continue;
+                    if (!e.alive || (e.flying && !ElementSystem.hasStatus(e, "grounded")) || p.hitList.Contains(e.uid)) continue;
                     if (Sq(e.x - p.x) + Sq(e.y - p.y) > 0.42 * 0.42) continue;
                     p.hitList.Add(e.uid);
                     DamageSystem.applyHit(sim, e, p.payload);

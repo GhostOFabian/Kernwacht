@@ -4,12 +4,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Kernwacht.Sim
 {
     public static partial class Towers
     {
-        public static readonly Dictionary<string, TowerDefinition> TOWERS = new Dictionary<string, TowerDefinition>
+        public static readonly Dictionary<string, TowerDefinition> TOWERS = TowersNew.Add(new Dictionary<string, TowerDefinition>
         {
             ["ranger"] = new TowerDefinition
             {
@@ -922,17 +923,17 @@ namespace Kernwacht.Sim
                 synergies = "Bremst Gegner im Feuer deiner Türme – ideal vor Kanonen, Minen und Meteoren.",
                 counters = "Flieger fliegen darüber hinweg. Zählt nicht zum Turmlimit.",
             },
-        };
+        });
 
         /** Die zwölf Türme (ohne Barrikade). */
         /** 3.2: Reihenfolge der Bauleiste = Freischaltung im Helden-Endlos (W1, W3, W5, W6, W7 …); Tasten 1, 2, 3 … passend. */
         public static readonly List<string> TOWER_ORDER = new List<string>
         {
-            "ranger", "ember", "frost", "goldmine", "storm", "cannon", "spore", "ballista", "skyguard", "minelayer", "rune", "resonator", "pylon", "totem", "riftbinder", "tesla", "gravity", "meteor", "laser", "dragon",
+            "ranger", "ember", "frost", "goldmine", "storm", "cannon", "bank", "spore", "ballista", "skyguard", "minelayer", "rune", "resonator", "quake", "pylon", "totem", "acid", "riftbinder", "tesla", "seal", "gale", "gravity", "meteor", "ward", "eyrie", "laser", "dragon", "barracks",
         };
 
         /** Legendäre Türme (nur durch Fusion). */
-        public static readonly List<string> LEGENDARY_ORDER = new List<string> { "plasma", "glacier", "voidlance", "starfall", "thornwood", "thunderspire", "riftgate", "phoenix", "cathedral", "stormeye", "sporemine", "skywatch" };
+        public static readonly List<string> LEGENDARY_ORDER = new List<string> { "plasma", "glacier", "voidlance", "starfall", "thornwood", "thunderspire", "riftgate", "phoenix", "cathedral", "stormeye", "sporemine", "skywatch", "silencehall", "banecircle", "acidmortar", "plaguepot", "quakemaw", "cyclone", "stormbattery", "falcon", "sunlance", "order", "treasury", "deepdrill", "shieldnet" };
 
         /** Fusionsrezepte: zwei voll ausgebaute (Stufe 4 + Spezialisierung) benachbarte Türme. */
         public static readonly List<FusionRecipe> FUSIONS = new List<FusionRecipe>
@@ -949,7 +950,7 @@ namespace Kernwacht.Sim
             new FusionRecipe { id = "stormeye", a = "storm", b = "frost", cost = 380 },
             new FusionRecipe { id = "sporemine", a = "minelayer", b = "spore", cost = 360 },
             new FusionRecipe { id = "skywatch", a = "skyguard", b = "frost", cost = 380 },
-        };
+        }.Concat(TowersNew.FUSIONS).ToList();
 
         /** Maximaler Abstand (Zellen, Mittelpunkt) zwischen Fusionspartnern. */
         public const double FUSION_RANGE = 2.3;

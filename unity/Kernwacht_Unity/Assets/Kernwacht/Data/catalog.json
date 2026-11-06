@@ -609,6 +609,437 @@
    "notes": ""
   },
   {
+   "id": "seal",
+   "title": "Siegelstein",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/seal.glb",
+   "tris": 5332,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "RingA",
+    "RingB"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "acid",
+   "title": "Ätzkessel",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/acid.glb",
+   "tris": 6236,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "quake",
+   "title": "Bebenhammer",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/quake.glb",
+   "tris": 6376,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "gale",
+   "title": "Windwacht",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/gale.glb",
+   "tris": 4348,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Rotor"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "eyrie",
+   "title": "Adlerhorst",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/eyrie.glb",
+   "tris": 6472,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "barracks",
+   "title": "Wachkaserne",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/barracks.glb",
+   "tris": 6594,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Flag"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "bank",
+   "title": "Handelskontor",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/bank.glb",
+   "tris": 4240,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Beam"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "ward",
+   "title": "Schildwerk",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/ward.glb",
+   "tris": 3708,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Core"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "silencehall",
+   "title": "Stillezitadelle",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/silencehall.glb",
+   "tris": 5406,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Ring"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "banecircle",
+   "title": "Bannkreis",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/banecircle.glb",
+   "tris": 8390,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Ring"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "acidmortar",
+   "title": "Säuremörser",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/acidmortar.glb",
+   "tris": 4880,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "plaguepot",
+   "title": "Pestkessel",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/plaguepot.glb",
+   "tris": 6876,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "quakemaw",
+   "title": "Bebenschlund",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/quakemaw.glb",
+   "tris": 4820,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Orbit"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "cyclone",
+   "title": "Zyklonturm",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/cyclone.glb",
+   "tris": 6116,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Rotor",
+    "Cloud"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "stormbattery",
+   "title": "Sturmbatterie",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/stormbattery.glb",
+   "tris": 5240,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Rotor"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "falcon",
+   "title": "Falkenauge",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/falcon.glb",
+   "tris": 6800,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "sunlance",
+   "title": "Sonnenlanze",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sunlance.glb",
+   "tris": 4740,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Petals"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "order",
+   "title": "Ordensburg",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/order.glb",
+   "tris": 5436,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Flag"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "treasury",
+   "title": "Schatzkammer (2×2)",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/treasury.glb",
+   "tris": 2242,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Lid"
+   ],
+   "bones": 0,
+   "notes": "Belegt 2×2 Felder (Grundfläche ≈ 1,9 m)."
+  },
+  {
+   "id": "deepdrill",
+   "title": "Tiefbohrer (2×2)",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/deepdrill.glb",
+   "tris": 6506,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Drill"
+   ],
+   "bones": 0,
+   "notes": "Belegt 2×2 Felder (Grundfläche ≈ 1,9 m)."
+  },
+  {
+   "id": "shieldnet",
+   "title": "Schildnetz",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/shieldnet.glb",
+   "tris": 4536,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Ring"
+   ],
+   "bones": 0,
+   "notes": ""
+  },
+  {
+   "id": "soldier",
+   "title": "Kasernensoldat",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/soldier.glb",
+   "tris": 1868,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": "Lane-Einheit der Wachkaserne (kein baubarer Turm)."
+  },
+  {
+   "id": "knight",
+   "title": "Ordensritter",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/knight.glb",
+   "tris": 4400,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0,
+   "notes": "Lane-Einheit der Ordensburg (kein baubarer Turm)."
+  },
+  {
    "id": "runner",
    "title": "Flinkling",
    "category": "enemy",

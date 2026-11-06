@@ -344,6 +344,8 @@ namespace Kernwacht.Sim
             ["gravity"] = 14, ["meteor"] = 14,
             ["laser"] = 17, ["dragon"] = 17,
             ["minelayer"] = 6, ["sporemine"] = 0, ["skyguard"] = 5, ["skywatch"] = 0,
+            ["bank"] = 4, ["quake"] = 8, ["acid"] = 10, ["seal"] = 12, ["gale"] = 13, ["ward"] = 15, ["eyrie"] = 16, ["barracks"] = 19,
+            ["silencehall"] = 0, ["banecircle"] = 0, ["acidmortar"] = 0, ["plaguepot"] = 0, ["quakemaw"] = 0, ["cyclone"] = 0, ["stormbattery"] = 0, ["falcon"] = 0, ["sunlance"] = 0, ["order"] = 0, ["treasury"] = 0, ["deepdrill"] = 0, ["shieldnet"] = 0,
             ["plasma"] = 0, ["glacier"] = 0, ["voidlance"] = 0, ["starfall"] = 0, ["thornwood"] = 0, ["thunderspire"] = 0, ["riftgate"] = 0, ["phoenix"] = 0, ["cathedral"] = 0, ["stormeye"] = 0,
         };
 

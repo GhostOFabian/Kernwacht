@@ -149,35 +149,13 @@ namespace Kernwacht.Game.UI
                 rows.Add(new[] { "Mutanten besiegt", U.Fmt(st.mutationsKilled) });
                 Common.statsTable(c3, rows);
             });
-            // Schaden je Turmtyp, Gold pro Welle
+            // 4.0: Turmstatistik – Anzahl, Schaden, Anteil und Effizienz je Turmtyp
+            content.Add((t) => towerTable(app, t, s));
+            // Gold pro Welle
             content.Add((t) =>
             {
-                var cols = Common.columns(t, 12, 1, 1);
-                var c1 = Common.card(cols[0]);
-                Common.h3(c1, "Schaden je Turmtyp");
-                if (dmg.Count > 0)
-                {
-                    var bars = Ui.Column(c1, 5);
-                    foreach (var kv in dmg)
-                    {
-                        var row = Ui.Row(bars.transform, 8, TextAnchor.MiddleLeft, false);
-                        var hl = Ui.Row(row.transform, 6, TextAnchor.MiddleLeft, false);
-                        Ui.Size(hl, 210);
-                        Common.modelIcon(hl.transform, kv.Key, 30);
-                        var nm = Common.label(hl.transform, Towers.TOWERS.TryGetValue(kv.Key, out var td) ? td.name : kv.Key, Common.SMALL, Theme.Text, FontStyle.Normal, TextAnchor.MiddleLeft);
-                        Ui.Size(nm, -1, -1, 1);
-                        var track = Ui.Panel(row.transform, "Track", new Color(0, 0, 0, 0.45f), false, Theme.RoundSmall);
-                        Ui.Size(track, -1, 14, 1);
-                        var fill = Ui.Panel(track.transform, "Fill", Theme.Accent, false, Theme.RoundSmall);
-                        var fr = fill.rectTransform;
-                        fr.anchorMin = Vector2.zero; fr.anchorMax = new Vector2((float)(kv.Value / maxDmg), 1);
-                        fr.offsetMin = fr.offsetMax = Vector2.zero;
-                        var hv = Common.label(row.transform, TextUtil.fmt(kv.Value), Common.SMALL, Theme.Text, FontStyle.Normal, TextAnchor.MiddleRight);
-                        Ui.Size(hv, 86);
-                    }
-                }
-                else Common.para(c1, "–", "muted");
-                var c2 = Common.card(cols[1]);
+                var cols = Common.columns(t, 12, 1);
+                var c2 = Common.card(cols[0]);
                 Common.h3(c2, "Gold pro Welle");
                 if (st.goldPerWave.Count > 0)
                 {
@@ -213,6 +191,107 @@ namespace Kernwacht.Game.UI
             var el = Common.shell(app, title, null, content.ToArray());
             el.gameObject.name = "Screen_Results";
             return el;
+        }
+
+        class TowerRow
+        {
+            public string id;
+            public string name;
+            public double end, built, dmg, kills, invested;
+        }
+
+        static List<TowerRow> towerRows(GameState s)
+        {
+            var st = s.stats;
+            var rows = new Dictionary<string, TowerRow>();
+            TowerRow get(string id)
+            {
+                if (!rows.TryGetValue(id, out var r))
+                {
+                    r = new TowerRow { id = id, name = Towers.TOWERS.TryGetValue(id, out var td) ? td.name : id };
+                    rows[id] = r;
+                }
+                return r;
+            }
+            foreach (var kv in st.damageByTower) get(kv.Key).dmg = kv.Value;
+            foreach (var kv in st.builtByTower) get(kv.Key).built = kv.Value;
+            if (st.killsByTower != null) foreach (var kv in st.killsByTower) get(kv.Key).kills = kv.Value;
+            foreach (var tw in s.towers)
+            {
+                var r = get(tw.def);
+                r.end++;
+                r.invested += tw.invested;
+            }
+            var list = rows.Values.Where((r) => r.id != "barricade" && r.id != "lanebarricade").ToList();
+            U.StableSort(list, (a, b) => U.Or(b.dmg - a.dmg, b.end - a.end));
+            return list;
+        }
+
+        /// <summary>Text der Turmstatistik zum Kopieren (z. B. zum Teilen für die Balance).</summary>
+        static string towerTableText(GameState s)
+        {
+            var rows = towerRows(s);
+            double total = Math.Max(1, rows.Sum((r) => r.dmg));
+            var sb = new System.Text.StringBuilder();
+            sb.Append($"Kernwacht · {TextUtil.modeName(s.mode)} · Welle {U.Fmt(s.stats.wavesCleared)} · Seed {s.seed.text}\n");
+            if (s.he != null) sb.Append($"Held: {Champions.CHAMPIONS[s.he.champion.id].name} St. {U.Fmt(s.he.champion.level)} · Schaden {TextUtil.fmt(s.he.champion.damageDealt)} · Doktrin {Doctrines.of(s.he).name}\n");
+            sb.Append("Turm\tAm Ende\tGebaut\tSchaden\tAnteil\tAbschüsse\tInvestiert\tSchaden/100 Gold\n");
+            foreach (var r in rows)
+                sb.Append($"{r.name}\t{U.Fmt(r.end)}\t{U.Fmt(r.built)}\t{TextUtil.fmt(r.dmg)}\t{U.Fixed(r.dmg / total * 100, 1)} %\t{U.Fmt(r.kills)}\t{TextUtil.fmt(r.invested)}\t{(r.invested > 0 ? TextUtil.fmt(r.dmg / r.invested * 100) : "–")}\n");
+            return sb.ToString();
+        }
+
+        static void towerTable(GameApp app, Transform t, GameState s)
+        {
+            var rows = towerRows(s);
+            double total = Math.Max(1, rows.Sum((r) => r.dmg));
+            double maxDmg = Math.Max(1, rows.Count > 0 ? rows.Max((r) => r.dmg) : 0);
+            var c = Common.card(t, "TowerStats");
+            var head = Ui.Row(c, 10, TextAnchor.MiddleLeft, false);
+            var ht = Common.h3(head.transform, "Türme im Lauf");
+            Ui.Size(ht, -1, -1, 1);
+            string text = towerTableText(s);
+            Common.btn(head.transform, "Statistik kopieren", () => Common.copyText(app, text), Ui.BtnKind.Normal, "copy", true);
+            Common.para(c, "Anzahl am Ende des Laufs, insgesamt gebaut (Fusionen zählen als gebaut), Schaden und Anteil am Turmschaden, Abschüsse, investiertes Gold der verbliebenen Türme und Schaden je 100 Gold.", "small muted");
+            if (rows.Count == 0) { Common.para(c, "–", "muted"); return; }
+            float[] w = { 230, 64, 64, -1, 92, 62, 80, 86, 96 };
+            string[] hd = { "Turm", "Ende", "Gebaut", "Schaden", "", "Anteil", "Abschüsse", "Investiert", "je 100 Gold" };
+            var hr = Ui.Row(c, 8, TextAnchor.MiddleLeft, false);
+            for (int k = 0; k < hd.Length; k++)
+            {
+                if (k == 4) continue;
+                var l = Common.label(hr.transform, hd[k], Common.SMALL, Theme.Muted, FontStyle.Bold, k == 0 || k == 3 ? TextAnchor.MiddleLeft : TextAnchor.MiddleRight);
+                if (k == 3) Ui.Size(l, -1, -1, 1); else Ui.Size(l, w[k] + (k == 5 ? w[4] + 8 : 0));
+            }
+            var body = Ui.Column(c, 4);
+            foreach (var r in rows)
+            {
+                var row = Ui.Row(body.transform, 8, TextAnchor.MiddleLeft, false);
+                var nm = Ui.Row(row.transform, 6, TextAnchor.MiddleLeft, false);
+                Ui.Size(nm, w[0]);
+                Common.modelIcon(nm.transform, r.id, 28);
+                var nl = Common.label(nm.transform, r.name, Common.SMALL, Theme.Text, FontStyle.Normal, TextAnchor.MiddleLeft);
+                Ui.Size(nl, -1, -1, 1);
+                num(row.transform, U.Fmt(r.end), w[1], r.end > 0 ? Theme.Text : Theme.Muted);
+                num(row.transform, U.Fmt(r.built), w[2], Theme.Muted);
+                var track = Ui.Panel(row.transform, "Track", new Color(0, 0, 0, 0.45f), false, Theme.RoundSmall);
+                Ui.Size(track, -1, 14, 1);
+                var fill = Ui.Panel(track.transform, "Fill", Theme.Accent, false, Theme.RoundSmall);
+                var fr = fill.rectTransform;
+                fr.anchorMin = Vector2.zero; fr.anchorMax = new Vector2((float)(r.dmg / maxDmg), 1);
+                fr.offsetMin = fr.offsetMax = Vector2.zero;
+                num(row.transform, TextUtil.fmt(r.dmg), w[4], Theme.Text);
+                num(row.transform, $"{U.Fixed(r.dmg / total * 100, 1)} %", w[5], r.dmg / total >= 0.25 ? Theme.Gold : Theme.Text);
+                num(row.transform, U.Fmt(r.kills), w[6], Theme.Muted);
+                num(row.transform, r.invested > 0 ? TextUtil.fmt(r.invested) : "–", w[7], Theme.Muted);
+                num(row.transform, r.invested > 0 && r.dmg > 0 ? TextUtil.fmt(r.dmg / r.invested * 100) : "–", w[8], Theme.Text);
+            }
+        }
+
+        static void num(Transform p, string text, float width, Color col)
+        {
+            var l = Common.label(p, text, Common.SMALL, col, FontStyle.Normal, TextAnchor.MiddleRight);
+            Ui.Size(l, width);
         }
 
         /// <summary>Alias (Auftragsbeschreibung).</summary>
