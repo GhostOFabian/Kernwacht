@@ -266,7 +266,12 @@ namespace Kernwacht.Sim
             s.stats.kills++;
             TowerInstance t = null;
             if (U.Truthy(towerUid)) sim.c.towerByUid.TryGetValue(towerUid, out t);
-            if (t != null) t.kills++;
+            if (t != null)
+            {
+                t.kills++;
+                if (s.stats.killsByTower == null) s.stats.killsByTower = new Dictionary<string, double>();
+                s.stats.killsByTower[t.def] = (U.GetN(s.stats.killsByTower, t.def) ?? 0) + 1;
+            }
             // Turm-Meisterschaft (Helden-Endlos): Rangaufstieg macht die Turmwerte neu
             if (t != null && s.he != null && s.he.mastery != null)
             {

@@ -51,6 +51,8 @@ namespace Kernwacht.Sim
             // 3.12: Flieger profitieren nur halb von Tempo-Zuschlägen (Weltstufe, „Flink“, Wellenprofil) und haben eine Obergrenze
             double sm = wave != null ? wave.speedMul : 1;
             if (!U.Truthy(boss) && def.flying) speed = U.Min(Scaling.FLYER.maxSpeed, speed * (1 + (sm - 1) * Scaling.FLYER.speedMulShare));
+            // 4.0: Bosse erhalten Tempo-Zuschläge (Weltstufe, „Flink“, Wellenprofil) nur bis +20 %
+            else if (U.Truthy(boss)) speed *= U.Min(sm, 1.2);
             else speed *= sm;
             if (mutation == "hasty") speed *= 1.35;
             var abilities = new List<string>(def.abilities);

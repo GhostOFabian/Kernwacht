@@ -581,6 +581,8 @@ namespace Kernwacht.Sim
         public List<double> goldPerWave = new List<double>();
         public Dictionary<string, double> damageByTower = new Dictionary<string, double>();   // Partial<Record<TowerId, number>>
         public Dictionary<string, double> builtByTower = new Dictionary<string, double>();    // Partial<Record<TowerId, number>>
+        /// <summary>4.0: Abschüsse je Turmtyp (für die Laufstatistik).</summary>
+        public Dictionary<string, double> killsByTower = new Dictionary<string, double>();
         public List<string> bossesKilled = new List<string>();   // BossId[]
         public List<string> bossesFaced = new List<string>();    // BossId[]
         public Dictionary<string, double> reactions = new Dictionary<string, double>();

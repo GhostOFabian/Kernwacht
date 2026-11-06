@@ -132,6 +132,17 @@ namespace Kernwacht.Sim
             {
                 case "riftJump":
                 {
+                    // 4.0: Challenge-Bosse springen nicht mehr im letzten Drittel des Weges und seltener
+                    if (e.challenge == true)
+                    {
+                        var sp = map.spawn;
+                        double full = sim.c.field[(int)(sp.y * map.width + sp.x)];
+                        if (full < Pathfinding.INF && e.remaining < full * 0.35)
+                        {
+                            a.cd = 4;
+                            return;
+                        }
+                    }
                     double cx = e.nx;
                     double cy = e.ny;
                     for (int i = 0; i < 5; i++)

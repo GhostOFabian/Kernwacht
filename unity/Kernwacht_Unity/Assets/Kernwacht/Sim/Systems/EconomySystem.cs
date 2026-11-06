@@ -676,6 +676,7 @@ namespace Kernwacht.Sim
             RuneSystem.releaseRunes(sim, p.uid);
             s.stats.fusions++;
             s.stats.builtByTower[r.id] = (U.GetN(s.stats.builtByTower, r.id) ?? 0) + 1;
+            s.stats.builtByTower[r.id] = (U.GetN(s.stats.builtByTower, r.id) ?? 0) + 1;
             sim.reindex();
             markDirty(sim);
             sim.emit(new GameEvent { k = "fusion", tower = r.id, x = t.cx + 0.5, y = t.cy + 0.5 });
