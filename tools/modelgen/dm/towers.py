@@ -204,6 +204,7 @@ def spore():
     for x, y, z, r in caps:
         sc.capsule((x * 0.6, y - 0.08, z * 0.6), (x, y, z), 0.025, 0.02, 'bone', k=0.02)
         sc.ellipsoid((x, y + 0.02, z), (r, r * 0.4, r), 'flesh_moss', k=0.015)
+    sc.box((0, -1.0, 0), (3, 1.0, 3), 'rock', k=0.004, sub=True)  # nichts unter den Boden
     sculpt_into(m, sc, 'Base', 0.012)
     pods = []
     for i in range(7):
@@ -299,35 +300,63 @@ def resonator():
 
 @tower
 def goldmine():
+    """Goldmine (2×2): Felshügel mit Stollen, Förderturm, Gleise mit Lore, Erzhalde und Werkzeughütte.
+    Alles steht auf y ≥ 0 – sonst hebt das Spiel das Modell an (Unterkante = Boden) und es wirkt schwebend."""
     m = T('goldmine', 'Goldgräber (2×2)', 0.9, (0, 1.0, 0))
     m.notes = 'Belegt 2×2 Felder (Grundfläche ≈ 1,9 m).'
-    sc = Sculpt(detail=0.01, dfreq=6, seed=11)
-    sc.ellipsoid((0.15, 0.12, -0.2), (0.85, 0.45, 0.7), 'rock', k=0.15, noise=0.03)
-    sc.ellipsoid((-0.45, 0.1, 0.25), (0.45, 0.32, 0.5), 'rock', k=0.15, noise=0.03)
-    sc.box((0.0, 0.25, 0.45), (0.22, 0.26, 0.4), 'rock', k=0.04, sub=True)
+    # Boden: festgetretene Erde mit Steinkante
+    m.add(rbox(1.86, 0.05, 1.86, 0.02).t(0, 0.025, 0), 'rock_red', 'Base')
+    m.add(kit.boulders(14, 0.88, 0.06, seed=12).s(1, 0.5, 1).t(0, 0.02, 0), 'rock', 'Base')
+    # Felshügel hinten mit Stollen (wird unter dem Boden abgeschnitten)
+    sc = Sculpt(detail=0.012, dfreq=6, seed=11)
+    sc.ellipsoid((0.0, 0.0, -0.35), (0.9, 0.62, 0.55), 'rock', k=0.18, noise=0.035)
+    sc.ellipsoid((-0.55, 0.0, -0.1), (0.4, 0.4, 0.45), 'rock', k=0.18, noise=0.035)
+    sc.ellipsoid((0.5, 0.0, -0.05), (0.38, 0.3, 0.4), 'rock', k=0.18, noise=0.035)
+    sc.box((-0.05, 0.2, 0.05), (0.17, 0.2, 0.45), 'rock', k=0.03, sub=True)   # Stollenöffnung
+    sc.box((0, -1.0, 0), (3, 1.0, 3), 'rock', k=0.004, sub=True)              # nichts unter den Boden
     sculpt_into(m, sc, 'Base', 0.02, 120)
-    m.add(kit.planks_platform(0.9, 0.02, 0.03, 12).s(1, 1, 0.98), 'wood_black', 'Base')
-    # Stollenrahmen
-    for x in (-0.24, 0.24):
-        m.add(rbox(0.07, 0.55, 0.07, 0.01).t(x, 0.29, 0.62), 'wood', 'Base')
-    m.add(rbox(0.6, 0.08, 0.09, 0.01).t(0, 0.6, 0.62), 'wood', 'Base')
-    m.add(rbox(0.36, 0.5, 0.02, 0.0).t(0, 0.29, 0.5), 'void', 'Base')
-    m.add(kit.skull(0.08).t(0, 0.66, 0.66), 'bone', 'Base')
-    # Gleise und Lore
-    for x in (-0.09, 0.09):
-        m.add(rbox(0.02, 0.02, 0.9, 0.004).t(x, 0.05, 0.95), 'iron_rust', 'Base')
-    for i in range(6):
-        m.add(rbox(0.26, 0.02, 0.05, 0.004).t(0, 0.035, 0.6 + i * 0.13), 'wood_black', 'Base')
-    cart = merge([rbox(0.24, 0.14, 0.3, 0.015).t(0, 0.15, 1.05)] + [cylinder(0.04, 0.02, 10).rz(math.pi / 2).t(sg * 0.13, 0.08, 1.05 + dz) for sg in (1, -1) for dz in (-0.09, 0.09)])
+    m.add(rbox(0.3, 0.36, 0.5, 0.0).t(-0.05, 0.19, -0.05), 'obsidian', 'Base')
+    # Goldadern im Fels
+    for (x, y, z, sd) in ((-0.45, 0.42, 0.12, 3), (0.32, 0.5, -0.02, 5), (0.05, 0.62, -0.25, 9), (-0.72, 0.25, 0.22, 4)):
+        m.add(kit.crystal_cluster(4, 0.035, 0.11, 0.05, seed=sd).t(x, y, z), 'crystal_gold', 'Base')
+    # Stollenrahmen aus Holz
+    for x in (-0.24, 0.14):
+        m.add(rbox(0.07, 0.48, 0.07, 0.01).t(x, 0.27, 0.3), 'wood', 'Base')
+    m.add(rbox(0.52, 0.08, 0.1, 0.01).t(-0.05, 0.53, 0.3), 'wood', 'Base')
+    m.add(merge([kit.beam((x, 0.05, 0.38), (x * 0.5 - 0.02, 0.5, 0.3), 0.035) for x in (-0.36, 0.26)]), 'wood_black', 'Base')
+    m.add(cylinder(0.008, 0.12, 5).t(0.2, 0.5, 0.36), 'iron', 'Base')
+    m.add(sphere(0.035, seg=8).t(0.2, 0.47, 0.36), 'glow_fire', 'Base')
+    # Gleise aus dem Stollen nach vorn, Lore mit Gold
+    for x in (-0.13, 0.03):
+        m.add(rbox(0.02, 0.02, 1.1, 0.004).t(x, 0.07, 0.4), 'iron_rust', 'Base')
+    for i in range(8):
+        m.add(rbox(0.26, 0.02, 0.05, 0.004).t(-0.05, 0.055, -0.05 + i * 0.13), 'wood_black', 'Base')
+    cart = merge([rbox(0.24, 0.14, 0.3, 0.015).t(-0.05, 0.17, 0.62)] + [cylinder(0.04, 0.02, 10).rz(math.pi / 2).t(-0.05 + sg * 0.13, 0.1, 0.62 + dz) for sg in (1, -1) for dz in (-0.09, 0.09)])
     m.add(cart, 'iron_rust', 'Base')
-    m.add(kit.crystal_cluster(6, 0.04, 0.12, 0.06, seed=2).t(0, 0.22, 1.05), 'crystal_gold', 'Base')
-    m.add(kit.crystal_cluster(5, 0.05, 0.18, 0.07, seed=7).t(-0.6, 0.25, 0.55), 'crystal_gold', 'Base')
-    # Förderturm mit Rad (Turret)
-    for x in (-0.12, 0.12):
-        m.add(kit.beam((x + 0.35, 0.35, -0.35), (x * 0.4 + 0.35, 1.05, -0.35), 0.05), 'wood', 'Base')
+    m.add(kit.crystal_cluster(6, 0.04, 0.12, 0.06, seed=2).t(-0.05, 0.24, 0.62), 'crystal_gold', 'Base')
+    # Erzhalde mit Gold
+    m.add(displace(sphere(0.22, 0.1, 0.2, 12).t(0.55, 0.05, 0.55), 0.02, 12), 'rock', 'Base')
+    m.add(kit.crystal_cluster(6, 0.04, 0.12, 0.08, seed=7).t(0.55, 0.12, 0.55), 'crystal_gold', 'Base')
+    # Werkzeughütte links vorn
+    m.add(rbox(0.34, 0.26, 0.3, 0.01).t(-0.6, 0.18, 0.55), 'wood', 'Base')
+    m.add(kit.roof(0.28, 0.16, 4, 0.31, 0.03, 0.0).ry(math.pi / 4).s(1.0, 1, 0.95).t(-0.6, 0, 0.55), 'wood_black', 'Base')
+    m.add(rbox(0.1, 0.17, 0.02, 0.004).t(-0.6, 0.135, 0.71), 'wood_black', 'Base')
+    m.add(merge([rbox(0.12, 0.12, 0.12, 0.01).t(-0.28, 0.11, 0.78), rbox(0.1, 0.1, 0.1, 0.01).t(-0.3, 0.22, 0.78).ry(0.4)]), 'wood', 'Base')
+    m.add(merge([kit.beam((-0.82, 0.05, 0.8), (-0.7, 0.42, 0.82), 0.02), rbox(0.12, 0.02, 0.03, 0.004).t(-0.7, 0.42, 0.82)]), 'iron', 'Base')
+    # Förderturm rechts hinten auf dem Boden, Rad dreht sich (Turret)
+    for x in (0.42, 0.72):
+        for z in (-0.6, -0.3):
+            m.add(kit.beam((x, 0.05, z), (0.57 + (x - 0.57) * 0.3, 1.05, -0.45 + (z + 0.45) * 0.3), 0.045), 'wood', 'Base')
+    for y in (0.4, 0.75):
+        f = (y - 0.05) / 1.0
+        r = 0.15 - f * 0.105
+        m.add(rbox(r * 2 + 0.04, 0.03, 0.03, 0.004).t(0.57, y, -0.45 - r), 'wood_black', 'Base')
+        m.add(rbox(r * 2 + 0.04, 0.03, 0.03, 0.004).t(0.57, y, -0.45 + r), 'wood_black', 'Base')
+    m.add(rbox(0.16, 0.06, 0.16, 0.01).t(0.57, 1.05, -0.45), 'iron', 'Base')
+    m.add(tube(curve([(0.57, 1.0, -0.3), (0.3, 0.55, -0.05), (0.0, 0.42, 0.05)], 10), 0.008, 4), 'leather_black', 'Base')
     wheel = merge([torus(0.18, 0.02, 24, 6).rx(math.pi / 2)] + [rbox(0.02, 0.36, 0.02, 0).rz(a) for a in (0, 1.05, 2.1)] + [cylinder(0.03, 0.08, 10).rx(math.pi / 2).t(0, 0, -0.04)])
-    m.add(wheel.t(0.35, 1.0, -0.35), 'iron', 'Turret')
-    m.nodes['Turret'].pos = (0.35, 1.0, -0.35)
+    m.add(wheel.t(0.57, 1.18, -0.45), 'iron', 'Turret')
+    m.nodes['Turret'].pos = (0.57, 1.18, -0.45)
     m.anim_rot('Idle', 'Turret', [(0, (0, 0, 1), 0), (2, (0, 0, 1), 180), (4, (0, 0, 1), 359)])
     m.anim_rot('Attack', 'Turret', [(0, (0, 0, 1), 0), (0.5, (0, 0, 1), 270), (1.0, (0, 0, 1), 359)])
     return m
@@ -469,6 +498,7 @@ def dragon():
         a = TAU * i / 4 + 0.6
         sc.capsule((math.cos(a) * 0.2, 0.5, math.sin(a) * 0.2), (math.cos(a) * 0.35, 1.05, math.sin(a) * 0.35), 0.06, 0.015, 'rock_red', k=0.06)
     sc.torus((0, 0.92, 0), 0.24, 0.07, 'wood_black', k=0.03, noise=0.01)  # Nest
+    sc.box((0, -1.0, 0), (3, 1.0, 3), 'rock', k=0.004, sub=True)  # nichts unter den Boden
     sculpt_into(m, sc, 'Base', 0.016, 110)
     eggs = merge([sphere(0.05, 0.07, 0.05, 10).t(math.cos(a) * 0.1, 0.97, math.sin(a) * 0.1) for a in (0.5, 2.6, 4.4)])
     m.add(eggs, 'crystal_red', 'Base')
@@ -723,6 +753,7 @@ def thornwood():
         p1 = (math.cos(a) * 0.3, 1.0 + rng.random() * 0.15, math.sin(a) * 0.3)
         p2 = (math.cos(a + 0.6) * 0.42, 1.25 + rng.random() * 0.2, math.sin(a + 0.6) * 0.42)
         sc.chain([p0, p1, p2], [0.07, 0.04, 0.01], 'bark', k=0.04)
+    sc.box((0, -1.0, 0), (3, 1.0, 3), 'rock', k=0.004, sub=True)  # nichts unter den Boden
     sculpt_into(m, sc, 'Base', 0.012, target=8000)
     # Dornen
     th = []
@@ -873,6 +904,7 @@ def sporemine():
         sc.capsule((x, y - 0.05, z), (x, y + 0.08, z), 0.025, 0.02, 'bone', k=0.02)
         sc.ellipsoid((x, y + 0.11, z), (0.07, 0.035, 0.07), 'chitin_red', k=0.015)
         spots.append((x, y + 0.14, z))
+    sc.box((0, -1.0, 0), (3, 1.0, 3), 'rock', k=0.004, sub=True)  # nichts unter den Boden
     sculpt_into(m, sc, 'Base', 0.012, target=7000)
     m.add(merge([sphere(0.03, seg=8).t(*p) for p in spots]), 'glow_poison', 'Base')
     m.add(merge([sphere(0.045, seg=10).t(math.cos(a) * 0.33, 0.05, math.sin(a) * 0.33) for a in np.linspace(0, TAU, 6)[:-1]]), 'glow_poison', 'Turret')

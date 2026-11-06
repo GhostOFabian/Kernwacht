@@ -151,7 +151,7 @@
    "title": "Goldgräber (2×2)",
    "category": "tower",
    "path": "Assets/Kernwacht/Models/tower/goldmine.glb",
-   "tris": 11996,
+   "tris": 15904,
    "clips": [
     "Idle",
     "Attack"

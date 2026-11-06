@@ -241,7 +241,7 @@ def barracks():
         bowl, coals = kit.brazier(0.05)
         m.add(bowl.t(sg * 0.36, 0.67, 0.36), 'iron', 'Base')
         m.add(coals.t(sg * 0.36, 0.67, 0.36), 'ember', 'Base')
-    m.add(merge([rbox(0.04, 0.2, 0.04, 0.008).t(sg * 0.12, 0.08, 0.42).rx(0.2) for sg in (-1, 0, 1)]), 'wood', 'Base')
+    m.add(merge([rbox(0.04, 0.2, 0.04, 0.008).rx(0.2).t(sg * 0.12, 0.1, 0.42) for sg in (-1, 0, 1)]), 'wood', 'Base')
     # Fahnenmast (Turret)
     m.add(cylinder(0.02, 0.7, 6).t(0, 0.67, 0), 'wood', 'Turret')
     m.add(spike(0.03, 0.1, 6).t(0, 1.37, 0), 'gold', 'Turret')
