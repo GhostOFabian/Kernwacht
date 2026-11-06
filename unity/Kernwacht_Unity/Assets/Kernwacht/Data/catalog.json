@@ -1830,6 +1830,1256 @@
    ],
    "bones": 0,
    "notes": ""
+  },
+  {
+   "id": "sf_acid",
+   "notes": "",
+   "title": "Säurereaktor",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_acid.glb",
+   "tris": 2516,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_acidmortar",
+   "notes": "",
+   "title": "Korrosionsartillerie",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_acidmortar.glb",
+   "tris": 1828,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_ballista",
+   "notes": "",
+   "title": "Railgun",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_ballista.glb",
+   "tris": 2120,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_banecircle",
+   "notes": "",
+   "title": "Nullfeld",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_banecircle.glb",
+   "tris": 2584,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Ring"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_bank",
+   "notes": "",
+   "title": "Kreditbörse",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_bank.glb",
+   "tris": 1528,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Holo"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_barracks",
+   "notes": "",
+   "title": "Klonbunker",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_barracks.glb",
+   "tris": 1356,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_barricade",
+   "notes": "",
+   "title": "Energiebarriere",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_barricade.glb",
+   "tris": 576,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_cannon",
+   "notes": "",
+   "title": "Massetreiber",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_cannon.glb",
+   "tris": 1904,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_cathedral",
+   "notes": "",
+   "title": "Infraschall-Dom",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_cathedral.glb",
+   "tris": 2548,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Ring"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_cloudbank",
+   "notes": "",
+   "title": "Gasnebel",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_cloudbank.glb",
+   "tris": 1600,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_core",
+   "notes": "",
+   "title": "Fusionsreaktor (Kern)",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_core.glb",
+   "tris": 2360,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Crystal",
+    "Ring"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_crystals",
+   "notes": "",
+   "title": "Energiekristalle",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_crystals.glb",
+   "tris": 492,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_cyclone",
+   "notes": "",
+   "title": "Ionensturm-Turbine",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_cyclone.glb",
+   "tris": 3056,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Fan"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_deepdrill",
+   "notes": "",
+   "title": "Kernbohrer (2×2)",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_deepdrill.glb",
+   "tris": 1278,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Drill"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_dragon",
+   "notes": "",
+   "title": "Drohnenhangar",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_dragon.glb",
+   "tris": 2216,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_ember",
+   "notes": "",
+   "title": "Plasmaspeier",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_ember.glb",
+   "tris": 2604,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_eyrie",
+   "notes": "",
+   "title": "Scharfschützenkuppel",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_eyrie.glb",
+   "tris": 1592,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_falcon",
+   "notes": "",
+   "title": "Gauss-Scharfschütze",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_falcon.glb",
+   "tris": 2216,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_frost",
+   "notes": "",
+   "title": "Kryoemitter",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_frost.glb",
+   "tris": 3604,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Core"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_gale",
+   "notes": "",
+   "title": "Druckwellenturbine",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_gale.glb",
+   "tris": 2200,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Fan"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_glacier",
+   "notes": "",
+   "title": "Nullpunktkanone",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_glacier.glb",
+   "tris": 3112,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_glowshroom",
+   "notes": "",
+   "title": "Leuchtqualle",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_glowshroom.glb",
+   "tris": 716,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_goldmine",
+   "notes": "",
+   "title": "Erzförderer (2×2)",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_goldmine.glb",
+   "tris": 2398,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Drill"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_gravity",
+   "notes": "",
+   "title": "Gravitonmaschine",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_gravity.glb",
+   "tris": 2308,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "G1",
+    "G2"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_iceblock",
+   "notes": "",
+   "title": "Kryobehälter",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_iceblock.glb",
+   "tris": 764,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_knight",
+   "notes": "",
+   "title": "Kampfmech",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_knight.glb",
+   "tris": 1680,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_lanebarricade",
+   "notes": "",
+   "title": "Sperrfeld",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_lanebarricade.glb",
+   "tris": 564,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_laser",
+   "notes": "",
+   "title": "Laserbatterie",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_laser.glb",
+   "tris": 1798,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_lavapool",
+   "notes": "",
+   "title": "Plasmabecken",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_lavapool.glb",
+   "tris": 608,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_meteor",
+   "notes": "",
+   "title": "Orbital-Uplink",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_meteor.glb",
+   "tris": 1836,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Dish"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_minelayer",
+   "notes": "",
+   "title": "Minenleger",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_minelayer.glb",
+   "tris": 1840,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_mushroom",
+   "notes": "",
+   "title": "Alienkapsel",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_mushroom.glb",
+   "tris": 576,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_order",
+   "notes": "",
+   "title": "Mech-Garnison",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_order.glb",
+   "tris": 2020,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_phoenix",
+   "notes": "",
+   "title": "Kampfträger",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_phoenix.glb",
+   "tris": 1664,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_plaguepot",
+   "notes": "",
+   "title": "Nanoseuche-Reaktor",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_plaguepot.glb",
+   "tris": 2848,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_plasma",
+   "notes": "",
+   "title": "Fusionsbrenner",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_plasma.glb",
+   "tris": 2870,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_portal",
+   "notes": "",
+   "title": "Sprungtor (Spawn)",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_portal.glb",
+   "tris": 2976,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Vortex"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_pylon",
+   "notes": "",
+   "title": "Relaisknoten",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_pylon.glb",
+   "tris": 1836,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Dish"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_quake",
+   "notes": "",
+   "title": "Seismohammer",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_quake.glb",
+   "tris": 1764,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_quakemaw",
+   "notes": "",
+   "title": "Gravitationshammer",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_quakemaw.glb",
+   "tris": 2272,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Orbit"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_ranger",
+   "notes": "",
+   "title": "Pulsgeschütz",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_ranger.glb",
+   "tris": 2104,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_resonator",
+   "notes": "",
+   "title": "Schallkanone",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_resonator.glb",
+   "tris": 2552,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_riftbinder",
+   "notes": "",
+   "title": "Phasenprojektor",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_riftbinder.glb",
+   "tris": 1640,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Ring"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_riftgate",
+   "notes": "",
+   "title": "Wurmlochtor",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_riftgate.glb",
+   "tris": 2988,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Ring"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_rock",
+   "notes": "",
+   "title": "Meteoritengestein",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_rock.glb",
+   "tris": 1608,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_ruin",
+   "notes": "",
+   "title": "Mech-Wrack",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_ruin.glb",
+   "tris": 696,
+   "clips": [],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_rune",
+   "notes": "",
+   "title": "Psi-Emitter",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_rune.glb",
+   "tris": 1660,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Prism"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_seal",
+   "notes": "",
+   "title": "Störsender",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_seal.glb",
+   "tris": 2328,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Arr"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_shieldnet",
+   "notes": "",
+   "title": "Schildmatrix",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_shieldnet.glb",
+   "tris": 2116,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Ring"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_shop",
+   "notes": "",
+   "title": "Versorgungsdepot",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_shop.glb",
+   "tris": 592,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base",
+    "Sign"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_silencehall",
+   "notes": "",
+   "title": "Funkstille-Zitadelle",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_silencehall.glb",
+   "tris": 2168,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Ring"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_skyguard",
+   "notes": "",
+   "title": "Flak-Phalanx",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_skyguard.glb",
+   "tris": 2268,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_skywatch",
+   "notes": "",
+   "title": "Abfangstation",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_skywatch.glb",
+   "tris": 1756,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_soldier",
+   "notes": "",
+   "title": "Klonsoldat",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_soldier.glb",
+   "tris": 1388,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_spore",
+   "notes": "",
+   "title": "Toxinwerfer",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_spore.glb",
+   "tris": 2756,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_sporemine",
+   "notes": "",
+   "title": "Toxinminenfeld",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_sporemine.glb",
+   "tris": 2268,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_starfall",
+   "notes": "",
+   "title": "Orbitalbombardement",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_starfall.glb",
+   "tris": 2148,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_storm",
+   "notes": "",
+   "title": "Lichtbogenmast",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_storm.glb",
+   "tris": 3592,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_stormbattery",
+   "notes": "",
+   "title": "Abfangturbine",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_stormbattery.glb",
+   "tris": 2280,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Fan"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_stormeye",
+   "notes": "",
+   "title": "Ionensturm-Auge",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_stormeye.glb",
+   "tris": 2932,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Eye"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_sunlance",
+   "notes": "",
+   "title": "Orbitallaser",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_sunlance.glb",
+   "tris": 2524,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Petals"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_tesla",
+   "notes": "",
+   "title": "Tesla-Generator",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_tesla.glb",
+   "tris": 3168,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_thornwood",
+   "notes": "",
+   "title": "Flechette-Batterie",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_thornwood.glb",
+   "tris": 1968,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_thunderspire",
+   "notes": "",
+   "title": "Hochspannungsturm",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_thunderspire.glb",
+   "tris": 2480,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_totem",
+   "notes": "",
+   "title": "Feldverstärker",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_totem.glb",
+   "tris": 2264,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Holo"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_treasury",
+   "notes": "",
+   "title": "Zentralbank (2×2)",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_treasury.glb",
+   "tris": 2324,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Holo"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_tree",
+   "notes": "",
+   "title": "Xenobaum",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_tree.glb",
+   "tris": 1324,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_tree_dead",
+   "notes": "",
+   "title": "Verdorrter Xenobaum",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_tree_dead.glb",
+   "tris": 892,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_voidlance",
+   "notes": "",
+   "title": "Antimaterielanze",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_voidlance.glb",
+   "tris": 2336,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_ward",
+   "notes": "",
+   "title": "Schildgenerator",
+   "category": "tower",
+   "path": "Assets/Kernwacht/Models/tower/sf_ward.glb",
+   "tris": 2088,
+   "clips": [
+    "Idle",
+    "Attack"
+   ],
+   "nodes": [
+    "Base",
+    "Turret",
+    "Muzzle",
+    "Core"
+   ],
+   "bones": 0
+  },
+  {
+   "id": "sf_willow",
+   "notes": "",
+   "title": "Tentakelpflanze",
+   "category": "world",
+   "path": "Assets/Kernwacht/Models/world/sf_willow.glb",
+   "tris": 1812,
+   "clips": [
+    "Idle"
+   ],
+   "nodes": [
+    "Base"
+   ],
+   "bones": 0
   }
  ]
 }
