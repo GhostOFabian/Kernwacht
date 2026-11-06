@@ -35,9 +35,9 @@
       setTimeout(function () { location.reload(); }, 1500);
     }, false);
     var config = {
-      dataUrl: "Build/WebGL.data.unityweb?v=17012cb2",
-      frameworkUrl: "Build/WebGL.framework.js.unityweb?v=17012cb2",
-      codeUrl: "Build/WebGL.wasm.unityweb?v=17012cb2",
+      dataUrl: "Build/WebGL.data.unityweb?v=db8d682c",
+      frameworkUrl: "Build/WebGL.framework.js.unityweb?v=db8d682c",
+      codeUrl: "Build/WebGL.wasm.unityweb?v=db8d682c",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "GhostOFabian",
       productName: "Kernwacht",
@@ -46,7 +46,7 @@
       devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
     };
     var script = document.createElement("script");
-    script.src = "Build/WebGL.loader.js?v=17012cb2";
+    script.src = "Build/WebGL.loader.js?v=db8d682c";
     script.onload = function () {
       createUnityInstance(canvas, config, function (p) {
         document.querySelector("#fill").style.width = Math.round(p * 100) + "%";
