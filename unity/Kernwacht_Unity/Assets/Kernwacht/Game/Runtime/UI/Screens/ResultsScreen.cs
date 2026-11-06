@@ -67,7 +67,7 @@ namespace Kernwacht.Game.UI
                 var col = Ui.Column(banner.transform, 4);
                 Ui.Size(col, -1, -1, 1);
                 Common.label(col.transform, win ? (mission != null ? $"Mission „{mission.name}“ geschafft" : "Der Kern hält stand!") : "Der Kern ist gefallen", Common.H2, Theme.Text, FontStyle.Bold);
-                Common.para(col.transform, $"{TextUtil.modeName(s.mode)} · {s.map.name} · {U.Fmt(st.wavesCleared)} Wellen überstanden");
+                Common.para(col.transform, $"{TextUtil.modeName(s.mode)} · {Themes.MapText(s.map.name)} · {U.Fmt(st.wavesCleared)} Wellen überstanden");
                 if (U.Truthy(r.stars))
                 {
                     var stars = Ui.Row(col.transform, 4, TextAnchor.MiddleLeft, false);

@@ -328,6 +328,15 @@ namespace Kernwacht.Game
             },
         };
 
+        /// <summary>Kartennamen u. ä.: Fantasy-Biomnamen durch die Sci-Fi-Namen ersetzen (nur im Sci-Fi-Thema).</summary>
+        public static string MapText(string t)
+        {
+            if (!SciFi || string.IsNullOrEmpty(t) || origBiome == null) return t;
+            foreach (var kv in SCI_BIOME)
+                if (origBiome.TryGetValue(kv.Key, out var o) && !string.IsNullOrEmpty(o.name)) t = t.Replace(o.name, kv.Value.name);
+            return t;
+        }
+
         /// <summary>Name des Bioms im Sci-Fi-Thema (für die Auswahl im Startbildschirm).</summary>
         public static string SciBiomeName(string id) => SCI_BIOME.TryGetValue(id ?? "", out var b) ? b.name : null;
 

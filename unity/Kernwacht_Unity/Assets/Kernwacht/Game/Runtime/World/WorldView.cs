@@ -91,6 +91,9 @@ namespace Kernwacht.Game
         static readonly string[] ZONE_WINDUP_ABIL = { "fireZones", "nullPulse", "quake", "riftJump", "riftPortals", "riftPortals", "stomp", "siegeSlam", "devour" };
 
         // Tageszeit-Schlüsselbilder (Lichtfarbe, Intensität, Höhenwinkel)
+        static readonly int[] TOD_COL = { 0xffe2b8, 0xffffff, 0xffb070, 0x9aa8ff };
+        /// <summary>4.1 Sci-Fi: kühles Licht, Neon-Dämmerung.</summary>
+        static readonly int[] TOD_SF = { 0xc8e4ff, 0xf4f8ff, 0xffa0d8, 0x8090ff };
         static readonly float[][] TOD = { new[] { 0xffe2b8, 0.9f, 0.7f }, new[] { 0xffffff, 1.0f, 0.95f }, new[] { 0xffb070, 0.85f, 0.55f }, new[] { 0x9aa8ff, 0.62f, 0.75f } };
 
         const bool SPRITE_ADD = true;
@@ -1179,7 +1182,8 @@ namespace Kernwacht.Game
             int i0 = Mathf.FloorToInt(tod) % TOD.Length;
             int i1 = (i0 + 1) % TOD.Length;
             float f = tod - Mathf.Floor(tod);
-            int c0 = (int)TOD[i0][0], c1 = (int)TOD[i1][0];
+            var todC = Themes.SciFi ? TOD_SF : TOD_COL;
+            int c0 = todC[i0], c1 = todC[i1];
             float k0 = TOD[i0][1], e0 = TOD[i0][2], k1 = TOD[i1][1], e1 = TOD[i1][2];
             int col = Col.Mix(Col.Mix((int)pal.light, c0, 0.55), Col.Mix((int)pal.light, c1, 0.55), f);
             float inten = k0 + (k1 - k0) * f;

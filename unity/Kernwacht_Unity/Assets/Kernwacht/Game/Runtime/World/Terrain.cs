@@ -96,6 +96,8 @@ namespace Kernwacht.Game
         }
 
         static readonly int[] MOOD_TINT = { 0xffc89a, 0xffffff, 0xff8a6a, 0x5a70c8, 0xc8f0e0, 0xe0a0ff };
+        /// <summary>4.1 Sci-Fi: kühlere, neonartige Stimmungen statt Morgenrot/Abendglut.</summary>
+        static readonly int[] MOOD_TINT_SF = { 0x80c0ff, 0xffffff, 0xff70c0, 0x5a70c8, 0x80ffd0, 0xb080ff };
         static readonly string[] MOOD_NAME = { "Morgenrot", "Klarer Tag", "Abendglut", "Mondnacht", "Nebelgrün", "Violetter Dunst" };
 
         public static MapMood mood(MapDefinition m)
@@ -105,7 +107,7 @@ namespace Kernwacht.Game
             var md = new MapMood
             {
                 salt = salt,
-                tint = MOOD_TINT[pick],
+                tint = Themes.SciFi ? MOOD_TINT_SF[pick] : MOOD_TINT[pick],
                 name = MOOD_NAME[pick],
                 tintAmt = pick == 1 ? 0.04f : 0.14f + rnd(salt, 502) * 0.2f,
                 seaShade = 0.86f + rnd(salt, 503) * 0.3f,
@@ -702,11 +704,12 @@ namespace Kernwacht.Game
                     else Add("box", x, y + 0.003f, z, 0.3f, 0.006f, 0.3f, Col.Shade(groundC, 1.1), 0, (int)(n * 4) * 1.5708f);
                     break;
                 case "cavern":
-                    if (n > 0.6f)
+                    if (n > 0.9f)
                     {
-                        Add("box", x, y + 0.004f, z, 0.36f, 0.008f, 0.04f, accent, 1f, (int)(n * 4) * 1.5708f);
-                        if (n > 0.85f) glows.Add(new GlowPoint(x, y + 0.05f, z, 0.22f, accent, n * 9));
+                        Add("box", x, y + 0.004f, z, 0.3f, 0.008f, 0.035f, accent, 0.8f, (int)(n * 40) % 4 * 1.5708f);
+                        if (n > 0.97f) glows.Add(new GlowPoint(x, y + 0.05f, z, 0.22f, accent, n * 9));
                     }
+                    else if (n > 0.55f) Add("box", x, y + 0.003f, z, 0.28f, 0.006f, 0.28f, Col.Shade(groundC, 1.12), 0, (int)(n * 4) * 1.5708f);
                     else Add("gem", x, y + 0.02f, z, 0.1f, 0.06f, 0.08f, 0x4a4a5a, 0, n * 6);
                     break;
             }
