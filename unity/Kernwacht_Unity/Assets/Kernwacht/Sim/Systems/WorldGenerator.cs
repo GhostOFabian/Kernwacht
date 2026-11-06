@@ -466,7 +466,8 @@ namespace Kernwacht.Sim
             }
             rng.shuffle(candidates);
             double k = Math.Sqrt((map.width * map.height) / (22 * 14));
-            double veins = U.Round(rng.@int(3, 6) * k);
+            // 4.0: höchstens 4 Goldvorkommen je Karte (auch auf großen Karten)
+            double veins = U.Min(4, U.Round(rng.@int(3, 6) * k));
             double ley = U.Round(rng.@int(2, 4) * k);
             // Goldadern als 2×2-Flächen, damit ein Goldgräber (2×2) genau darauf passt
             var taken = new HashSet<double>();
