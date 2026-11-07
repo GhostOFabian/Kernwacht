@@ -145,7 +145,9 @@ namespace Kernwacht.Sim
                     }
                     double cx = e.nx;
                     double cy = e.ny;
-                    for (int i = 0; i < 5; i++)
+                    // 4.1: Challenge-Bosse springen nur 3 statt 5 Felder – sie sollen nicht durch die ganze Verteidigung hüpfen
+                    int jump = e.challenge == true ? 3 : 5;
+                    for (int i = 0; i < jump; i++)
                     {
                         var n = Pathfinding.nextCell(map, sim.c.field, cx, cy);
                         if (n == null) break;

@@ -564,6 +564,9 @@ namespace Kernwacht.Sim
         /// Schreitet um reale Zeit voran. Spielgeschwindigkeit erhöht die Anzahl fester Ticks,
         /// nicht die Schrittweite – dadurch bleiben Schaden und Statusdauern exakt.
         /// </summary>
+        /// <summary>4.1: Zeitpunkt der letzten „Standfestigkeit gebrochen“-Meldung (nur Anzeige, nicht gespeichert).</summary>
+        public double lastStaggerMsg = -99;
+
         public double advance(double realDt)
         {
             if (this.s.paused || this.isOver())
