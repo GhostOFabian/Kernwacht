@@ -128,6 +128,26 @@ namespace Kernwacht.Game.EditorTools
             PlayerSettings.WebGL.decompressionFallback = true;
             PlayerSettings.WebGL.dataCaching = true;
             PlayerSettings.WebGL.template = Directory.Exists("Assets/WebGLTemplates/Kernwacht") ? "PROJECT:Kernwacht" : "APPLICATION:Default";
+            // 4.1: CPU schonen – Emscripten/Binaryen (Linken, wasm-opt) nur mit 2 Kernen statt allen
+            System.Environment.SetEnvironmentVariable("EMCC_CORES", "2");
+            System.Environment.SetEnvironmentVariable("BINARYEN_CORES", "2");
+            // 4.1: kürzere Build-Zeit (weniger CPU-Volllast beim Linken; das Spiel wird etwas größer)
+            try
+            {
+                foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    var t = asm.GetType("UnityEditor.WebGL.UserBuildSettings");
+                    if (t == null) continue;
+                    var p = t.GetProperty("codeOptimization", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    if (p == null) break;
+                    var names = System.Enum.GetNames(p.PropertyType);
+                    string want = System.Array.IndexOf(names, "BuildTimes") >= 0 ? "BuildTimes" : null;
+                    if (want != null) p.SetValue(null, System.Enum.Parse(p.PropertyType, want));
+                    Debug.Log($"[Kernwacht] WebGL-Codeoptimierung: {p.GetValue(null)} (verfügbar: {string.Join(", ", names)})");
+                    break;
+                }
+            }
+            catch (System.Exception e) { Debug.LogWarning("[Kernwacht] Codeoptimierung nicht gesetzt: " + e.Message); }
         }
 
         [MenuItem("Kernwacht/4 · WebGL-Build erstellen", priority = 4)]
@@ -151,7 +171,6 @@ namespace Kernwacht.Game.EditorTools
             if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
             {
                 Debug.Log($"[Kernwacht] WebGL-Build fertig: {Path.GetFullPath("Builds/WebGL")} ({report.summary.totalSize / (1024 * 1024)} MB). Zum Testen: File → Build And Run oder den Ordner auf einen Webserver legen.");
-                EditorUtility.RevealInFinder("Builds/WebGL/index.html");
             }
             else Debug.LogError("[Kernwacht] WebGL-Build fehlgeschlagen: " + report.summary.result);
         }

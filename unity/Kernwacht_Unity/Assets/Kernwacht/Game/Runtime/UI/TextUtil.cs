@@ -40,7 +40,7 @@ namespace Kernwacht.Game.UI
             ["random"] = "Zufällig",
         };
 
-        public static readonly List<string> PRIORITY_ORDER = new List<string> { "first", "exit", "strong", "weak", "close", "random" };
+        public static readonly List<string> PRIORITY_ORDER = new List<string> { "first", "strong" };
 
         public static readonly Dictionary<string, string> MODE_NAMES = new Dictionary<string, string>
         {

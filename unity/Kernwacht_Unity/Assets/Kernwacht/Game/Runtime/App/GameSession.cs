@@ -26,7 +26,7 @@ namespace Kernwacht.Game
         };
 
         /// <summary>PORT: Kopie von PRIORITY_ORDER aus ui/text.ts (gleiche Reihenfolge), um keine Abhängigkeit vom Text-Modul zu erzeugen.</summary>
-        static readonly string[] PRIORITY_ORDER = { "first", "exit", "strong", "weak", "close", "random" };
+        static readonly string[] PRIORITY_ORDER = { "first", "strong" };
 
         static readonly int[][] NEIGHBORS = { new[] { 1, 0 }, new[] { -1, 0 }, new[] { 0, 1 }, new[] { 0, -1 }, new[] { 1, 1 }, new[] { -1, 1 }, new[] { 1, -1 }, new[] { -1, -1 } };
 

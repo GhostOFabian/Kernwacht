@@ -955,6 +955,9 @@ namespace Kernwacht.Sim
         /** Maximaler Abstand (Zellen, Mittelpunkt) zwischen Fusionspartnern. */
         public const double FUSION_RANGE = 2.3;
 
+        /// <summary>4.1: Nur noch zwei Zielwahlen – „Erster auf dem Weg“ und „Meiste Lebenspunkte“.</summary>
+        public static string basePriority(string p) => p == "strong" ? "strong" : "first";
+
         public static readonly Dictionary<string, TowerActiveDefinition> TOWER_ACTIVES = new Dictionary<string, TowerActiveDefinition>
         {
             ["overdrive"] = new TowerActiveDefinition { id = "overdrive", name = "Überladung", description = "6 s doppeltes Angriffstempo.", cooldown = 45, duration = 6 },

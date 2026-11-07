@@ -2163,7 +2163,12 @@ namespace Kernwacht.Game
             float tintAmt = 0;
             if (frozen) { tint = 0xd8f4ff; tintAmt = 0.6f; }
             else if (Has(e, "chill")) { tint = 0x80c8ff; tintAmt = 0.35f; }
-            else if (Has(e, "poison")) { tint = 0x9ae040; tintAmt = 0.22f; }
+            else if (Has(e, "stun")) { tint = 0xfff080; tintAmt = 0.4f + Mathf.Sin(t * 14) * 0.1f; }
+            else if (Has(e, "burn")) { tint = 0xff7030; tintAmt = 0.3f + Mathf.Sin(t * 12 + (float)e.uid) * 0.08f; }
+            else if (Has(e, "poison")) { tint = 0x9ae040; tintAmt = 0.3f; }
+            else if (Has(e, "corrode")) { tint = 0xd0f040; tintAmt = 0.3f; }
+            else if (Has(e, "mark")) { tint = 0xc070ff; tintAmt = 0.28f; }
+            else if (Has(e, "silence") || Has(e, "sealed")) { tint = 0x60e8d4; tintAmt = 0.28f; }
             if (e.enraged) { tint = 0xff4020; tintAmt = 0.25f + Mathf.Sin(t * 10) * 0.1f; }
             float emitBoost = 0;
             float squash = 1;
@@ -2348,8 +2353,8 @@ namespace Kernwacht.Game
             foreach (var st in e.statuses)
             {
                 if (st.id == null || !Palette.STATUS_GLYPH.TryGetValue(st.id, out var g)) continue;
-                float off2 = -barW / 2 + 0.08f + n * 0.17f;
-                r.overlayGlyph(g.mesh, bx + rx * off2, by + 0.2f, bz + rz * off2, 0.13f, (float)g.sy, Ci(g.color));
+                float off2 = -barW / 2 + 0.08f + n * 0.2f;
+                r.overlayGlyph(g.mesh, bx + rx * off2, by + 0.22f, bz + rz * off2, 0.16f, (float)g.sy, Ci(g.color));
                 n++;
                 if (n >= 6) break;
             }

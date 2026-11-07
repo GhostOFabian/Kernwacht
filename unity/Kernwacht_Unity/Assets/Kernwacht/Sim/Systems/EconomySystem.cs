@@ -365,7 +365,7 @@ namespace Kernwacht.Sim
             var t = new TowerInstance
             {
                 uid = sim.uid(), def = def, cx = cx, cy = cy, level = U.Truthy(spec) ? d.upgrades.Count + 1 : 1, spec = spec, invested = chk.cost, builtWave = s.wave,
-                builtInPhase = s.phase == "build", priority = d.defaultPriority, cooldown = 0.3, target = 0, retarget = 0,
+                builtInPhase = s.phase == "build", priority = Towers.basePriority(d.defaultPriority), cooldown = 0.3, target = 0, retarget = 0,
                 aim = 0, stunned = 0, disrupted = 0, rampTarget = 0, rampStacks = 0, damageDealt = 0, kills = 0, goldEarned = 0,
                 shots = 0, fireAnim = 0, activeCd = 0, activeT = 0, forged = 0, charge = 0, orbit = 0,
             };
@@ -657,7 +657,7 @@ namespace Kernwacht.Sim
             t.level = 4;
             t.spec = 0;
             t.invested += p.invested + r.cost;
-            t.priority = Towers.TOWERS[r.id].defaultPriority;
+            t.priority = Towers.basePriority(Towers.TOWERS[r.id].defaultPriority);
             t.target = 0;
             t.charge = 0;
             t.activeCd = 0;
