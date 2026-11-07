@@ -1549,7 +1549,8 @@ namespace Kernwacht.Game
                         // Stufe 3: glatter Goldreif dicht um den Sockel
                         if (tw.level >= 3) r.add("opaque", "band", x, by + 0.05f, z, (foot + 0.07f) * 2, 1, (foot + 0.07f) * 2, 0xe0b040, 1, 0.35f, 0);
                         // Stufe 4: schwebender, leuchtender Heiligenschein über der Turmspitze
-                        if (tw.level >= 4)
+                        // 4.1: nur bei Türmen, die noch fusioniert werden können – fusionierte (fertige) Türme brauchen ihn nicht
+                        if (tw.level >= 4 && !legendary && IsFusionPart(tw.def))
                         {
                             float hy = by + realTop * squash + 0.16f + Mathf.Sin(t * 2.2f + (float)tw.uid) * 0.03f;
                             int hc = tw.spec == 0 ? 0xffe080 : accent;
@@ -1557,7 +1558,7 @@ namespace Kernwacht.Game
                             r.billboard(SPRITE_ADD, SHAPE.glow, x, hy, z, 0.55f, hc, 0.3f);
                         }
                     }
-                    if (tw.spec != 0) drawParts(WorldModels.specParts((int)tw.spec, top), x, by, z, 0, scale, main, accent, "opaque", 1, -1, 0, 0, (float)tw.uid);
+                    if (tw.spec != 0 && !legendary) drawParts(WorldModels.specParts((int)tw.spec, top), x, by, z, 0, scale, main, accent, "opaque", 1, -1, 0, 0, (float)tw.uid);
                 }
                 // 3.6: Veredelung ★ – kleine Sterne über dem Turm
                 int stars = tw.stars.HasValue ? (int)tw.stars.Value : 0;
@@ -2882,6 +2883,18 @@ namespace Kernwacht.Game
                         break;
                 }
             }
+        }
+
+        static HashSet<string> fusionParts;
+        /// <summary>Ist der Turmtyp Zutat mindestens einer Fusion?</summary>
+        static bool IsFusionPart(string id)
+        {
+            if (fusionParts == null)
+            {
+                fusionParts = new HashSet<string>();
+                foreach (var f in Towers.FUSIONS) { fusionParts.Add(f.a); fusionParts.Add(f.b); }
+            }
+            return id != null && fusionParts.Contains(id);
         }
 
         /// <summary>4.1 Sci-Fi: Energiegeschosse statt Pfeilen, Bolzen und Kanonenkugeln.</summary>
