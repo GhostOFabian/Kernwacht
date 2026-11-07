@@ -254,15 +254,16 @@ namespace Kernwacht.Sim
         public static void updateHeroes(GameSimulation sim, double dt)
         {
             GameState s = sim.s;
-            if (s.heroes.Count == 0) return;
-            bool combat = s.phase == "combat";
-            foreach (EnemyInstance e in s.enemies) e.blockedBy = 0;
+            // 4.1: globale Puffer (z. B. Netzflut) laufen auch ohne Lane-Helden ab – im Helden-Endlos blieben sie sonst dauerhaft
             foreach (GlobalBuff b in s.buffs) b.t -= dt;
             if (s.buffs.Any((b) => b.t <= 0))
             {
                 s.buffs = s.buffs.Where((b) => b.t > 0).ToList();
                 sim.c.statsDirty = true;
             }
+            if (s.heroes.Count == 0) return;
+            bool combat = s.phase == "combat";
+            foreach (EnemyInstance e in s.enemies) e.blockedBy = 0;
             foreach (HeroInstance h in s.heroes)
             {
                 if (h.state == "cooldown" || h.state == "down")

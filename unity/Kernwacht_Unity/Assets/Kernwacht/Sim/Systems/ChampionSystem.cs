@@ -126,6 +126,15 @@ namespace Kernwacht.Sim
         /// <summary>Berechnet die effektiven Heldenwerte vollständig neu (kein Aufaddieren über die Zeit → keine Drift).</summary>
         public static ChampionStats championStats(HeroEndlessState he)
         {
+            if (!GameSimulation.PROFILE) return championStatsImpl(he);
+            long a = System.Diagnostics.Stopwatch.GetTimestamp();
+            var r = championStatsImpl(he);
+            GameSimulation.PROF[14] += System.Diagnostics.Stopwatch.GetTimestamp() - a;
+            return r;
+        }
+
+        static ChampionStats championStatsImpl(HeroEndlessState he)
+        {
             ChampionState c = he.champion;
             var def = Champions.CHAMPIONS[c.id];
             ChampionStats st = def.@base.Copy();
@@ -690,15 +699,30 @@ namespace Kernwacht.Sim
                 a.range = U.Min(cap.range, a.range);
                 a.crit = U.Min(cap.crit, a.crit);
             }
-            List<KeyValuePair<double, ChampTowerBuff>> entries = U.Entries(map);
-            U.StableSort(entries, (x, y) => x.Key - y.Key);
-            string sig = U.Join(entries.Select((kv) => $"{U.Fmt(kv.Key)}:{U.Fixed(kv.Value.dmg, 3)}/{U.Fixed(kv.Value.speed, 3)}/{U.Fixed(kv.Value.range, 2)}/{U.Fixed(kv.Value.crit, 2)}"), ",");
-            if (sig != sim.c.champBuffSig)
+            // 4.1 Leistung: Vergleich der Werte statt Signatur-Zeichenkette (lief 4× je Sekunde mit ~50 Türmen).
+            var old = sim.c.champBuff;
+            bool first = sim.c.champBuffSig == "" || old == null;
+            bool diff = first || old.Count != map.Count;
+            if (!diff) foreach (var kv in map) { old.TryGetValue(kv.Key, out var ob); if (!sameBuff(kv.Value, ob)) { diff = true; break; } }
+            if (!diff) return;
+            sim.c.champBuff = map;
+            sim.c.champBuffSig = "x";
+            // Heldenbuffs wirken nur auf den eigenen Turm – statt alle Turmwerte neu zu berechnen nur die geänderten.
+            if (first || sim.c.statsDirty || sim.c.networkDirty || sim.c.towerStats.Count != sim.s.towers.Count) { sim.c.statsDirty = true; return; }
+            foreach (TowerInstance t in sim.s.towers)
             {
-                sim.c.champBuff = map;
-                sim.c.champBuffSig = U.Or(sig, "-");
-                sim.c.statsDirty = true;
+                map.TryGetValue(t.uid, out var nb);
+                ChampTowerBuff ob2 = null;
+                old.TryGetValue(t.uid, out ob2);
+                if (sameBuff(nb, ob2)) continue;
+                sim.c.towerStats[t.uid] = TowerSystem.computeTowerStats(sim, t, true);
             }
+        }
+
+        static bool sameBuff(ChampTowerBuff a, ChampTowerBuff b)
+        {
+            if (a == null || b == null) { var x = a ?? b; return x == null || Math.Abs(x.dmg) < 5e-4 && Math.Abs(x.speed) < 5e-4 && Math.Abs(x.range) < 5e-3 && Math.Abs(x.crit) < 5e-3; }
+            return Math.Abs(a.dmg - b.dmg) < 5e-4 && Math.Abs(a.speed - b.speed) < 5e-4 && Math.Abs(a.range - b.range) < 5e-3 && Math.Abs(a.crit - b.crit) < 5e-3;
         }
 
         public static List<TowerBuff> buffsOfTower(GameSimulation sim, double uid)
@@ -1115,9 +1139,13 @@ namespace Kernwacht.Sim
             foreach (EnemyInstance e in sim.s.enemies) if (e.blockedBy == CHAMPION_UID) e.blockedBy = 0;
             GameState s = sim.s;
             ChampionState c = he.champion;
+            GameSimulation.PM(-1);
             updateTowerBuffs(sim, dt);
+            GameSimulation.PM(11);
             LootSystem.updatePickups(sim, dt);
+            GameSimulation.PM(12);
             updateChampionZones(sim, dt);
+            GameSimulation.PM(13);
             for (int i = 0; i < c.skillCd.Count; i++) c.skillCd[i] = U.Max(0, c.skillCd[i] - dt);
             foreach (string k in U.Keys(c.potionCd)) c.potionCd[k] = U.Max(0, U.Get(c.potionCd, k, 0) - dt);
             if (c.buffs.Count > 0)

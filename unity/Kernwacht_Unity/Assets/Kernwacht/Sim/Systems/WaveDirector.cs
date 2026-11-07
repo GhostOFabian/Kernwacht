@@ -40,6 +40,8 @@ namespace Kernwacht.Sim
             {
                 groups.Add(new WaveGroup { enemy = "boss", count = 1, elite = false, boss = boss, challenge = challenge ? (bool?)true : null });
                 budget *= 0.35;
+                // 4.1: Challenge-Wellen – der Boss ist die Prüfung, die Begleitwelle nur noch halb so groß.
+                if (challenge) budget *= 0.5;
             }
             List<string> pool = Enemies.WAVE_ENEMIES.Where((id) => Enemies.ENEMIES[id].minWave <= n)
                 .Where((id) => id != "scout" || s.map.variant == "mazing").ToList();
@@ -75,6 +77,8 @@ namespace Kernwacht.Sim
             if (endless && n >= Scaling.SCALING.smoothFrom)
             {
                 double lpBudget = cap * Scaling.SCALING.smoothHpPerSlot;
+                // 4.1: Bisher bekam die LP-Verteilung den Boss-Abschlag nicht ab – Welle 150/200 = volle Welle + Challenge-Boss.
+                if (boss != null) lpBudget *= challenge ? 0.2 : 0.45;
                 Func<string, double> eff = (id) => Enemies.ENEMIES[id].hp + (Enemies.ENEMIES[id].onDeathSpawn != null ? Enemies.ENEMIES[Enemies.ENEMIES[id].onDeathSpawn.enemy].hp * Enemies.ENEMIES[id].onDeathSpawn.count : 0);
                 foreach (string id in chosen)
                 {
@@ -93,7 +97,7 @@ namespace Kernwacht.Sim
                 groups.Add(new WaveGroup { enemy = id, count = count, elite = false, boss = null });
             }
             // Elitegegner: ab Welle 5 regelmäßig, im Endlosmodus zunehmend.
-            bool eliteWave = n >= 5 && (n % 4 == 1 || (endless && n >= 15 && n % 2 == 1) || (endless && n >= Scaling.SCALING.pressureFrom));
+            bool eliteWave = !challenge && n >= 5 && (n % 4 == 1 || (endless && n >= 15 && n % 2 == 1) || (endless && n >= Scaling.SCALING.pressureFrom));
             if (eliteWave)
             {
                 List<string> elitePool = new List<string> { "brute", "shield", "regen", "runner", "phase", "saboteur", "golem", "siege", "shaman" }.Where((id) => Enemies.ENEMIES[id].minWave <= n).ToList();
@@ -106,7 +110,7 @@ namespace Kernwacht.Sim
             if (profile != null)
             {
                 List<string> elitePool = new List<string> { "brute", "shield", "regen", "runner", "golem", "siege", "shaman" }.Where((id) => Enemies.ENEMIES[id].minWave <= n).ToList();
-                if (profile.extraElites > 0 && elitePool.Count > 0) groups.Add(new WaveGroup { enemy = rng.pick(elitePool), count = profile.extraElites + Math.Floor(n / 20), elite = true, boss = null, mutation = null });
+                if (!challenge && profile.extraElites > 0 && elitePool.Count > 0) groups.Add(new WaveGroup { enemy = rng.pick(elitePool), count = profile.extraElites + Math.Floor(n / 20), elite = true, boss = null, mutation = null });
                 // Mini-Boss: alle n Wellen (nicht in Bosswellen) ein stark verstärkter Elitegegner
                 bool late = n >= Scaling.SCALING.pressureFrom;
                 double miniEvery = late ? Scaling.SCALING.miniBossEveryLate : HeroEndless.HERO_ENDLESS.miniBossEvery;
@@ -124,7 +128,8 @@ namespace Kernwacht.Sim
             double tier = Scaling.worldTier(n, endless);
             List<string> affixes = new List<string>();
             string immune = null;
-            double nAff = Scaling.affixCount(n, endless);
+            // 4.1: Challenge-Wellen ohne Wellen-Affixe (Störsender + Boss war kaum zu halten).
+            double nAff = challenge ? 0 : Scaling.affixCount(n, endless);
             if (nAff > 0)
             {
                 Rng ar = new Rng(RngUtil.hashSeed(s.seed.hash, $"affix-{U.Fmt(n)}"));

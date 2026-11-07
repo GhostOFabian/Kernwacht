@@ -163,7 +163,8 @@ namespace Kernwacht.Sim
 
         public static double worldTier(double wave, bool endless)
         {
-            return endless ? Math.Floor(U.Max(0, wave) / SCALING.tierEvery) : 0;
+            // 4.1: Weltstufe steigt erst eine Welle nach dem Challenge-Boss (51, 101, 151 …), nicht gleichzeitig.
+            return endless ? Math.Floor(U.Max(0, wave - 1) / SCALING.tierEvery) : 0;
         }
 
         public static double affixCount(double wave, bool endless)
@@ -198,10 +199,11 @@ namespace Kernwacht.Sim
             rewardMul = 5,
         };
 
-        /** 3.11: Challenge-Bosse werden ab Welle 150 je 100 Wellen um das 1-Fache stärker (Welle 250: ×7, Welle 500: ×15,75). */
+        /** 4.1: Challenge-Bosse werden ab Welle 150 je 200 Wellen um das 1-Fache stärker (Welle 250: ×5,25, Welle 500: ×9,6).
+         *  Vorher je 100 Wellen – der Nullhüter auf Welle 200 lief mit voll ausgebauter Verteidigung durch. */
         public static double challengeHpMul(double wave)
         {
-            return CHALLENGE.hpMul * (1 + U.Max(0, wave - 150) / 100);
+            return CHALLENGE.hpMul * (1 + U.Max(0, wave - 150) / 200);
         }
 
         public static bool isChallengeWave(double wave, bool endless)
