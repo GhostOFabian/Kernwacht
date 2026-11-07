@@ -170,7 +170,12 @@ namespace Kernwacht.Sim
                     }
                     ElementSystem.addStatus(e, "stun", 1.5, 1, 0);
                     sim.s.zones = sim.s.zones.Where((z) => !(z.src == e.uid && z.armed > 0 && z.kind != "fireZone")).ToList();
-                    sim.emit(new GameEvent { k = "message", text = canceled0 ? "Bossfähigkeit unterbrochen! Boss taumelt." : "Standfestigkeit gebrochen – Boss taumelt!", severity = "info" });
+                    // 4.1: Meldung höchstens alle 8 s (sonst stapeln sich bei vielen Schalltürmen die Hinweise)
+                    if (canceled0 || sim.s.time - sim.lastStaggerMsg > 8)
+                    {
+                        sim.lastStaggerMsg = sim.s.time;
+                        sim.emit(new GameEvent { k = "message", text = canceled0 ? "Bossfähigkeit unterbrochen! Boss taumelt." : "Standfestigkeit gebrochen – Boss taumelt!", severity = "info" });
+                    }
                 }
                 return;
             }
