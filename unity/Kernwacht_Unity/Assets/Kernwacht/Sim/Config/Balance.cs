@@ -103,7 +103,9 @@ namespace Kernwacht.Sim
             // durch Taktik statt durch reine Zahlen schwer wird.
             double quad = U.Min(w, 30);
             double tail = U.Max(0, w - 30);
-            double @base = 1 + 0.12 * w + 0.007 * quad * quad + 0.45 * tail + 2 * Math.Sqrt(tail);
+            // 4.1: ab Welle 150 wächst der lineare Anteil nur noch mit 0,25 statt 0,45 je Welle
+            double tailLate = U.Max(0, w - 150);
+            double @base = 1 + 0.12 * w + 0.007 * quad * quad + 0.45 * tail - 0.2 * tailLate + 2 * Math.Sqrt(tail);
             // 3.0: ab Welle 60 zusätzlich sanft exponentiell – es gibt immer eine Wand, die man weiter hinausschiebt.
             // 3.11: ab Welle 150 deutlich flacher (expRateLate), damit Spielerstärke und Gegner im Gleichschritt wachsen.
             double early = U.Max(0, U.Min(wave, Scaling.SCALING.expSlowFrom) - Scaling.SCALING.expFrom);

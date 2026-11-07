@@ -151,7 +151,7 @@ namespace Kernwacht.Sim
             {
                 index = n,
                 groups = groups,
-                hpMul = Balance.waveHpMul(n, endless) * (1 + Scaling.SCALING.tierHp * tier),
+                hpMul = Balance.waveHpMul(n, endless) * Scaling.tierHpMul(tier),
                 speedMul = (@event != null ? Biomes.TERRAIN_EVENTS[@event].enemySpeedMul : 1) * (profile != null ? profile.speedMul : 1) * (1 + U.Min(Scaling.SCALING.tierSpeedMax, Scaling.SCALING.tierSpeed * tier)) * (affixes.Contains("swift") ? 1.2 : 1),
                 rewardMul = Balance.killRewardMul(n) * (@event != null ? Biomes.TERRAIN_EVENTS[@event].goldMul : 1) * (1 + Scaling.SCALING.tierReward * tier),
                 @event = @event,

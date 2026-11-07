@@ -43,7 +43,8 @@ namespace Kernwacht.Sim
                 sim.emit(new GameEvent { k = "burst", x = e.x, y = e.y, r = 1.4 });
             }
             e.chSummonCd = (e.chSummonCd ?? Scaling.CHALLENGE.summonEvery) - dt;
-            if (e.chSummonCd <= 0)
+            // 4.1: In der Raserei keine Begleiter mehr – sie entstanden direkt am Boss, also oft kurz vor dem Kern
+            if (e.chSummonCd <= 0 && e.chEnraged != true)
             {
                 e.chSummonCd = Scaling.CHALLENGE.summonEvery;
                 for (int k = 0; k < Scaling.CHALLENGE.summonCount; k++)

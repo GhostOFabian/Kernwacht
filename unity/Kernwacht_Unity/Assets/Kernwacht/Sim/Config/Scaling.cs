@@ -136,7 +136,7 @@ namespace Kernwacht.Sim
             smoothHpPerSlot = 90,
             /** 3.11: Ab Welle expSlowFrom wächst die LP nur noch um expRateLate je Welle (statt expRate). */
             expSlowFrom = 150,
-            expRateLate = 1.006,
+            expRateLate = 1.0, // 4.1: vorher 1,006 – ab ~Welle 200 wuchsen die Gegner schneller als jede Verteidigung
         };
 
         /** 3.12: Flieger – Tempo-Obergrenze, nur halber Anteil an Tempo-Zuschlägen, Verlangsamung wirkt stärker. */
@@ -160,6 +160,12 @@ namespace Kernwacht.Sim
 
         public static readonly List<string> AFFIX_ORDER = new List<string> { "regen", "shielded", "immune", "swift", "splitter", "jammer", "armored" };
         public static readonly List<string> IMMUNE_TYPES = new List<string> { "physical", "fire", "frost", "lightning", "poison", "arcane" };
+
+        /** 4.1: LP-Zuschlag der Weltstufe – bis Stufe 3 je +15 %, danach je +8 % (sonst ab Welle 200 kaum noch einholbar). */
+        public static double tierHpMul(double tier)
+        {
+            return 1 + SCALING.tierHp * U.Min(3, tier) + 0.08 * U.Max(0, tier - 3);
+        }
 
         public static double worldTier(double wave, bool endless)
         {
@@ -188,7 +194,7 @@ namespace Kernwacht.Sim
             shieldEvery = 15,
             shieldPct = 0.08,
             shieldMax = 0.3,
-            summonEvery = 12,
+            summonEvery = 15,
             summonCount = 3,
             // 4.0: Raserei später und milder (Welle 150 war mit Rissprüngen und Tempo-Zuschlägen kaum zu halten)
             enrageAfter = 90,
@@ -199,11 +205,11 @@ namespace Kernwacht.Sim
             rewardMul = 5,
         };
 
-        /** 4.1: Challenge-Bosse werden ab Welle 150 je 200 Wellen um das 1-Fache stärker (Welle 250: ×5,25, Welle 500: ×9,6).
+        /** 4.1: Challenge-Bosse werden ab Welle 150 je 300 Wellen um das 1-Fache stärker (Welle 300: ×5,25, Welle 500: ×7,6).
          *  Vorher je 100 Wellen – der Nullhüter auf Welle 200 lief mit voll ausgebauter Verteidigung durch. */
         public static double challengeHpMul(double wave)
         {
-            return CHALLENGE.hpMul * (1 + U.Max(0, wave - 150) / 200);
+            return CHALLENGE.hpMul * (1 + U.Max(0, wave - 150) / 300);
         }
 
         public static bool isChallengeWave(double wave, bool endless)
