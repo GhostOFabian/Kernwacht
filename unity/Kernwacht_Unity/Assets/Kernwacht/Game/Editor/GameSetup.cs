@@ -128,6 +128,9 @@ namespace Kernwacht.Game.EditorTools
             PlayerSettings.WebGL.decompressionFallback = true;
             PlayerSettings.WebGL.dataCaching = true;
             PlayerSettings.WebGL.template = Directory.Exists("Assets/WebGLTemplates/Kernwacht") ? "PROJECT:Kernwacht" : "APPLICATION:Default";
+            // 4.1: CPU schonen – Emscripten/Binaryen (Linken, wasm-opt) nur mit 2 Kernen statt allen
+            System.Environment.SetEnvironmentVariable("EMCC_CORES", "2");
+            System.Environment.SetEnvironmentVariable("BINARYEN_CORES", "2");
             // 4.1: kürzere Build-Zeit (weniger CPU-Volllast beim Linken; das Spiel wird etwas größer)
             try
             {
