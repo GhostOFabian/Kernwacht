@@ -217,13 +217,13 @@ namespace Kernwacht.Sim
             d["silencehall"] = L("silencehall", "Stillezitadelle", "Legendär · Schall & Stille", "🔕", 0x80e0f0,
                 "Fusion aus Siegelstein und Resonator: Jeder Glockenschlag bricht im ganzen Radius alle Fähigkeiten ab und lässt Gegner 3 s verstummen. Deckt Getarnte auf.",
                 "sonic", "pulse", "first", "nova",
-                B("damage", 45, "range", 3.4, "cooldown", 1.6, "interrupt", 90, "silenceDur", 3, "markPct", 0.12, "markDur", 3, "hitsAir", 1),
+                B("damage", 65, "range", 3.4, "cooldown", 1.6, "interrupt", 90, "silenceDur", 3, "markPct", 0.12, "markDur", 3, "hitsAir", 1),
                 "Schaltet Heilerschamanen und ganze Bossphasen ab.", "Geringer Einzelschaden.", true);
 
             d["banecircle"] = L("banecircle", "Bannkreis", "Legendär · Arkan & Bann", "⭕", 0xb070ff,
                 "Fusion aus Siegelstein und Totemschrein: Ein Runenkreis bannt alle Gegner darin – sie verstummen, werden 3 s lang nicht geheilt und verlieren 20 % Resistenz.",
                 "arcane", "pulse", "first", "nova",
-                B("damage", 30, "range", 3.0, "cooldown", 1.2, "silenceDur", 2.5, "sealDur", 3, "interrupt", 30, "markPct", 0.2, "markDur", 3, "hitsAir", 1),
+                B("damage", 45, "range", 3.0, "cooldown", 1.2, "silenceDur", 2.5, "sealDur", 3, "interrupt", 30, "markPct", 0.2, "markDur", 3, "hitsAir", 1),
                 "Stoppt Heilung, Regeneration und Zwillingsbund.", "Kleiner Radius.", true);
 
             d["acidmortar"] = L("acidmortar", "Säuremörser", "Legendär · Gift & Artillerie", "🧪", 0xa8e040,
@@ -235,7 +235,7 @@ namespace Kernwacht.Sim
             d["plaguepot"] = L("plaguepot", "Pestkessel", "Legendär · Seuche", "☣️", 0x8ad030,
                 "Fusion aus Ätzkessel und Sporenwerfer: Seuchenschleim vergiftet stark und zersetzt. Stirbt ein Gegner, springen Gift und Zersetzung auf bis zu 3 Nachbarn über.",
                 "poison", "projectile", "first", "overdrive",
-                B("damage", 90, "range", 3.8, "cooldown", 1.0, "projectileSpeed", 7, "splash", 1.1, "poisonDps", 45, "poisonDur", 6, "poisonMaxStacks", 10, "corrodePct", 0.05, "corrodeMax", 5, "corrodeDur", 6, "contagion", 3),
+                B("damage", 70, "range", 3.8, "cooldown", 1.0, "projectileSpeed", 7, "splash", 1.1, "poisonDps", 28, "poisonDur", 6, "poisonMaxStacks", 10, "corrodePct", 0.05, "corrodeMax", 5, "corrodeDur", 6, "contagion", 3),
                 "Verheerend gegen dichte Wellen und Brutmütter. Feuer auf Gift löst Giftbrand aus.", "Flieger, giftresistente Gegner.");
 
             d["quakemaw"] = L("quakemaw", "Bebenschlund", "Legendär · Erdbeben", "🌋", 0xc08050,
@@ -259,7 +259,7 @@ namespace Kernwacht.Sim
             d["falcon"] = L("falcon", "Falkenauge", "Legendär · Präzision", "🎯", 0xd8b070,
                 "Fusion aus Adlerhorst und Belagerungsarmbrust: Ein durchschlagender Bolzen trifft alles in einer Linie und richtet Nicht-Bosse unter 14 % Leben hin.",
                 "physical", "projectile", "strong", "overdrive",
-                B("damage", 170, "range", 8, "cooldown", 2.8, "projectileSpeed", 30, "pierce", 4, "executePct", 0.14, "armorPierce", 0.8, "critChance", 0.1, "critMult", 2.5, "hitsAir", 1),
+                B("damage", 250, "range", 8, "cooldown", 2.8, "projectileSpeed", 30, "pierce", 4, "executePct", 0.14, "armorPierce", 0.8, "critChance", 0.1, "critMult", 2.5, "hitsAir", 1),
                 "Jagt Eliten und Bosse quer über die Karte.", "Langsam gegen Schwärme.");
 
             d["sunlance"] = L("sunlance", "Sonnenlanze", "Legendär · Himmelsstrahl", "☀️", 0xffd070,
@@ -271,7 +271,7 @@ namespace Kernwacht.Sim
             d["order"] = L("order", "Ordensburg", "Legendär · Ritterorden", "🏰", 0xd06048,
                 "Fusion aus Wachkaserne und Totemschrein: 3 Ordensritter halten je 2 Gegner bis zu 14 s auf, kehren nach 7 s zurück und machen Getroffene spröde.",
                 "physical", "barracks", "first", "overdrive",
-                B("damage", 55, "range", 3, "cooldown", 0.8, "soldiers", 3, "soldierHold", 14, "soldierRespawn", 7, "soldierBlock", 2, "brittleDur", 1.5),
+                B("damage", 75, "range", 3, "cooldown", 0.8, "soldiers", 3, "soldierHold", 14, "soldierRespawn", 7, "soldierBlock", 2, "brittleDur", 1.5),
                 "Ein Bollwerk auf der Lane für Kanonen und Frost.", "Flieger und Tunnelgräber laufen vorbei.");
 
             d["treasury"] = L("treasury", "Schatzkammer", "Legendär · Wirtschaft", "💰", 0xffd060,
