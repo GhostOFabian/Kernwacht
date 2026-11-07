@@ -1580,7 +1580,7 @@ namespace Kernwacht.Game
                 // Hinweis über dem Turm: Spezialisierung wählbar und bezahlbar (goldener Stern), Fähigkeit bereit (cyan Ring)
                 if (inst.tower != null || inst.fallback)
                 {
-                    bool canSpec = def.specs.Count == 2 && tw.spec == 0 && def.legendary != true && EconomySystem.nextUpgradeCost(tw) == null
+                    bool canSpec = def.specs.Count >= 1 && tw.spec == 0 && def.legendary != true && EconomySystem.nextUpgradeCost(tw) == null
                         && s.gold >= Math.Min(EconomySystem.specCost(tw, 1), EconomySystem.specCost(tw, 2));
                     float realTopH = inst.fallback ? top * scale : inst.nativeH * inst.tr.localScale.x;
                     if (canSpec)

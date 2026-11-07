@@ -533,15 +533,15 @@ namespace Kernwacht.Game.UI
                 HK.Tip(b, up.description);
                 return;
             }
-            if (d.specs.Count == 2 && t.spec == 0 && d.legendary != true)
+            if (d.specs.Count >= 1 && t.spec == 0 && d.legendary != true)
             {
                 var row = HK.HRow(body, 4, TextAnchor.MiddleLeft, true);
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < d.specs.Count; i++)
                 {
                     var sp = d.specs[i];
                     double c = EconomySystem.specCost(t, i + 1);
                     int spn = i + 1;
-                    var b = HK.B(row.transform, $"{(i == 0 ? "(A)" : "(B)")} {sp.name} · {HK.fmt(c)}", () => a.specialize(tuid, spn), Ui.BtnKind.Primary, 14);
+                    var b = HK.B(row.transform, $"★ {sp.name} · {HK.fmt(c)}", () => a.specialize(tuid, spn), Ui.BtnKind.Primary, 14);
                     Ui.Size(b, -1, -1, 1);
                     HK.Enable(b, s.gold >= c);
                     HK.Tip(b, sp.description);
@@ -696,18 +696,18 @@ namespace Kernwacht.Game.UI
                     HK.Enable(sb, !(st2.Count == 0 || ch > s.gold));
                     HK.Tip(sb, st2.Count > 0 ? $"Alle voll ausgebauten {d.name} um einen Stern veredeln (zusammen {HK.fmt(total)} Gold) – bei zu wenig Gold so viele wie möglich. Je Stern: {Goldsinks.starText(t.def)}." : "Erst voll ausbauen (Stufe 4 und Spezialisierung)");
                 }
-                if (d.specs.Count == 2 && d.legendary != true)
+                if (d.specs.Count >= 1 && d.legendary != true)
                 {
                     var sr = HK.Flow(g, 4);
-                    for (int sp = 1; sp <= 2; sp++)
+                    for (int sp = 1; sp <= d.specs.Count; sp++)
                     {
                         int spn = sp;
                         var need = group.Where((o) => o.spec != spn).ToList();
                         double total = need.Sum((o) => EconomySystem.specTargetCost(o, spn));
                         double cheapestSp = need.Count > 0 ? need.Min((o) => EconomySystem.specTargetCost(o, spn)) : double.PositiveInfinity;
-                        var b = HK.Sm(sr.transform, $"{(sp == 1 ? "(A)" : "(B)")} Alle: {d.specs[sp - 1].name}{(need.Count > 0 ? $" ({HK.fmt(total)})" : " ✓")}", () => a.groupSpec(uids, spn), need.Count > 0 ? Ui.BtnKind.Normal : Ui.BtnKind.On);
+                        var b = HK.Sm(sr.transform, $"Alle: {d.specs[sp - 1].name}{(need.Count > 0 ? $" ({HK.fmt(total)})" : " ✓")}", () => a.groupSpec(uids, spn), need.Count > 0 ? Ui.BtnKind.Normal : Ui.BtnKind.On);
                         HK.Enable(b, !(need.Count == 0 || cheapestSp > s.gold));
-                        HK.Tip(b, need.Count > 0 ? $"Alle {group.Count} auf Höchststufe bringen und auf „{d.specs[sp - 1].name}“ stellen (Wechsel {U.Fmt(U.Round(EconomySystem.RESPEC_MUL * 100))} % des Preises). Gesamt {HK.fmt(total)} Gold – bei zu wenig Gold so viele wie möglich." : "Alle bereits so spezialisiert");
+                        HK.Tip(b, need.Count > 0 ? $"Alle {group.Count} auf Höchststufe bringen und auf „{d.specs[sp - 1].name}“ spezialisieren. Gesamt {HK.fmt(total)} Gold – bei zu wenig Gold so viele wie möglich." : "Alle bereits so spezialisiert");
                     }
                 }
             }
@@ -748,14 +748,14 @@ namespace Kernwacht.Game.UI
                 string otherDef = r.a == t.def ? r.b : r.a;
                 var near = fus.FirstOrDefault((f) => f.recipe.id == r.id)?.partner;
                 var others = s.towers.Where((o) => o != t && o.def == otherDef).ToList();
-                bool selfOk = t.level >= 4 && t.spec != 0;
-                bool partnerOk = near != null && near.level >= 4 && near.spec != 0;
+                bool selfOk = t.level >= 4;
+                bool partnerOk = near != null && near.level >= 4;
                 bool goldOk = s.gold >= r.cost;
                 string ok(bool yes) => yes ? "✔" : "✖";
                 string on = Towers.TOWERS[otherDef].name;
                 string range = HK.fmtNum(Towers.FUSION_RANGE, 1);
                 string partnerText;
-                if (near != null) partnerText = $"{on} in der Nähe (gold markiert) – {(near.level >= 4 ? "Stufe 4 ✓" : $"Stufe {U.Fmt(near.level)}/4")}{(U.Truthy(near.spec) ? ", spezialisiert ✓" : ", Spezialisierung fehlt")}";
+                if (near != null) partnerText = $"{on} in der Nähe (gold markiert) – {(near.level >= 4 ? "Stufe 4 ✓" : $"Stufe {U.Fmt(near.level)}/4")}{(U.Truthy(near.spec) ? ", spezialisiert (Erbe) ✓" : "")}";
                 else if (others.Count > 0) partnerText = $"{on} steht zu weit weg – höchstens {range} Felder Abstand nötig";
                 else if (s.he != null && !PassiveTree.towerUnlocked(otherDef, s.he, s.wave)) partnerText = $"{on} bauen (wird ab Welle {U.Fmt(PassiveTree.towerUnlockWave(otherDef, s.he))} freigeschaltet), höchstens {range} Felder entfernt";
                 else partnerText = $"{on} in höchstens {range} Feldern Abstand bauen";
@@ -774,9 +774,9 @@ namespace Kernwacht.Game.UI
                     double sb = r.a == t.def ? near.spec : t.spec;
                     HK.T(col.transform, $"Erbe dieser Kombination: {FusionHeritage.describe(r.id, sa, sb)}", 14, HK.StarGold);
                 }
-                else Tiny(col.transform, "Die Spezialisierungen beider Türme bestimmen das Erbe: A+A, B+B oder gemischt ergeben verschiedene Varianten.");
+                else Tiny(col.transform, "Spezialisierte Eltern (Stufe 5) vererben ihre Spezialisierung zur Hälfte; sind beide spezialisiert, gibt es +15 % Schaden obendrauf.");
                 var bad = Theme.Hex(0xffb0a0);
-                HK.T(col.transform, $"{ok(selfOk)} Dieser Turm: {(t.level >= 4 ? "Stufe 4 ✓" : $"Stufe {U.Fmt(t.level)}/4 – noch {U.Fmt(4 - t.level)}× aufwerten")}{(t.level >= 4 ? (U.Truthy(t.spec) ? ", spezialisiert ✓" : ", Spezialisierung fehlt") : ", danach spezialisieren")}", 14, selfOk ? Theme.Good : bad);
+                HK.T(col.transform, $"{ok(selfOk)} Dieser Turm: {(t.level >= 4 ? "Stufe 4 ✓" : $"Stufe {U.Fmt(t.level)}/4 – noch {U.Fmt(4 - t.level)}× aufwerten")}{(t.level >= 4 && U.Truthy(t.spec) ? ", spezialisiert (Erbe) ✓" : "")}", 14, selfOk ? Theme.Good : bad);
                 HK.T(col.transform, $"{ok(partnerOk)} Partner: {partnerText}", 14, partnerOk ? Theme.Good : bad);
                 HK.T(col.transform, $"{ok(goldOk)} {U.Fmt(r.cost)} Gold", 14, goldOk ? Theme.Good : bad);
                 if (near != null)
@@ -833,26 +833,25 @@ namespace Kernwacht.Game.UI
                 var b = HK.B(row.transform, $"▲ {U.Fmt(next.Value)} Gold (U)", () => a.upgrade(tuid), Ui.BtnKind.Primary, 15);
                 HK.Enable(b, s.gold >= next.Value);
             }
-            else if (d.specs.Count == 2 && t.spec == 0 && d.legendary != true)
+            else if (d.specs.Count >= 1 && t.spec == 0 && d.legendary != true)
             {
-                bool anyAff = s.gold >= Math.Min(EconomySystem.specCost(t, 1), EconomySystem.specCost(t, 2));
-                Bold(body, anyAff ? "★ Spezialisierung bereit – jetzt wählen!" : "★ Spezialisierung wählen (später gegen Aufpreis wechselbar)", 16).color = anyAff ? HK.StarGold : Theme.Text;
-                if (anyAff) Small(body, "Später gegen Aufpreis wechselbar.", Theme.Muted);
-                for (int i = 0; i < 2; i++)
+                bool anyAff = s.gold >= EconomySystem.specCost(t, 1);
+                Bold(body, anyAff ? "★ Spezialisierung bereit (Stufe 5)" : "★ Spezialisierung (Stufe 5)", 16).color = anyAff ? HK.StarGold : Theme.Text;
+                for (int i = 0; i < d.specs.Count; i++)
                 {
                     var sp = d.specs[i];
                     double c = EconomySystem.specCost(t, i + 1);
                     int spn = i + 1;
                     var row = Upg(body, SpecBorder);
                     HK.Img(row.transform, Icons.Model(t.def), 44);
-                    UpgText(row.transform, $"{(i == 0 ? "(A)" : "(B)")} {sp.name}", sp.description);
+                    UpgText(row.transform, sp.name, sp.description);
                     var b = HK.B(row.transform, $"{U.Fmt(c)} Gold", () => a.specialize(tuid, spn), Ui.BtnKind.Primary, 15);
                     HK.Enable(b, s.gold >= c);
                 }
             }
             else if (U.Truthy(t.spec))
             {
-                var cur = d.specs[(int)t.spec - 1];
+                var cur = d.specs[System.Math.Min((int)t.spec, d.specs.Count) - 1];
                 Small(body, $"Spezialisiert: {cur.name} – {cur.description}");
                 if (d.specs.Count == 2 && d.legendary != true)
                 {

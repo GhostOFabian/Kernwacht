@@ -75,7 +75,7 @@ namespace Kernwacht.Sim
             var def = Towers.TOWERS[t.def];
             var st = spreadBase(def);
             for (int i = 0; i < t.level - 1 && i < def.upgrades.Count; i++) applyMods(st, def.upgrades[i].mods);
-            if (t.spec > 0) applyMods(st, def.specs[(int)t.spec - 1].mods);
+            if (t.spec > 0 && def.specs.Count > 0) applyMods(st, def.specs[System.Math.Min((int)t.spec, def.specs.Count) - 1].mods);
             // Fusions-Erbe (legendäre Türme): halbe Elternspezialisierungen + Kombinationsbonus
             FusionHeritage.apply(st, t);
             // 3.6: Veredelung
@@ -213,7 +213,7 @@ namespace Kernwacht.Sim
             var def = Towers.TOWERS[t.def];
             var st = spreadBase(def);
             for (int i = 0; i < t.level - 1 && i < def.upgrades.Count; i++) applyMods(st, def.upgrades[i].mods);
-            if (t.spec > 0) applyMods(st, def.specs[(int)t.spec - 1].mods);
+            if (t.spec > 0 && def.specs.Count > 0) applyMods(st, def.specs[System.Math.Min((int)t.spec, def.specs.Count) - 1].mods);
             // Fusions-Erbe (legendäre Türme): halbe Elternspezialisierungen + Kombinationsbonus
             FusionHeritage.apply(st, t);
             return st;

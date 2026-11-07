@@ -52,7 +52,7 @@ namespace Kernwacht.Game.UI
             var inPair = new HashSet<double>();
             foreach (var p in pairs) { inPair.Add(p.a.uid); inPair.Add(p.b.uid); }
             bool endless = s.rules.endless;
-            bool isMaxed(TowerInstance t) => !inPair.Contains(t.uid) && EconomySystem.nextUpgradeCost(t) == null && !(Towers.TOWERS[t.def].specs.Count == 2 && t.spec == 0 && Towers.TOWERS[t.def].legendary != true) && (!endless || Towers.TOWERS[t.def].attack == "none" || (t.stars ?? 0) >= Goldsinks.STARS.max);
+            bool isMaxed(TowerInstance t) => !inPair.Contains(t.uid) && EconomySystem.nextUpgradeCost(t) == null && !(Towers.TOWERS[t.def].specs.Count >= 1 && t.spec == 0 && Towers.TOWERS[t.def].legendary != true) && (!endless || Towers.TOWERS[t.def].attack == "none" || (t.stars ?? 0) >= Goldsinks.STARS.max);
             int maxedCount = s.towers.Count(isMaxed);
             var list = s.towers.Where((t) => !hideMaxed || !isMaxed(t) || t.uid == v.selectedTower).ToList();
             if (towerSort == "damage") U.StableSort(list, (x, y) => y.damageDealt - x.damageDealt);
@@ -110,7 +110,6 @@ namespace Kernwacht.Game.UI
                     foreach (var x in new[] { p.a, p.b })
                     {
                         if (x.level < 4) miss.Add($"{Towers.TOWERS[x.def].name} Stufe {U.Fmt(x.level)}/4");
-                        else if (!U.Truthy(x.spec)) miss.Add($"{Towers.TOWERS[x.def].name} Spezialisierung fehlt");
                     }
                     var row = HK.HRow(content, 5);
                     HK.Img(row.transform, Icons.Model(p.a.def), 28);
@@ -133,7 +132,7 @@ namespace Kernwacht.Game.UI
                     {
                         var zb = HK.Sm(row.transform, "Zeigen", () =>
                         {
-                            var x = pa.a.level < 4 || !U.Truthy(pa.a.spec) ? pa.a : pa.b;
+                            var x = pa.a.level < 4 ? pa.a : pa.b;
                             a.selectTower(x.uid);
                             a.lookAt(x.cx + 0.5, x.cy + 0.5);
                         });
@@ -163,7 +162,7 @@ namespace Kernwacht.Game.UI
                         var d = Towers.TOWERS[def];
                         var lv = EconomySystem.upgradableTowers(sim, uids).Select((t) => EconomySystem.nextUpgradeCost(t) ?? double.PositiveInfinity).ToList();
                         var stc = endless ? group.Where(EconomySystem.fullyBuilt).Select((t) => EconomySystem.starCost(t)).Where(U.IsFinite).ToList() : new List<double>();
-                        int needSpec = group.Count((t) => EconomySystem.nextUpgradeCost(t) == null && d.specs.Count == 2 && t.spec == 0 && d.legendary != true);
+                        int needSpec = group.Count((t) => EconomySystem.nextUpgradeCost(t) == null && d.specs.Count >= 1 && t.spec == 0 && d.legendary != true);
                         double minStars = group.Min((t) => t.stars ?? 0);
                         double cheapest = double.PositiveInfinity;
                         foreach (var x in lv) cheapest = Math.Min(cheapest, x);
@@ -188,7 +187,7 @@ namespace Kernwacht.Game.UI
                             a.upgradeAll(uids);
                         }, lv.Count > 0 ? Ui.BtnKind.Primary : Ui.BtnKind.Normal);
                         if (lv.Count == 0 && stc.Count > 0) HK.Star(b);
-                        HK.Tip(b, lv.Count > 0 ? $"Alle {group.Count} {d.name} aufwerten (danach veredeln), solange das Gold reicht" : stc.Count > 0 ? $"Alle {group.Count} {d.name} veredeln, solange das Gold reicht – je Stern {Goldsinks.starText(def)}" : needSpec > 0 ? "Spezialisierung wählen – öffnet die Gruppenauswahl" : "Alles erledigt");
+                        HK.Tip(b, lv.Count > 0 ? $"Alle {group.Count} {d.name} aufwerten (danach veredeln), solange das Gold reicht" : stc.Count > 0 ? $"Alle {group.Count} {d.name} veredeln, solange das Gold reicht – je Stern {Goldsinks.starText(def)}" : needSpec > 0 ? "Spezialisieren – öffnet die Gruppenauswahl" : "Alles erledigt");
                         if (lv.Count > 0 || stc.Count > 0) live(() => HK.Enable(b, !(cheapest > s.gold)));
                         else HK.Enable(b, needSpec > 0);
                     }
@@ -206,7 +205,7 @@ namespace Kernwacht.Game.UI
                 {
                     var d = Towers.TOWERS[t.def];
                     double? next = EconomySystem.nextUpgradeCost(t);
-                    bool needSpec = next == null && d.specs.Count == 2 && t.spec == 0 && d.legendary != true;
+                    bool needSpec = next == null && d.specs.Count >= 1 && t.spec == 0 && d.legendary != true;
                     string specName = U.Truthy(t.spec) && d.specs.Count >= t.spec ? d.specs[(int)t.spec - 1].name : "";
                     double tuid = t.uid;
                     var tt = t;
@@ -234,7 +233,7 @@ namespace Kernwacht.Game.UI
                     else if (needSpec)
                     {
                         var b = HK.Sm(btns.transform, "Spezial.", () => { a.selectTower(tuid); a.lookAt(tt.cx + 0.5, tt.cy + 0.5); });
-                        HK.Tip(b, "Spezialisierung wählen – öffnet die Turmdetails");
+                        HK.Tip(b, "Spezialisieren – öffnet die Turmdetails");
                     }
                     else if (endless && d.attack != "none" && (t.stars ?? 0) < Goldsinks.STARS.max)
                     {
@@ -381,7 +380,7 @@ namespace Kernwacht.Game.UI
                     ? "Hier gibt es keinen festen Weg. Türme und günstige Barrikaden (B) lenken die Gegner um – die Vorschau zeigt die neue Route. Den Weg vollständig zu blockieren ist nicht möglich. Flieger folgen ebenfalls dem Weg, brauchen aber Türme mit Luftabwehr."
                     : "Gegner folgen dem hellen Weg. Platziere Türme an Kurven, damit sie lange in Reichweite bleiben. Anhöhen geben Reichweite, Leylinien (violetter Ring) Schaden, Goldadern (gelbe Kristalle) mehr Minenertrag." },
                 new[] { "Wellen & Gold", "Starte jede Welle mit „▶ Welle“ (Leertaste). Die Leiste oben zeigt, welche Gegner kommen – tippe sie für Details und Konter an. Abschüsse und überstandene Wellen bringen Gold." },
-                new[] { "Aufwerten, Fähigkeiten, Fusion", "Tippe einen Turm an: drei Ausbaustufen, danach eine von zwei Spezialisierungen. Ab Stufe 2 haben viele Türme eine aktive Fähigkeit (C). Zwei passende, voll ausgebaute Türme nebeneinander lassen sich zu einem legendären Turm verschmelzen." },
+                new[] { "Aufwerten, Fähigkeiten, Fusion", "Tippe einen Turm an: drei Ausbaustufen, danach eine feste Spezialisierung (Stufe 5). Ab Stufe 2 haben viele Türme eine aktive Fähigkeit (C). Zwei passende Türme ab Stufe 4 nebeneinander lassen sich zu einem legendären Turm verschmelzen – die Spezialisierung ist dafür nicht nötig." },
                 new[] { "Helden", "Unten links warten deine Helden. Z/X oder Porträt antippen und eine Wegzelle wählen: der Held kämpft dort eine begrenzte Zeit. Fähigkeiten mit A/S/D. Einsätze kosten Rissenergie (⚡), die du durch Abschüsse, Reaktionen und Wellen sammelst. Fällt ein Held, braucht er länger zur Erholung." },
                 new[] { "Elemente, Netzwerke, Bosse", "Kombiniere Elemente: Feuer + Kälte = Dampf (nass), Blitz auf nasse Ziele = Überladung, Feuer auf Gift = Giftbrand. Leitpylone vernetzen Türme für Boni und Resonanzen. Bosse kündigen Fähigkeiten an – Resonatoren unterbrechen sie." },
                 new[] { "Kamera", "Ziehen verschiebt die Karte, Mausrad oder zwei Finger zoomen, ⟲ ⟳ (Q/E) drehen. Die Minikarte oben rechts springt per Antippen. „?“ öffnet jederzeit Hilfe und Kodex. Viel Erfolg!" },

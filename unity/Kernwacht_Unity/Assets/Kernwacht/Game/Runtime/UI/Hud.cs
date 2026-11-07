@@ -1051,7 +1051,7 @@ namespace Kernwacht.Game.UI
             foreach (var t in s.towers)
             {
                 var td = Towers.TOWERS[t.def];
-                if (td.specs.Count == 2 && t.spec == 0 && td.legendary != true && EconomySystem.nextUpgradeCost(t) == null
+                if (td.specs.Count >= 1 && t.spec == 0 && td.legendary != true && EconomySystem.nextUpgradeCost(t) == null
                     && s.gold >= Math.Min(EconomySystem.specCost(t, 1), EconomySystem.specCost(t, 2))) sr++;
             }
             if (sr != specReady)
