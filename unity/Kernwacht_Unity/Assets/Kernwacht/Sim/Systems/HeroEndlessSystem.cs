@@ -318,7 +318,9 @@ namespace Kernwacht.Sim
             if (he == null) return;
             TacticalCharges.update(sim, dt);
             // 3.0: Nachrückende Wellen – ab Welle 120 rückt nach 45 s Kampf die nächste Welle nach
-            if (s.phase == "combat" && s.wave >= Scaling.SCALING.overrunFrom)
+            // 4.1: nie in eine Challenge-Welle hinein und nicht während eines Challenge-Bosses nachrücken
+            bool challengeNear = Scaling.isChallengeWave(s.wave, true) || Scaling.isChallengeWave(s.wave + 1, true);
+            if (s.phase == "combat" && s.wave >= Scaling.SCALING.overrunFrom && !challengeNear)
             {
                 if (he.overrunWave != s.wave)
                 {

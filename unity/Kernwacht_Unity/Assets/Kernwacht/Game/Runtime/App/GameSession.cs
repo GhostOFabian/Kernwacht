@@ -468,11 +468,22 @@ namespace Kernwacht.Game
         }
 
         /// <summary>Schwebende Zahl über der Welt (CSS .floater: steigt 42 px auf und verblasst in 1,1 s).</summary>
+        readonly Dictionary<string, float> floaterLast = new Dictionary<string, float>();
+
         void floater(Floater f)
         {
-            if (floaterCount > 30) return;
+            // 4.1: bei vielen Türmen nicht dutzende gleiche Texte („Überladung“ …) – je Text höchstens alle 1,5 s, max. 14 gleichzeitig
+            if (floaterCount > 14) return;
+            bool bigF = B(f.big);
+            string fk = f.text ?? "";
+            float now = Time.unscaledTime;
+            if (!bigF && floaterLast.TryGetValue(fk, out var last) && now - last < 1.5f) return;
+            floaterLast[fk] = now;
+            if (floaterLast.Count > 200) floaterLast.Clear();
             var parent = Tr(hud.floaters) as RectTransform;
             if (parent == null) parent = app.worldLayer;
+            // Eigene Zeichenebene: bewegte Texte bauen nicht jedes Bild die ganze HUD-Oberfläche neu auf
+            if (parent != null && parent.GetComponent<Canvas>() == null) parent.gameObject.AddComponent<Canvas>();
             var p = app.view.project((float)f.x, (float)f.y, (float)f.z);
             // Bildschirm (oben links) → lokale Canvas-Koordinaten
             var screenPt = new Vector2((float)p.x, Screen.height - (float)p.y);
@@ -491,9 +502,6 @@ namespace Kernwacht.Game
             var sh = t.gameObject.AddComponent<Shadow>();
             sh.effectColor = new Color(0, 0, 0, 0.9f);
             sh.effectDistance = new Vector2(1, -1);
-            var ol = t.gameObject.AddComponent<Outline>();
-            ol.effectColor = new Color(0, 0, 0, 0.6f);
-            ol.effectDistance = new Vector2(1, 1);
             floaterCount++;
             var fx = t.gameObject.AddComponent<FloaterFx>();
             fx.reduced = app.save.settings.reducedMotion;
