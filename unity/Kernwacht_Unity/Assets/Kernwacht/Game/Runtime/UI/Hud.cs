@@ -1051,7 +1051,7 @@ namespace Kernwacht.Game.UI
             foreach (var t in s.towers)
             {
                 var td = Towers.TOWERS[t.def];
-                if (td.specs.Count == 2 && t.spec == 0 && td.legendary != true && EconomySystem.nextUpgradeCost(t) == null
+                if (td.specs.Count >= 1 && t.spec == 0 && td.legendary != true && EconomySystem.nextUpgradeCost(t) == null
                     && s.gold >= Math.Min(EconomySystem.specCost(t, 1), EconomySystem.specCost(t, 2))) sr++;
             }
             if (sr != specReady)
@@ -1141,7 +1141,7 @@ namespace Kernwacht.Game.UI
         {
             if (tier.HasValue && U.Truthy(tier.Value))
                 Chip(strip.transform, $"Weltstufe {U.Fmt(tier.Value)}", Theme.Hex(0xff8a5c), Theme.Hex(0xffc0a0), null,
-                    $"Weltstufe {U.Fmt(tier.Value)}: Gegner +{U.Fmt(U.Round(Scaling.SCALING.tierHp * tier.Value * 100))} % LP, mehr Rüstung und Tempo – dafür +{U.Fmt(U.Round(Scaling.SCALING.tierReward * tier.Value * 100))} % Kopfgeld");
+                    $"Weltstufe {U.Fmt(tier.Value)}: Gegner +{U.Fmt(U.Round((Scaling.tierHpMul(tier.Value) - 1) * 100))} % LP, mehr Rüstung und Tempo – dafür +{U.Fmt(U.Round(Scaling.SCALING.tierReward * tier.Value * 100))} % Kopfgeld");
             if (affixes == null) return;
             foreach (var af in affixes)
             {

@@ -1,3 +1,4 @@
+using System.Linq;
 // Erweiterung 4.0: acht neue Grundtürme und dreizehn neue Fusionen.
 // Sie schließen Lücken im Gegnerkonter: Fähigkeiten unterbrechen (Siegelstein), Resistenzen zersetzen (Ätzkessel),
 // eingegrabene Gegner treffen (Bebenhammer), zurückstoßen (Windwacht), Eliten jagen (Adlerhorst), Lane halten
@@ -293,8 +294,26 @@ namespace Kernwacht.Sim
                 B("range", 4.2, "wardCd", 8, "wardReflect", 1),
                 "Schützt ganze Turmgruppen gegen Weltenstampfer und Aschenkönigin.", "Kein eigener Angriff.");
 
+            // 4.1: Jeder Turm hat nur noch EINE feste Spezialisierung (Stufe 5). Die zweite Variante entfällt –
+            // weniger Entscheidungen beim Ausbauen, und Fusionen brauchen keine Spezialisierung mehr.
+            foreach (var t in d.Values)
+            {
+                if (t.specs == null || t.specs.Count < 2) continue;
+                var keep = t.specs.FirstOrDefault((u) => SPEC_KEEP.Contains(u.id + ":" + t.id)) ?? t.specs[0];
+                t.specs = new List<UpgradeDefinition> { keep };
+            }
             return d;
         }
+
+        /** 4.1: Die verbleibende Spezialisierung je Turm (Spezialisierungs-ID:Turm-ID); fehlt ein Eintrag, bleibt die erste. */
+        static readonly HashSet<string> SPEC_KEEP = new HashSet<string>
+        {
+            "rangerA:ranger", "emberA:ember", "frostA:frost", "stormA:storm", "sporeA:spore", "ballistaB:ballista",
+            "runeA:rune", "resonB:resonator", "mineA:goldmine", "pylonB:pylon", "cannonA:cannon", "riftA:riftbinder",
+            "meteorB:meteor", "teslaA:tesla", "gravA:gravity", "dragonA:dragon", "laserB:laser", "totemA:totem",
+            "mineA:minelayer", "skyA:skyguard", "sealB:seal", "acidA:acid", "quakeA:quake", "galeB:gale",
+            "eyrieA:eyrie", "barA:barracks", "bankA:bank", "wardB:ward",
+        };
 
         public static readonly List<FusionRecipe> FUSIONS = new List<FusionRecipe>
         {

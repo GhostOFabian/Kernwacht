@@ -72,11 +72,11 @@ namespace Kernwacht.Game.UI
                         UL(root, new[]
                         {
                             $"Ab Welle {F(SC.expFrom)} wachsen die Gegner-LP zusätzlich um {R((SC.expRate - 1) * 100)} % je Welle.",
-                            $"Weltstufen: alle {F(SC.tierEvery)} Wellen eine Stufe – je Stufe +{R(SC.tierHp * 100)} % LP, mehr Rüstung und Tempo, aber +{R(SC.tierReward * 100)} % Kopfgeld.",
+                            $"Weltstufen: nach jedem {F(SC.tierEvery)}er-Boss eine Stufe (ab Welle {F(SC.tierEvery + 1)}) – je Stufe +{R(SC.tierHp * 100)} % LP (ab Stufe 4 je +8 %), mehr Rüstung und Tempo, aber +{R(SC.tierReward * 100)} % Kopfgeld.",
                             $"🏰 Bauplätze (Endlos): zu Beginn {F(TL.@base)} Türme (Barrikaden, Goldgräber sowie die Unterstützungstürme Leitpylon und Totemschrein zählen nicht), alle {F(TL.perWaves)} Wellen und nach jeder geschafften Bosswelle ein Platz mehr. Fokusbonus – weniger ist mehr: jeder freie Bauplatz macht ALLE Türme um {R(TL.focusPer * 100)} % stärker (höchstens +{R(TL.focusMax * 100)} %). Beispiel: 30 Plätze, 20 Türme gebaut → 10 frei → +20 % Schaden.",
                             $"🚧 Lane-Barrikade (Endlos, Classic): direkt auf die Lane setzen – Bodengegner werden darüber um 50 % langsamer. Kostenlos, ohne Turmlimit, mindestens {F(LB.minSpawnDist)} Felder vom Riss entfernt, höchstens {F(LB.maxCharges)} je {F(LB.window / 60)} Minuten Spielzeit.",
-                            $"⚔ Challenge-Bosse: alle {F(CH.every)} Wellen bis Welle {F(CH.switchAt)}, danach alle {F(CH.everyLate)} Wellen. {F(CH.hpMul).Replace('.', ',')}× LP (ab Welle 150 je 100 Wellen noch einmal so viel, z. B. Welle 250 ×7), +{R(CH.resist * 100)} % Resistenzen, Kontrolleffekte nur zu {R(CH.ccMul * 100)} %, Schildschub alle {F(CH.shieldEvery)} s, {F(CH.summonCount)} Elite-Begleiter alle {F(CH.summonEvery)} s, Raserei nach {F(CH.enrageAfter)} s. Ein Durchbruch kostet mindestens {F(CH.leakMin)} bzw. {R(CH.leakPct * 100)} % der Kernenergie; der Sieg bringt {F(CH.rewardMul)}× Kopfgeld, Relikte und eine Rune.",
-                            $"Spezialisierter Turmkauf ab Welle {F(EconomySystem.PRESPEC.from)}: Ein Klick auf einen Turm in der Bauleiste öffnet die Auswahl Normal / Spezialisierung A / B. Spezialisierte Türme werden direkt auf Höchststufe gebaut und kosten Grundpreis + alle Stufen + Spezialisierung, +{R((EconomySystem.PRESPEC.premium - 1) * 100)} % Aufpreis.",
+                            $"⚔ Challenge-Bosse: alle {F(CH.every)} Wellen bis Welle {F(CH.switchAt)}, danach alle {F(CH.everyLate)} Wellen. {F(CH.hpMul).Replace('.', ',')}× LP (ab Welle 150 je 300 Wellen noch einmal so viel, z. B. Welle 300 ×5,25), +{R(CH.resist * 100)} % Resistenzen, Kontrolleffekte nur zu {R(CH.ccMul * 100)} %, Schildschub alle {F(CH.shieldEvery)} s, {F(CH.summonCount)} Elite-Begleiter alle {F(CH.summonEvery)} s, Raserei nach {F(CH.enrageAfter)} s (dann keine Begleiter mehr). Ein Durchbruch kostet mindestens {F(CH.leakMin)} bzw. {R(CH.leakPct * 100)} % der Kernenergie; der Sieg bringt {F(CH.rewardMul)}× Kopfgeld, Relikte und eine Rune.",
+                            $"Spezialisierter Turmkauf ab Welle {F(EconomySystem.PRESPEC.from)}: Ein Klick auf einen Turm in der Bauleiste öffnet die Auswahl Normal / Spezialisiert. Spezialisierte Türme werden direkt auf Höchststufe gebaut und kosten Grundpreis + alle Stufen + Spezialisierung, +{R((EconomySystem.PRESPEC.premium - 1) * 100)} % Aufpreis.",
                             $"Wellen-Affixe ab Welle {F(SC.affixFrom)} (1, ab {F(SC.affixFrom + SC.affixStep)} zwei, ab {F(SC.affixFrom + 2 * SC.affixStep)} drei): {string.Join(" · ", Scaling.AFFIX_ORDER.Select((a) => $"{Scaling.AFFIXES[a].icon} {Scaling.AFFIXES[a].name} – {Scaling.AFFIXES[a].description}"))}. Sie stehen vor jeder Welle in der Wellenvorschau.",
                             $"Ab Welle {F(SC.pressureFrom)}: Elitegegner in jeder Welle, Mini-Bosse alle {F(SC.miniBossEveryLate)} Wellen, durchbrechende Bosse kosten doppelt Kernenergie.",
                             $"Ab Welle {F(SC.overrunFrom)} rückt nach {F(SC.overrunAfter)} s Kampf die nächste Welle automatisch nach (Countdown in der Wellenleiste).",
@@ -155,7 +155,7 @@ namespace Kernwacht.Game.UI
                     }
                 case "legend":
                     {
-                        P(root, $"Zwei voll ausgebaute (Stufe 4 und spezialisiert) passende Türme, die höchstens {F(Towers.FUSION_RANGE)} Felder auseinander stehen, lassen sich zu einem legendären Turm verschmelzen. Der zweite Turm geht dabei in den ersten über. Legendäre Türme können nicht direkt gebaut werden.");
+                        P(root, $"Zwei passende Türme ab Stufe 4 (Spezialisierung nicht nötig), die höchstens {F(Towers.FUSION_RANGE)} Felder auseinander stehen, lassen sich zu einem legendären Turm verschmelzen. Der zweite Turm geht dabei in den ersten über. Legendäre Türme können nicht direkt gebaut werden.");
                         var codex = Ui.Column(root, 6).transform;
                         foreach (var f in Towers.FUSIONS)
                         {
@@ -186,7 +186,7 @@ namespace Kernwacht.Game.UI
                                 if (d.detector == true) P(t, "Detektor: enttarnt getarnte Gegner in Reichweite.", "small good");
                                 Common.statsTable(t, TextUtil.statLines(TextUtil.baseStatsOf(id), d));
                                 P(t, B("Stufen: ") + string.Join(" · ", d.upgrades.Select((u, i) => $"{i + 2}. {u.name} ({F(u.cost)}): {u.description}")), "small");
-                                P(t, B("Spezialisierungen: ") + string.Join(" · ", d.specs.Select((s, i) => $"{(i != 0 ? "Ⓑ" : "Ⓐ")} {s.name} ({F(s.cost)}): {s.description}")), "small");
+                                P(t, B("Spezialisierung: ") + string.Join(" · ", d.specs.Select((s, i) => $"{s.name} ({F(s.cost)}): {s.description}")), "small");
                                 P(t, "+ " + d.synergies, "small");
                                 P(t, "× " + d.counters, "small");
                             });
@@ -283,7 +283,7 @@ namespace Kernwacht.Game.UI
                             "Turm wählen: Klick in der Turmleiste oder Tasten 1–0, −, = (Barrikade: B).",
                             "Bauen: Klick auf ein freies Feld (grün = erlaubt, rot = nicht erlaubt). Umschalt+Klick baut mehrere.",
                             "Turm anklicken: Details, Aufwerten (U), Zielwahl (T), Verkaufen (Entf, zweimal).",
-                            "Doppelklick auf einen Turm wählt alle Türme dieser Sorte (gold markiert) – „Alle aufwerten“ baut sie gemeinsam aus. „Alle ▲“ oben bzw. in der Turmübersicht wertet alle Türme bis Stufe 4 auf, solange das Gold reicht (günstigste zuerst, Spezialisierung wählst du selbst).",
+                            "Doppelklick auf einen Turm wählt alle Türme dieser Sorte (gold markiert) – „Alle aufwerten“ baut sie gemeinsam aus. „Alle ▲“ oben bzw. in der Turmübersicht wertet alle Türme bis Stufe 4 auf, solange das Gold reicht (günstigste zuerst, spezialisieren tust du selbst).",
                             "Goldgräber belegen 2×2 Felder (das gewählte Feld ist oben links). Die Turmübersicht blendet voll ausgebaute Türme aus (umschaltbar).",
                             "Abbrechen: Rechtsklick oder Esc. Pause mit Menü: P oder Esc. Mini-Pause ohne Menü (weiter bauen/aufwerten): Leertaste im Kampf oder „Mini“. Tempo (1×/2×/3×/5×/8×): F. Welle starten: Leertaste. Das Spiel pausiert nicht automatisch beim Tab- oder Fensterwechsel.",
                             "Kamera: Ziehen = verschieben, Mausrad = zoomen, Q/E = um 90° drehen. R = alle Reichweiten, G = Raster, H = Hilfe.",

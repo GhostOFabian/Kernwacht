@@ -309,6 +309,11 @@ namespace Kernwacht.Sim
         {
             var s = sim.s;
             if (!U.Truthy(e.boss)) return;
+            // 4.1: Risskorridor und angekündigte Sprünge schließen mit dem Tod des Bosses – sonst schleusen die
+            // Portale nach dem Bosssieg noch Gegner direkt bis vor den Kern (Welle 150: −20 Kernenergie).
+            // (Zonen werden in-place beendet: ZoneSystem arbeitet während des Takts auf derselben Liste.)
+            foreach (var z in s.zones)
+                if (z.src == e.uid && (z.kind == "portalIn" || z.kind == "portalOut" || z.kind == "riftJump")) { z.armed = 0; z.t = 0; }
             if (e.swallowed.Count > 0)
             {
                 double refund = 0;

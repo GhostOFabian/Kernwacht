@@ -75,7 +75,7 @@ namespace Kernwacht.Sim
             var def = Towers.TOWERS[t.def];
             var st = spreadBase(def);
             for (int i = 0; i < t.level - 1 && i < def.upgrades.Count; i++) applyMods(st, def.upgrades[i].mods);
-            if (t.spec > 0) applyMods(st, def.specs[(int)t.spec - 1].mods);
+            if (t.spec > 0 && def.specs.Count > 0) applyMods(st, def.specs[System.Math.Min((int)t.spec, def.specs.Count) - 1].mods);
             // Fusions-Erbe (legendäre Türme): halbe Elternspezialisierungen + Kombinationsbonus
             FusionHeritage.apply(st, t);
             // 3.6: Veredelung
@@ -213,7 +213,7 @@ namespace Kernwacht.Sim
             var def = Towers.TOWERS[t.def];
             var st = spreadBase(def);
             for (int i = 0; i < t.level - 1 && i < def.upgrades.Count; i++) applyMods(st, def.upgrades[i].mods);
-            if (t.spec > 0) applyMods(st, def.specs[(int)t.spec - 1].mods);
+            if (t.spec > 0 && def.specs.Count > 0) applyMods(st, def.specs[System.Math.Min((int)t.spec, def.specs.Count) - 1].mods);
             // Fusions-Erbe (legendäre Türme): halbe Elternspezialisierungen + Kombinationsbonus
             FusionHeritage.apply(st, t);
             return st;
@@ -386,6 +386,7 @@ namespace Kernwacht.Sim
                     return false;
                 }
             }
+            if (t.def == "totem" && t.stunned <= 0) sim.c.statsDirty = true;
             t.stunned = U.Max(t.stunned, dur);
             return true;
         }
@@ -544,6 +545,8 @@ namespace Kernwacht.Sim
                 if (t.stunned > 0)
                 {
                     t.stunned = U.Max(0, t.stunned - dt);
+                    // 4.1: betäubte Totems geben keine Aura – Ende der Betäubung macht die Werte neu
+                    if (t.stunned <= 0 && t.def == "totem") sim.c.statsDirty = true;
                     continue;
                 }
                 var def = Towers.TOWERS[t.def];
@@ -561,11 +564,15 @@ namespace Kernwacht.Sim
                 t.retarget -= dt;
                 EnemyInstance target = null;
                 if (U.Truthy(t.target)) sim.c.enemyByUid.TryGetValue(t.target, out target);
-                if (target == null || !canHit(st, target) || !inRange(t, st, target) || t.retarget <= 0)
+                // 4.1 Leistung: Türme ohne Ziel suchen nur alle 0,1 s neu statt in jedem Takt (vorher bei vielen Türmen
+                // und Gegnern außerhalb der Reichweite der größte Einzelposten). Ein verlorenes Ziel löst sofort eine Suche aus.
+                bool search = target == null ? (t.target != 0 || t.retarget <= 0) : (!canHit(st, target) || !inRange(t, st, target) || t.retarget <= 0);
+                if (search)
                 {
                     t.retarget = Balance.SIM.retargetInterval;
                     target = pickBest(sim, t, st);
                     t.target = target != null ? target.uid : 0;
+                    if (target == null) t.retarget = 0.1;
                 }
                 // PORT: Math.atan2 kann sich im letzten Bit von V8 (fdlibm) unterscheiden.
                 if (target != null) t.aim = Math.Atan2(target.y - (t.cy + 0.5), target.x - (t.cx + 0.5));

@@ -177,7 +177,7 @@ namespace Kernwacht.Sim
                     {
                         if (sim.upgrade(cand.uid).ok) continue;
                     }
-                    else if (cost == null && cand.spec == 0 && Towers.TOWERS[cand.def].specs.Count == 2)
+                    else if (cost == null && cand.spec == 0 && Towers.TOWERS[cand.def].specs.Count >= 1)
                     {
                         double sp = cand.uid % 2 == 0 ? 1 : 2;
                         if (s.gold >= EconomySystem.specCost(cand, sp) && sim.specialize(cand.uid, sp).ok) continue;

@@ -25,7 +25,22 @@ namespace Kernwacht.Sim
         public byte[] blocked;
         public bool fieldDirty;
         public bool networkDirty;
-        public bool statsDirty;
+        bool _statsDirty;
+        public static readonly Dictionary<string, int> DIRTY_SRC = new Dictionary<string, int>();
+        public bool statsDirty
+        {
+            get => _statsDirty;
+            set
+            {
+                if (value && !_statsDirty && GameSimulation.PROFILE)
+                {
+                    var f = new System.Diagnostics.StackTrace(1, true).GetFrame(0);
+                    string k = f?.GetMethod()?.DeclaringType?.Name + "." + f?.GetMethod()?.Name;
+                    DIRTY_SRC[k] = (DIRTY_SRC.TryGetValue(k, out var n) ? n : 0) + 1;
+                }
+                _statsDirty = value;
+            }
+        }
         public Dictionary<double, Dictionary<string, double>> towerStats = new Dictionary<double, Dictionary<string, double>>();
         public Dictionary<double, TowerInstance> towerByCell = new Dictionary<double, TowerInstance>();
         public Dictionary<double, TowerInstance> towerByUid = new Dictionary<double, TowerInstance>();
@@ -608,11 +623,26 @@ namespace Kernwacht.Sim
         public bool lastOverBudget;
 
         /// <summary>Ein fester Simulationsschritt.</summary>
+        /// <summary>Messung für Testläufe (im Spiel aus): Zeit je Systemgruppe in Stopwatch-Ticks.</summary>
+        public static bool PROFILE = false;
+        public static readonly long[] PROF = new long[15];
+        public static readonly string[] PROF_NAMES = { "Wellen/Cache", "Gegner", "Bosse", "Cache", "Türme", "Geschosse", "Zonen", "Rest", "Held", "Champion", "Mining", "C.Buffs", "C.Pickups", "C.Zonen", "C.Stats(alle)" };
+        public static long pmT;
+        public static void PM(int k) { if (!PROFILE) return; long now = System.Diagnostics.Stopwatch.GetTimestamp(); if (k >= 0) PROF[k] += now - pmT; pmT = now; }
+        static void Prof(int k, ref long p0)
+        {
+            if (!PROFILE) return;
+            long now = System.Diagnostics.Stopwatch.GetTimestamp();
+            PROF[k] += now - p0;
+            p0 = now;
+        }
+
         public void step()
         {
             if (this.isOver()) return;
             try
             {
+                long p0 = PROFILE ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
                 this.refreshCaches();
                 double dt = Balance.SIM.dt;
                 this.s.tick++;
@@ -623,22 +653,33 @@ namespace Kernwacht.Sim
                     this.s.stats.duration += dt;
                     WaveDirector.updateSpawns(this, dt);
                 }
+                Prof(0, ref p0);
                 EnemySystem.updateEnemies(this, dt);
+                Prof(1, ref p0);
                 BossSystem.updateBosses(this, dt);
+                Prof(2, ref p0);
                 HeroSystem.updateHeroes(this, dt);
+                Prof(8, ref p0);
                 if (this.s.he != null)
                 {
                     ChampionSystem.updateChampion(this, dt);
+                    Prof(9, ref p0);
                     MiningSystem.updateMining(this, dt);
                 }
+                Prof(10, ref p0);
                 this.refreshCaches();
+                Prof(3, ref p0);
                 TowerSystem.updateTowers(this, dt);
+                Prof(4, ref p0);
                 ProjectileSystem.updateProjectiles(this, dt);
+                Prof(5, ref p0);
                 ZoneSystem.updateZones(this, dt);
+                Prof(6, ref p0);
                 NetworkSystem.updateNetworkDischarge(this, dt);
                 this.cleanup(dt);
                 if (this.s.phase == "combat") WaveDirector.checkWaveEnd(this);
                 if (this.s.he != null && !this.isOver()) HeroEndlessSystem.updateHeroEndless(this, dt);
+                Prof(7, ref p0);
             }
             catch (Exception err)
             {

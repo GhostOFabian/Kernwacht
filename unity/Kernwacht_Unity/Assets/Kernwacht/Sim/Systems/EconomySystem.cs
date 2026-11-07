@@ -129,7 +129,7 @@ namespace Kernwacht.Sim
             var d = Towers.TOWERS[t.def];
             if (d.legendary == true) return true;
             if (t.level - 1 < d.upgrades.Count) return false;
-            return d.specs.Count < 2 || t.spec != 0;
+            return d.specs.Count == 0 || t.spec != 0;
         }
 
         /// <summary>Preis für den nächsten Stern (Infinity = nicht möglich).</summary>
@@ -241,7 +241,7 @@ namespace Kernwacht.Sim
         {
             var s = sim.s;
             var d = Towers.TOWERS[def];
-            return s.rules.endless && s.wave >= PRESPEC.from && d.specs.Count >= 2 && d.upgrades.Count >= 3 && d.legendary != true;
+            return s.rules.endless && s.wave >= PRESPEC.from && d.specs.Count >= 1 && d.upgrades.Count >= 3 && d.legendary != true;
         }
 
         /// <summary>Preis eines vorspezialisierten Turms: (Grundpreis + alle Stufen + Spezialisierung) × Aufpreis.</summary>
@@ -408,7 +408,7 @@ namespace Kernwacht.Sim
             var t = U.Get(sim.c.towerByUid, uid);
             if (t == null) return CommandResult.Fail("Turm nicht gefunden");
             double? cost = nextUpgradeCost(t);
-            if (cost == null) return CommandResult.Fail(Towers.TOWERS[t.def].upgrades.Count == 0 ? "Nicht aufwertbar" : "Maximale Stufe erreicht – Spezialisierung wählen");
+            if (cost == null) return CommandResult.Fail(Towers.TOWERS[t.def].upgrades.Count == 0 ? "Nicht aufwertbar" : "Maximale Stufe erreicht – jetzt spezialisieren");
             if (s.gold < cost.Value) return CommandResult.Fail("Nicht genug Gold");
             s.gold -= cost.Value;
             s.stats.goldSpent += cost.Value;
@@ -424,7 +424,7 @@ namespace Kernwacht.Sim
             var s = sim.s;
             var t = U.Get(sim.c.towerByUid, uid);
             if (t == null) return CommandResult.Fail("Turm nicht gefunden");
-            if (Towers.TOWERS[t.def].specs.Count < 2) return CommandResult.Fail("Nicht spezialisierbar");
+            if (Towers.TOWERS[t.def].specs.Count < 1) return CommandResult.Fail("Nicht spezialisierbar");
             if (t.level < 4) return CommandResult.Fail("Erst alle drei Stufen ausbauen");
             if (t.spec != 0) return CommandResult.Fail("Bereits spezialisiert");
             double cost = specCost(t, spec);
@@ -586,8 +586,8 @@ namespace Kernwacht.Sim
 
         private static bool fused(TowerInstance t)
         {
-            var d = Towers.TOWERS[t.def];
-            return t.level >= 4 && (d.specs.Count == 0 || t.spec != 0);
+            // 4.1: Fusion schon ab Stufe 4 – die Spezialisierung (Stufe 5) ist dafür nicht mehr nötig
+            return t.level >= 4;
         }
 
         /// <summary>Mögliche Fusionen für einen Turm (voll ausgebaut + benachbarter, voll ausgebauter Partner).</summary>
@@ -807,7 +807,7 @@ namespace Kernwacht.Sim
             if (!U.Truthy(count) && !U.Truthy(stars))
             {
                 double left = upgradableTowers(sim, uidList).Count;
-                return new CountSpentResult { ok = false, reason = U.Truthy(left) ? "Nicht genug Gold für eine weitere Stufe" : sim.s.rules.endless ? "Nichts mehr aufzuwerten oder zu veredeln (Spezialisierung wählen oder mehr Gold)" : "Alle Türme sind bereits auf der höchsten Stufe", count = count, spent = spent };
+                return new CountSpentResult { ok = false, reason = U.Truthy(left) ? "Nicht genug Gold für eine weitere Stufe" : sim.s.rules.endless ? "Nichts mehr aufzuwerten oder zu veredeln (spezialisieren oder mehr Gold)" : "Alle Türme sind bereits auf der höchsten Stufe", count = count, spent = spent };
             }
             return new CountSpentResult { ok = true, message = $"{(U.Truthy(count) ? $"{U.Fmt(count)}× aufgewertet" : "")}{(U.Truthy(count) && U.Truthy(stars) ? ", " : "")}{(U.Truthy(stars) ? $"{U.Fmt(stars)}× veredelt" : "")} für {U.Fmt(spent)} Gold", count = count + stars, spent = spent };
         }

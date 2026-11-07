@@ -42,9 +42,9 @@ namespace Kernwacht.Sim
             lateGrowth = 1.25,
             /** Preis ★n → ★n+1 = Basis · growth^n; Basis = Gesamtwert des voll ausgebauten Turms · baseFactor. */
             baseFactor = 0.6,
-            growth = 1.55,
+            growth = 1.45, // 4.1: vorher 1,55 – späte Sterne waren das einzige Goldziel und zu teuer
             /** Legendäre Türme (Grundpreis 0): feste Basis. */
-            legendaryBase = 900,
+            legendaryBase = 700,
             /** Für alle kämpfenden Türme je Stern. */
             dmgPerStar = 0.08,
             speedPerStar = 0.02,
