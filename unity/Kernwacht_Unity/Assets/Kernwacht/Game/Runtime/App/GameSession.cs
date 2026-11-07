@@ -40,6 +40,7 @@ namespace Kernwacht.Game
         double fpsFrames = 0;
         double lowFpsTime = 0;
         public double adaptiveScale = 1;
+        int highFpsTime;
         int floaterCount = 0;
         double slowmo = 0;
         string lastPhase;
@@ -284,13 +285,27 @@ namespace Kernwacht.Game
             fpsFrames = 0;
             if (fps < 38) lowFpsTime++;
             else lowFpsTime = 0;
+            // 4.1: läuft es wieder flüssig, Auflösung schrittweise zurückholen (sonst bleibt das Bild dauerhaft pixelig)
+            if (fps > 52) highFpsTime++;
+            else highFpsTime = 0;
+            if (highFpsTime >= 8)
+            {
+                highFpsTime = 0;
+                if (adaptiveScale < 1)
+                {
+                    adaptiveScale = Math.Min(1, adaptiveScale + 0.05);
+                    app.resize();
+                }
+                else if (highFpsTime == 0 && fps > 58) app.raiseAutoQuality();
+            }
             if (lowFpsTime >= 3)
             {
                 lowFpsTime = 0;
-                // Erst Effekte (Kantenglättung, Schatten, Glühen) reduzieren, dann die Auflösung.
-                if (!app.lowerAutoQuality() && adaptiveScale > 0.55)
+                // Erst Effekte (Kantenglättung, Schatten, Glühen) reduzieren, dann die Auflösung – aber nie unter 85 %,
+                // darunter wirkt das Bild deutlich pixelig.
+                if (!app.lowerAutoQuality() && adaptiveScale > 0.85)
                 {
-                    adaptiveScale = Math.Max(0.55, adaptiveScale - 0.15);
+                    adaptiveScale = Math.Max(0.85, adaptiveScale - 0.05);
                     app.resize();
                 }
             }

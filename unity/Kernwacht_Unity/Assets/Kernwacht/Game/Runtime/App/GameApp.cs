@@ -324,10 +324,11 @@ namespace Kernwacht.Game
         {
             new QualityTier(4, 2048, true),
             new QualityTier(2, 1024, true),
-            new QualityTier(0, 1024, true),
+            // 4.1: Kantenglättung bleibt an (ohne wirkt das Bild treppig/pixelig); stattdessen erst Glühen aus
+            new QualityTier(2, 1024, false),
             // Schatten nie zur Laufzeit abschalten: Unter WebGL fehlen dann die passenden Shadervarianten,
             // das Gelände und alle Modelle verschwinden (Fehler „texture format and sampler type“). Kleinste Stufe: 512.
-            new QualityTier(0, 512, true),
+            new QualityTier(2, 512, false),
             new QualityTier(0, 512, false),
         };
 
@@ -387,6 +388,15 @@ namespace Kernwacht.Game
         }
 
         /// <summary>Senkt die automatische Qualität um eine Stufe. Liefert false, wenn bereits die niedrigste Stufe aktiv ist.</summary>
+        /// <summary>4.1: Qualität wieder anheben, wenn es dauerhaft flüssig läuft.</summary>
+        public bool raiseAutoQuality()
+        {
+            if (autoTier <= 0) return false;
+            autoTier--;
+            applyQuality();
+            return true;
+        }
+
         public bool lowerAutoQuality()
         {
             if (autoTier >= AUTO_TIERS.Length - 1) return false;
