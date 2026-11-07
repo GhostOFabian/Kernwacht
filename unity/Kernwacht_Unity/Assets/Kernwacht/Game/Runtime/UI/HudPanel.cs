@@ -652,7 +652,7 @@ namespace Kernwacht.Game.UI
             if (withDesc && !string.IsNullOrEmpty(d.description)) HK.T(box.transform, d.description, HK.SMALL, Theme.Text);
             if (st == null) return;
             foreach (var (text, col) in effectLines(d, st))
-                HK.T(box.transform, $"<color={Hx(col)}>●</color> {text}", HK.SMALL, Theme.Text);
+                HK.T(box.transform, $"<color={Hx(col)}>• {text}</color>", HK.SMALL, Theme.Text);
         }
 
         void renderTower(TowerInstance t)
