@@ -226,15 +226,15 @@ namespace Kernwacht.Sim
                 "Stoppt Heilung, Regeneration und Zwillingsbund.", "Kleiner Radius.", true);
 
             d["acidmortar"] = L("acidmortar", "Säuremörser", "Legendär · Gift & Artillerie", "🧪", 0xa8e040,
-                "Fusion aus Ätzkessel und Kanonenschmiede: Säuregranaten aus großer Entfernung. Der Einschlag zersetzt ganze Gruppen (bis 6 Stapel) und hinterlässt eine ätzende Pfütze.",
+                "Fusion aus Ätzkessel und Kanonenschmiede: Säuregranaten aus großer Entfernung. Der Einschlag zersetzt ganze Gruppen (bis 4 Stapel) und hinterlässt eine ätzende Pfütze.",
                 "poison", "projectile", "first", "overdrive",
-                B("damage", 85, "range", 5, "cooldown", 2.2, "projectileSpeed", 7, "splash", 1.7, "corrodePct", 0.06, "corrodeMax", 6, "corrodeDur", 6, "cloudDur", 3, "cloudRadius", 1.0, "poisonDps", 8, "poisonDur", 3, "poisonMaxStacks", 5),
+                B("damage", 60, "range", 5, "cooldown", 2.2, "projectileSpeed", 7, "splash", 1.7, "corrodePct", 0.06, "corrodeMax", 4, "corrodeDur", 6, "cloudDur", 3, "cloudRadius", 1.0, "poisonDps", 8, "poisonDur", 3, "poisonMaxStacks", 5),
                 "Bricht Panzer und Schilde für alle anderen Türme.", "Trifft keine Flieger.");
 
             d["plaguepot"] = L("plaguepot", "Pestkessel", "Legendär · Seuche", "☣️", 0x8ad030,
                 "Fusion aus Ätzkessel und Sporenwerfer: Seuchenschleim vergiftet stark und zersetzt. Stirbt ein Gegner, springen Gift und Zersetzung auf bis zu 3 Nachbarn über.",
                 "poison", "projectile", "first", "overdrive",
-                B("damage", 45, "range", 3.8, "cooldown", 1.0, "projectileSpeed", 7, "splash", 1.1, "poisonDps", 22, "poisonDur", 6, "poisonMaxStacks", 8, "corrodePct", 0.05, "corrodeMax", 5, "corrodeDur", 6, "contagion", 3),
+                B("damage", 90, "range", 3.8, "cooldown", 1.0, "projectileSpeed", 7, "splash", 1.1, "poisonDps", 45, "poisonDur", 6, "poisonMaxStacks", 10, "corrodePct", 0.05, "corrodeMax", 5, "corrodeDur", 6, "contagion", 3),
                 "Verheerend gegen dichte Wellen und Brutmütter. Feuer auf Gift löst Giftbrand aus.", "Flieger, giftresistente Gegner.");
 
             d["quakemaw"] = L("quakemaw", "Bebenschlund", "Legendär · Erdbeben", "🌋", 0xc08050,
@@ -252,13 +252,13 @@ namespace Kernwacht.Sim
             d["stormbattery"] = L("stormbattery", "Sturmbatterie", "Legendär · Luftabwehr", "🛩️", 0x90b8d8,
                 "Fusion aus Windwacht und Flakbatterie: Fallwind-Granaten drücken Flieger 3 s zu Boden – dann treffen sie auch alle Bodentürme. 3 Ziele, ×2 Schaden gegen Flieger.",
                 "physical", "projectile", "first", "overdrive",
-                B("damage", 60, "range", 5.2, "cooldown", 0.5, "projectileSpeed", 26, "multishot", 3, "splash", 0.8, "hitsAir", 1, "hitsGround", 0, "groundDur", 3, "airDmgMul", 2),
+                B("damage", 90, "range", 5.2, "cooldown", 0.5, "projectileSpeed", 26, "multishot", 3, "splash", 0.8, "hitsAir", 1, "hitsGround", 0, "groundDur", 3, "airDmgMul", 2),
                 "Macht Kanonen, Sporen und Minen gegen Flieger nutzbar.", "Trifft keine Bodengegner.");
 
             d["falcon"] = L("falcon", "Falkenauge", "Legendär · Präzision", "🎯", 0xd8b070,
                 "Fusion aus Adlerhorst und Belagerungsarmbrust: Ein durchschlagender Bolzen trifft alles in einer Linie und richtet Nicht-Bosse unter 14 % Leben hin.",
                 "physical", "projectile", "strong", "overdrive",
-                B("damage", 210, "range", 8, "cooldown", 2.8, "projectileSpeed", 30, "pierce", 4, "executePct", 0.14, "armorPierce", 0.8, "critChance", 0.15, "critMult", 2.5, "hitsAir", 1),
+                B("damage", 170, "range", 8, "cooldown", 2.8, "projectileSpeed", 30, "pierce", 4, "executePct", 0.14, "armorPierce", 0.8, "critChance", 0.1, "critMult", 2.5, "hitsAir", 1),
                 "Jagt Eliten und Bosse quer über die Karte.", "Langsam gegen Schwärme.");
 
             d["sunlance"] = L("sunlance", "Sonnenlanze", "Legendär · Himmelsstrahl", "☀️", 0xffd070,
