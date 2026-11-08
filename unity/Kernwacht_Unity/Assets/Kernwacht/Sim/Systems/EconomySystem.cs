@@ -393,7 +393,7 @@ namespace Kernwacht.Sim
             if (t == null) return CommandResult.Fail("Turm nicht gefunden");
             double refund = refundValue(sim, t);
             s.gold += refund;
-            s.stats.goldSpent -= U.Min(refund, s.stats.goldSpent);
+            s.stats.goldRefunded += refund;
             s.towers = s.towers.Where((x) => x.uid != uid).ToList();
             RuneSystem.releaseRunes(sim, uid);
             sim.reindex();

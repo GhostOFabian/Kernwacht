@@ -578,6 +578,8 @@ namespace Kernwacht.Sim
         public double livesLost;
         public double goldEarned;
         public double goldSpent;
+        /** 4.1: Erlöse aus Turmverkäufen (werden nicht mehr vom Ausgegebenen abgezogen). */
+        public double goldRefunded;
         public List<double> goldPerWave = new List<double>();
         public Dictionary<string, double> damageByTower = new Dictionary<string, double>();   // Partial<Record<TowerId, number>>
         public Dictionary<string, double> builtByTower = new Dictionary<string, double>();    // Partial<Record<TowerId, number>>

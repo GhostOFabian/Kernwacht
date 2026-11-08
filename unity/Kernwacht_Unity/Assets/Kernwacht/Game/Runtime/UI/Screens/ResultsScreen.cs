@@ -139,6 +139,7 @@ namespace Kernwacht.Game.UI
                     new[] { "Abschüsse", TextUtil.fmt(st.kills) },
                     new[] { "Durchgebrochen", $"{U.Fmt(st.leaks)} (−{U.Fmt(st.livesLost)} ♥)" },
                     new[] { "Gold verdient / ausgegeben", $"{TextUtil.fmt(st.goldEarned)} / {TextUtil.fmt(st.goldSpent)}" },
+                    new[] { "Verkaufserlöse / Gold am Ende", $"{TextUtil.fmt(st.goldRefunded)} / {TextUtil.fmt(s.gold)}" },
                     new[] { "Größtes Netzwerk", $"{U.Fmt(st.maxNetworkSize)} Türme" },
                     new[] { "Kampfzeit", duration(st.duration) },
                     new[] { "Bosse", st.bossesFaced.Count > 0 ? string.Join(", ", st.bossesFaced.Select((b) => $"{Enemies.BOSSES[b].name} {(st.bossesKilled.Contains(b) ? "√" : "×")}")) : "–" },
@@ -337,7 +338,7 @@ namespace Kernwacht.Game.UI
             // Kopf
             var st = s.stats;
             shotText(go.transform, $"Kernwacht · {TextUtil.modeName(s.mode)}{(s.theme == "scifi" ? " · Sci-Fi" : "")} · Welle {U.Fmt(st.wavesCleared)} · {Balance.DIFFICULTY[s.difficulty].name}", m, m, W - 2 * m, 30, 24, Theme.Gold, TextAnchor.UpperLeft, FontStyle.Bold);
-            string line2 = $"Seed {s.seed.text} · Karte {Biomes.BIOMES[s.map.biome].name} ({s.map.variant}) · Kampfzeit {duration(st.duration)} · Gold verdient {TextUtil.fmt(st.goldEarned)} / ausgegeben {TextUtil.fmt(st.goldSpent)} · Leben {U.Fmt(s.lives)}/{U.Fmt(s.maxLives)}";
+            string line2 = $"Seed {s.seed.text} · Karte {Biomes.BIOMES[s.map.biome].name} ({s.map.variant}) · Kampfzeit {duration(st.duration)} · Gold verdient {TextUtil.fmt(st.goldEarned)} / ausgegeben {TextUtil.fmt(st.goldSpent)} / verkauft {TextUtil.fmt(st.goldRefunded)} / übrig {TextUtil.fmt(s.gold)} · Leben {U.Fmt(s.lives)}/{U.Fmt(s.maxLives)}";
             shotText(go.transform, line2, m, m + 32, W - 2 * m, 22, 16, Theme.Text, TextAnchor.UpperLeft);
             string line3 = s.he != null
                 ? $"Held: {Champions.CHAMPIONS[s.he.champion.id].name} St. {U.Fmt(s.he.champion.level)} · Heldenschaden {TextUtil.fmt(s.he.champion.damageDealt)} · Doktrin {Doctrines.of(s.he).name} · Turmschaden gesamt {TextUtil.fmt(total)}"
